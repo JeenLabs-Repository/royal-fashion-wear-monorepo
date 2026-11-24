@@ -215,10 +215,51 @@ t_image_telemetry() {
 }
 
 t_node20_install_fails() {
-  if docker run --rm -v "$PWD":/w -w /w node:20 sh -c "corepack enable && corepack prepare pnpm@10.11.1 --activate && pnpm install --frozen-lockfile" >/dev/null 2>&1; then
-    echo "error: an install under Node 20 succeeded"
+  # Isolated install surface so a root-owned Docker write never touches the
+  # workspace. pnpm 12 needs --config.engine-strict=true; .npmrc alone is not
+  # enough for this major.
+  tmp=$(mktemp -d) || { echo "error: could not create a temp directory"; return 1; }
+  cleanup_tmp() {
+    docker run --rm -v "$tmp":/w alpine sh -c 'rm -rf /w/* /w/.[!.]* /w/..?*' >/dev/null 2>&1 || true
+    rm -rf "$tmp"
+  }
+  mkdir -p "$tmp/apps/backend" "$tmp/apps/storefront" || {
+    cleanup_tmp
+    echo "error: could not prepare the temp tree"
     return 1
-  fi
+  }
+  cp package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc "$tmp/" || {
+    cleanup_tmp
+    echo "error: could not copy the install surface"
+    return 1
+  }
+  cp apps/backend/package.json "$tmp/apps/backend/" || {
+    cleanup_tmp
+    echo "error: could not copy the backend package manifest"
+    return 1
+  }
+  cp apps/storefront/package.json "$tmp/apps/storefront/" || {
+    cleanup_tmp
+    echo "error: could not copy the storefront package manifest"
+    return 1
+  }
+  out=$(
+    docker run --rm -v "$tmp":/w -w /w node:20 \
+      sh -c 'corepack enable && corepack prepare pnpm@12.18.0 --activate && pnpm install --frozen-lockfile --config.engine-strict=true' \
+      2>&1
+  ) || {
+    printf '%s\n' "$out" | grep -qiE 'unsupported.?engine|ERR_PNPM_UNSUPPORTED_ENGINE' || {
+      cleanup_tmp
+      echo "error: Node 20 install failed for a reason other than engines"
+      printf '%s\n' "$out" | tail -n 5
+      return 1
+    }
+    cleanup_tmp
+    return 0
+  }
+  cleanup_tmp
+  echo "error: an install under Node 20 succeeded"
+  return 1
 }
 
 t_e2e_specs() {
