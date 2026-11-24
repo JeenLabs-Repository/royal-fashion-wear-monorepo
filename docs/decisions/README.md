@@ -32,3 +32,5 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0015 | Workflow Hook Registration | accepted |
 | 0016 | Integration Card Reader Behavior | accepted |
 | 0017 | Admin Extension and Portal Routing | accepted |
+| 0018 | Vendor Plugin Extension Contract | accepted |
+| 0019 | Plain Ids Instead of Module Links | accepted |
