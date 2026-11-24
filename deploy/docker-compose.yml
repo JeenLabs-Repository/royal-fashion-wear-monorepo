@@ -68,6 +68,7 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-}
       S3_REGION: ${S3_REGION:-}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
 
   storefront:
     image: ${STOREFRONT_IMAGE:?set STOREFRONT_IMAGE to the storefront image reference}

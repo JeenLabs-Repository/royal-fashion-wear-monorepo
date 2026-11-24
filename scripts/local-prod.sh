@@ -58,6 +58,7 @@ SMTP_HOST=mailpit
 SMTP_PORT=1025
 SMTP_SECURE=false
 SMTP_FROM=store@example.test
+TRUST_PROXY_HOPS=0
 ENV
   echo "Wrote $ENV_FILE with generated throwaway secrets."
 }

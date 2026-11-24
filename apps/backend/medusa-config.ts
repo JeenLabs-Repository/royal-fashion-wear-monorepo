@@ -1,4 +1,9 @@
-import { defineConfig, loadEnv } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  defineConfig,
+  loadEnv,
+  Modules,
+} from "@medusajs/framework/utils";
 import {
   assertProductionConfig,
   DEV_FALLBACK_SECRET,
@@ -136,6 +141,20 @@ module.exports = defineConfig({
   ],
   modules: [
     { resolve: "@medusajs/medusa/translation" },
+    {
+      // Declared explicitly so the two-step sign-in options are in code.
+      resolve: "@medusajs/medusa/auth",
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      options: {
+        providers: [{ resolve: "@medusajs/medusa/auth-emailpass", id: "emailpass" }],
+        mfa: {
+          encryption_key: process.env.AUTH_MFA_ENCRYPTION_KEY,
+          // A session alone cannot switch two-step sign-in off; the user has to
+          // pass a challenge first.
+          disable_policy: "challenge",
+        },
+      },
+    },
     { resolve: "./src/modules/staff-access" },
     { resolve: "./src/modules/audit-log" },
 
