@@ -26,3 +26,4 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0009 | Manual Order Routing | proposed |
 | 0010 | Test Data Convention | accepted |
 | 0011 | Branch Protection and Owner Promotion | accepted |
+| 0012 | Staff Governance Spike Results | accepted |

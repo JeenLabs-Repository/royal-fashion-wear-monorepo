@@ -85,3 +85,67 @@ Observed: With trust proxy forced to 0 in the earliest middleware, `req.ip` is `
 Observed: With trust proxy 1, `req.ip` is `203.0.113.9` for a one-entry header and `198.51.100.7` for the two-entry header `203.0.113.9, 198.51.100.7` (Express skips one hop from the right, so the right-most forwarded entry becomes `req.ip`).
 Decision: The trusted hop count is applied by calling `req.app.set("trust proxy", hops)` in the earliest admin middleware (or an equivalent boot hook), driven by a bootstrap variable named `TRUST_PROXY_HOPS` with default 0 in development and 1 behind the reverse proxy. The framework default of 1 must be overridden when the bootstrap value is 0.
 Decision: The audit field for the forwarded header stores the raw first header entry, and the `ip` field stores `req.ip`.
+
+## S5 Stock Command Line User Creation
+
+Question: What does the stock user command create, and what does it do for an existing email?
+Setup: Backend source and a throwaway database, command run twice with the same email.
+Run on: 2026-11-25 against Medusa 2.22.7
+Observed: The command accepts the flags `--email` (`-e`), `--password` (`-p`), `--id` (`-i`), `--invite`, plus shared CLI flags `--verbose`, `--no-color`, `--json`, `--help`, `--version`.
+Observed: A new run created one user row, one auth identity, and one provider identity; the identity stores the user id under the metadata key `user_id` inside `app_metadata`.
+Observed: The second run with the same email and another password errored with Medusa `invalid_data` from `UserModuleService.createUsers` / `create-users-workflow` (duplicate email); the user count stayed 1; the password was not updated.
+Observed: The command creates the user through `workflowEngine.run("create-users-workflow", { input: { users: [{ email, roles }] } })`, then `authService.register("emailpass", { body: { email, password } })`, then `authService.updateAuthIdentities({ id, app_metadata: { user_id } })`. When Medusa RBAC is installed it also assigns the super-admin role id; this project has no staff assignment table yet, so a CLI user has no staff assignment.
+Observed: Calls that create a password identity, link it to a user and reset the password of an existing identity: create via `authService.register("emailpass", { body: { email, password } })`; link via `authService.updateAuthIdentities({ id, app_metadata: { user_id } })`; reset via `authService.updateProvider("emailpass", { email, password, entity_id })` (Auth module API; the stock CLI does not reset on duplicate).
+Decision: The recovery scripts create users with `create-users-workflow` (or `UserModuleService.createUsers`), create password identities with `authService.register("emailpass", ...)`, link with `authService.updateAuthIdentities` setting `app_metadata.user_id`, and reset passwords with `authService.updateProvider("emailpass", { email, password, entity_id })`.
+Decision: A user created by the stock command has no staff assignment, so default deny blocks it until a script or a superadmin assigns a role.
+
+## S6 Module Loader and Test Harness
+
+Question: When does a module loader run, do hand-written migrations run in the test runners, and how does a test run raw SQL as the application role?
+Setup: Throwaway module with one model, a loader, a generated-style migration and a hand-written trigger migration, one module runner test and one http runner test.
+Run on: 2026-11-25 against Medusa 2.22.7
+Observed: The loader runs on backend start (`[spike] loader ran` before Server is ready) and can read the table afterward.
+Observed: The loader also runs during `medusa db:migrate`, after the module migrations complete (table read returned row count 0); it did not run before the table existed in this run.
+Observed: A thrown error in the loader stops boot (`Loaders for module SpikeMod failed: spike loader failure`; server never becomes ready).
+Observed: The http runner shows the trigger created by the hand-written migration (`spike_item_no_update` present).
+Observed: The connection object is a knex instance (`dbConnection.raw` works; a later knex connection error confirmed the driver); `select current_user` returns role `postgres` under the test `DB_*` credentials.
+Observed: The module runner does not show the trigger (empty trigger list); it builds its schema from the models, not from the hand-written migrations.
+Decision: Role synchronisation that must not break boot runs as a migration script or a dedicated `medusa exec` script; a loader may run soft sync with try/catch because a thrown loader stops the process. Prefer a migration script when the work must happen exactly once with the schema.
+Decision: Trigger tests live in `integration-tests/http/*.spec.ts` under `medusaIntegrationTestRunner`; raw SQL as the application role runs with `dbConnection.raw(sql)` (knex). Module-runner tests alone cannot assert hand-written triggers.
+
+## S7 Alert Window Primitive
+
+Question: Which call opens an alert window once per 15 minutes atomically, with Redis on and off?
+Setup: A script run with `medusa exec`, once with Redis enabled and once without.
+Run on: 2026-11-25 against Medusa 2.22.7
+Observed: The registered locking provider is `in-memory` without Redis and still `in-memory` with `USE_REDIS=true` until `@medusajs/medusa/locking-redis` is registered explicitly (Redis was connected for cache, event-bus and workflow-engine only).
+Observed: A second owner acquiring a held key throws at once with message `Failed to acquire lock for key "spike:window"` (does not wait).
+Observed: The same owner acquiring again succeeds.
+Observed: After the expiry another owner succeeds; the expire unit is seconds (`expire: 2`, wait 3 seconds, then acquire ok).
+Observed: Two simultaneous acquires gave exactly one success (`fulfilled,rejected`).
+Observed: The cache set with a ttl of 2 returned `{"a":1}` immediately and `null` after 3 seconds; the ttl unit is seconds; with Redis on (cache-redis) and off the acquire behaviour matched for the in-memory locking provider; cache get/set still worked in both runs.
+Decision: The window opens with the locking module `acquire` call using a key such as `["break-glass:alert-window", actorId]`, a fresh owner id per attempt, and an expiry of 900 seconds, never released.
+Decision: The fallback order is the cache get then set, then an in-memory store with a logged warning.
+Decision: An in-memory locking provider is atomic only inside one backend process; if more than one backend instance ever runs, register the Redis locking provider that ships inside `@medusajs/medusa` as `{ resolve: "@medusajs/medusa/locking-redis", options: { redisUrl } }` (no new package).
+Decision: This replaces the earlier wording of a raw Redis set-if-absent with a 900 second expiry, because the locking module gives the same atomic acquire-with-expiry without a new dependency; the unique open-review index and the notification idempotency key stay as a second line of defence.
+
+## S8 Integration Updated Event
+
+Question: What does the integration update event carry, and where is the change history kept?
+Setup: A probe subscriber logging the event name and sorted data key names only; upsert workflow source inspected; a workflow-shaped emit confirmed the subscriber.
+Run on: 2026-11-25 against Medusa 2.22.7
+Observed: The event name is `integration.updated` and the data keys from the Gorgo upsert workflow emit are `actor`, `change`, `fields`, `provider_id` (confirmed by subscriber log `data_keys=actor,change,fields,provider_id`).
+Observed: An integration row id is not present; the stable key is `provider_id`. A change id is not present on the event.
+Observed: The change-history model is `IntegrationChange`, its table is `integration_change`, and the module writes rows with `createIntegrationChanges` / `recordChange`; the admin list route reads via Query graph on entity `integration_change` (newest first). Generated list helpers follow the MedusaService naming `listIntegrationChanges`.
+Decision: The audit subscriber writes the provider id from the event and the newest change id looked up afterward; when the event lacks the change id it reads the newest change id through `listIntegrationChanges({ provider_id }, { order: { created_at: "DESC" }, take: 1, select: ["id"] })` (or the equivalent Query graph on `integration_change`).
+
+## Defaults for later plans
+
+S1: Matcher string `/admin*`, own authenticate first, path from `originalUrl`, per-route validators run after the chain, exclude invite-accept from the chain, Gate PASS
+S2: Actor type literal `api-key`; header HTTP Basic with the secret key as user name and empty password
+S3: Allowlist `/auth/*` plus `GET /admin/users/me`, `GET /admin/staff/me`, layout/shell GETs (`/admin/layouts/*`, `/admin/modules`, `/admin/search-indexes`, `/admin/notifications*`, `/admin/cloud/announcements*`); flag from `auth_context.mfa_enabled` with `listAuthMfa` fallback; tests mint JWT via `generateJwtToken`
+S4: Apply `TRUST_PROXY_HOPS` with `req.app.set("trust proxy", hops)` in earliest middleware (framework hardcodes 1; no projectConfig option); store raw first forwarded entry and `req.ip`
+S5: Create with `create-users-workflow`, identity with `auth.register("emailpass")`, link with `updateAuthIdentities` `user_id`, reset with `updateProvider("emailpass")`; CLI user has no staff assignment
+S6: Role sync in migration script or `medusa exec` (loader throw stops boot); trigger tests in http runner; raw SQL via `dbConnection.raw`
+S7: Window via Locking `acquire` expire 900 seconds fresh owner id never released; fallback cache then in-memory; register `@medusajs/medusa/locking-redis` for multi-instance
+S8: Event keys `provider_id`, `change`, `actor`, `fields`; look up newest `integration_change` id by `provider_id` when change id is absent
