@@ -10,6 +10,12 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - `runbooks/` holds step-by-step procedures for operating the store, such as recovering staff access.
 - `testing/` holds test conventions. It is added with the test tooling.
 
+## Pages
+
+- `guides/vendor-plugin-extension-points.md` explains how a compliance plugin attaches to the vendor module.
+- `guides/seed-demo-vendors.md` creates demo vendors for development.
+- `concepts/vendor-domain.md` explains vendors, locations, invitations and the sales channel rule.
+
 ## Writing Rules
 
 - Use active voice and second person.
