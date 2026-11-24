@@ -31,6 +31,7 @@ describe("redactAudit", () => {
       currency_code: "inr",
       state_code: "KA",
       postal_code: "560001",
+      code: "permission_denied",
       name: "Asha",
       email: "asha@example.test",
       keyboard: "kept",

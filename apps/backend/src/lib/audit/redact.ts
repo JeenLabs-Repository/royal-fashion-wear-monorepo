@@ -15,12 +15,15 @@ const SENSITIVE_WORDS = new Set([
 ]);
 
 // Ordinary data fields whose names happen to contain a sensitive word.
+// Exact key `code` is kept so denial status codes in audit meta stay readable;
+// OTP secrets still redact under otp / otp_code.
 const NEVER_REDACT = new Set([
   "role_key",
   "country_code",
   "currency_code",
   "state_code",
   "postal_code",
+  "code",
 ]);
 
 const MAX_DEPTH = 6;
