@@ -7,6 +7,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - `guides/` holds task-focused how-tos. Each guide starts from a goal and ends with what you should see.
 - `concepts/` holds explanations of how and why something works.
 - `decisions/` holds short records of key choices, so nobody undoes a decided choice by accident.
+- `runbooks/` holds step-by-step procedures for operating the store, such as recovering staff access.
 - `testing/` holds test conventions. It is added with the test tooling.
 
 ## Writing Rules

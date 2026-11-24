@@ -21,11 +21,12 @@ export default [
   {
     /**
      * `use-medusa-error-not-generic-error` exists so a thrown error maps onto
-     * the right HTTP status. Neither of these paths serves a request: the seed
-     * stages run through `medusa exec`, and `scripts/` runs as plain Node after
-     * `medusa build`. A generic `Error` is the correct thing to throw there.
+     * the right HTTP status. None of these paths serves a request: the seed
+     * stages and the recovery scripts in `src/scripts/` run through
+     * `medusa exec`, and `scripts/` runs as plain Node after `medusa build`. A
+     * generic `Error` is the correct thing to throw there.
      */
-    files: ["scripts/**/*.js", "src/migration-scripts/**/*.ts"],
+    files: ["scripts/**/*.js", "src/migration-scripts/**/*.ts", "src/scripts/**/*.ts"],
     rules: { "@medusajs/use-medusa-error-not-generic-error": "off" },
   },
 ];
