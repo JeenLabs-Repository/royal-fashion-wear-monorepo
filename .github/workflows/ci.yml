@@ -167,7 +167,7 @@ jobs:
 
   ci-gate:
     if: always()
-    needs: [lint, typecheck, build-backend, build-storefront, backend-tests, guards, gitleaks, signatures, branch-name]
+    needs: [lint, typecheck, build-backend, build-storefront, backend-tests, guards, gitleaks, signatures, branch-name, pr-notes]
     runs-on: ubuntu-latest
     env:
       ANY_FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
@@ -180,12 +180,27 @@ jobs:
       GITLEAKS: ${{ needs.gitleaks.result }}
       SIGNATURES: ${{ needs.signatures.result }}
       BRANCH_NAME: ${{ needs.branch-name.result }}
+      PR_NOTES: ${{ needs.pr-notes.result }}
     steps:
       - name: Summarise results
         run: |
-          printf 'lint: %s\ntypecheck: %s\nbuild-backend: %s\nbuild-storefront: %s\nbackend-tests: %s\nguards: %s\ngitleaks: %s\nsignatures: %s\nbranch-name: %s\n' \
-            "$LINT" "$TYPECHECK" "$BUILD_BACKEND" "$BUILD_STOREFRONT" "$BACKEND_TESTS" "$GUARDS" "$GITLEAKS" "$SIGNATURES" "$BRANCH_NAME"
+          printf 'lint: %s\ntypecheck: %s\nbuild-backend: %s\nbuild-storefront: %s\nbackend-tests: %s\nguards: %s\ngitleaks: %s\nsignatures: %s\nbranch-name: %s\npr-notes: %s\n' \
+            "$LINT" "$TYPECHECK" "$BUILD_BACKEND" "$BUILD_STOREFRONT" "$BACKEND_TESTS" "$GUARDS" "$GITLEAKS" "$SIGNATURES" "$BRANCH_NAME" "$PR_NOTES"
           if [ "$ANY_FAILED" = "true" ]; then
             echo "At least one required job failed or was cancelled."
             exit 1
           fi
+
+  pr-notes:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    env:
+      PR_BODY: ${{ github.event.pull_request.body }}
+      REQUIRE_PR_BODY: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+      - name: Check the pull request notes
+        run: node scripts/check-pr-notes.mjs
