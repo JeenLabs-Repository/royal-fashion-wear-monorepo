@@ -8,10 +8,11 @@ export type VendorContext = {
   internal_name: string;
 };
 
-// MedusaRequest is declared in @medusajs/types and re-exported from
-// @medusajs/framework/http, so the augmentation must target the owning module.
-declare module "@medusajs/types" {
-  interface MedusaRequest<Body = unknown, QueryFields = Record<string, unknown>> {
+// Handlers go through requireVendor, which does not depend on this
+// augmentation. The owning declaration lives in @medusajs/types and is
+// re-exported here; augmenting the package the app imports keeps tsc happy.
+declare module "@medusajs/framework/http" {
+  interface MedusaRequest {
     vendor?: VendorContext;
   }
 }

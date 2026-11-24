@@ -7,6 +7,7 @@ export const AUDIT_ACTIONS = [
   "vendor.reactivated",
   "vendor.location_created",
   "vendor.location_updated",
+  "vendor.request",
   "product.approved",
   "product.rejected",
   "product.changes_requested",

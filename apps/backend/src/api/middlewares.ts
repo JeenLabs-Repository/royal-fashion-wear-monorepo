@@ -8,7 +8,8 @@
 import { defineMiddlewares } from "@medusajs/framework/http";
 import { storeGuardRoutes } from "../lib/anonymity/store-guard";
 import { adminMiddlewareRoutes } from "../lib/rbac/admin-chain";
+import { vendorRouteEntries } from "../lib/vendor/middlewares";
 
 export default defineMiddlewares({
-  routes: [...adminMiddlewareRoutes, ...storeGuardRoutes],
+  routes: [...adminMiddlewareRoutes, ...storeGuardRoutes, ...vendorRouteEntries],
 });
