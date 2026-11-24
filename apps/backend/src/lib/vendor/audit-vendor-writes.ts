@@ -72,7 +72,8 @@ async function writeEntry(req: AdminRequest, res: MedusaResponse): Promise<void>
         ip: req.ip ?? null,
         user_agent: userAgent ?? null,
         body_keys: Object.keys((req.body ?? {}) as Record<string, unknown>).sort(),
-        ...(denial ? { denied_code: denial.code } : {}),
+        // Exact key `code` is keep-listed by the audit redactor (same as staff).
+        ...(denial ? { code: denial.code } : {}),
       },
     });
   } catch (error) {
