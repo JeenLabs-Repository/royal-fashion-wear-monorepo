@@ -80,7 +80,8 @@ const readSecret = (container: MedusaContainer): string => {
   if (!secret) {
     throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "The test app has no jwtSecret");
   }
-  return secret;
+  // jwtSecret is typed as string | Buffer; token helpers take a string.
+  return typeof secret === "string" ? secret : Buffer.from(secret).toString("utf8");
 };
 
 /** Registers an emailpass identity with a password. Returns its id. */

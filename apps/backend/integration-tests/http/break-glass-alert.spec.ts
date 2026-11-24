@@ -362,7 +362,7 @@ medusaIntegrationTestRunner({
       });
 
       test("the job file schedules itself for 03:30 UTC, which is 09:00 India time", async () => {
-        const { config } = await import("../../src/jobs/break-glass-review-reminder");
+        const { config } = await import("../../src/jobs/break-glass-review-reminder.js");
         expect(config.schedule).toBe("30 3 * * *");
       });
     });
