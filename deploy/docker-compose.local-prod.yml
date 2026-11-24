@@ -1,0 +1,45 @@
+# Override for the production-like test on the compute engine. It adds the
+# services the production file leaves out (a database and a mail catcher) and
+# publishes the two apps on localhost only. Never deploy this file.
+#
+# Use it through scripts/local-prod.sh, which generates deploy/.env.local-prod.
+
+services:
+  postgres:
+    # The same one variable as the dev stack names the major. Match it to the
+    # database host. The fallback stands until that major is known. Never latest.
+    image: postgres:${POSTGRES_VERSION:-17}-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: medusa_prod_like
+    volumes:
+      - local_prod_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d medusa_prod_like"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  backend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:19000:9000"
+
+  storefront:
+    ports:
+      - "127.0.0.1:18000:8000"
+    environment:
+      # Server-side calls reach the backend on the Compose network. The browser
+      # uses http://localhost:19000, which is baked into the image at build time.
+      MEDUSA_BACKEND_URL: http://backend:9000
+
+volumes:
+  local_prod_postgres:
