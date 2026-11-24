@@ -2,7 +2,6 @@ import {
   Body,
   Container,
   Head,
-  Html,
   Preview,
   Section,
   Text,
@@ -36,8 +35,10 @@ export function EmailLayout({
     .filter(Boolean)
     .join(" · ");
 
+  // Native html: react-email's Html component hard-defaults dir="ltr", which
+  // would leave a direction attribute after RTL support is removed (D-04).
   return (
-    <Html lang={locale}>
+    <html lang={locale}>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={s.body}>
@@ -59,6 +60,6 @@ export function EmailLayout({
           </Section>
         </Container>
       </Body>
-    </Html>
+    </html>
   );
 }
