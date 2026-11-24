@@ -22,7 +22,7 @@ export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
 
-    if (!authHeaders) return null
+    if (!("authorization" in authHeaders)) return null
 
     const headers = {
       ...authHeaders,
@@ -40,7 +40,7 @@ export const retrieveCustomer =
         },
         headers,
         next,
-        cache: "force-cache",
+        cache: "no-store",
       })
       .then(({ customer }) => customer)
       .catch(() => null)
@@ -66,7 +66,7 @@ export const retrieveCustomerAddresses =
   async (): Promise<HttpTypes.StoreCustomerAddress[] | null> => {
     const authHeaders = await getAuthHeaders()
 
-    if (!authHeaders) return null
+    if (!("authorization" in authHeaders)) return null
 
     const headers = {
       ...authHeaders,
@@ -84,7 +84,7 @@ export const retrieveCustomerAddresses =
         },
         headers,
         next,
-        cache: "force-cache",
+        cache: "no-store",
       })
       .then(({ addresses }) => addresses)
       .catch(() => null)

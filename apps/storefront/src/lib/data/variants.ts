@@ -10,7 +10,7 @@ export const retrieveVariant = async (
 ): Promise<HttpTypes.StoreProductVariant | null> => {
   const authHeaders = await getAuthHeaders()
 
-  if (!authHeaders) return null
+  if (!("authorization" in authHeaders)) return null
 
   const headers = {
     ...authHeaders,
@@ -30,7 +30,7 @@ export const retrieveVariant = async (
         },
         headers,
         next,
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
     .then(({ variant }) => variant)
