@@ -23,13 +23,8 @@
     "backend:seed": "turbo seed --filter=@dtc/gorgo-medusa-backend",
     "backend:dev": "turbo dev --filter=@dtc/gorgo-medusa-backend",
     "storefront:dev": "turbo dev --filter=@dtc/gorgo-medusa-storefront",
+    "guards": "node scripts/run-guards.mjs",
     "prepare": "husky"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.0.5",
-      "@types/react-dom": "19.0.5"
-    }
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
