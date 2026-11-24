@@ -2,16 +2,24 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
+  const expected = process.env.REVALIDATE_SECRET
   const secret = req.headers.get("x-revalidate-secret")
 
-  if (
-    process.env.REVALIDATE_SECRET &&
-    secret !== process.env.REVALIDATE_SECRET
-  ) {
+  // Fail closed: with no secret configured nobody gets in, instead of everybody.
+  if (!expected || secret !== expected) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const body = await req.json()
+  let body: { type?: string } | null
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+  }
+
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+  }
 
   if (
     body.type === "product.updated" ||
