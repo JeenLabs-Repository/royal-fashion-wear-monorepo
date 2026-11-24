@@ -1,9 +1,24 @@
 import { defineConfig, loadEnv } from "@medusajs/framework/utils";
+import {
+  assertProductionConfig,
+  DEV_FALLBACK_SECRET,
+  warnWeakConfig,
+} from "./src/lib/production-config";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
 const isProd = process.env.NODE_ENV === "production";
 const redisUrl = process.env.REDIS_URL;
+
+// An image build runs `medusa build` without any secret present, so only the
+// commands that boot the backend are held to the production rules.
+const isBuildCommand = process.argv[2] === "build";
+
+if (isProd && !isBuildCommand) {
+  assertProductionConfig(process.env);
+} else {
+  warnWeakConfig(process.env, console.warn);
+}
 
 // create-medusa-app writes REDIS_URL into every generated .env whether Redis runs
 // or not, so development requires an explicit opt-in.
@@ -68,18 +83,34 @@ const s3Module = {
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
-    databaseDriverOptions: { connection: { ssl: false } },
+    // The database sits on a private network, so TLS on that link is the
+    // operator's choice: set DATABASE_SSL=true to turn it on.
+    databaseDriverOptions: {
+      connection: {
+        ssl:
+          process.env.DATABASE_SSL === "true"
+            ? {
+                rejectUnauthorized:
+                  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== "false",
+              }
+            : false,
+      },
+    },
+    // Production requires REDIS_URL (the check above refuses to start without
+    // it), so sessions, events and workflows survive a restart.
     redisUrl: useRedis ? redisUrl : undefined,
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
       authCors: process.env.AUTH_CORS!,
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      jwtSecret: process.env.JWT_SECRET || DEV_FALLBACK_SECRET,
+      cookieSecret: process.env.COOKIE_SECRET || DEV_FALLBACK_SECRET,
     },
     cookieOptions: {
+      // "lax" stays: the storefront's payment return flow needs the cookie on
+      // a top-level redirect back from the payment page.
       sameSite: "lax",
-      secure: process.env.COOKIE_SECURE === "true",
+      secure: isProd || process.env.COOKIE_SECURE === "true",
     },
   },
   featureFlags: {
