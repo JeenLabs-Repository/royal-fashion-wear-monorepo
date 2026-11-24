@@ -7,12 +7,13 @@ module.exports = {
       rules: {
         "no-plan-references": (parsed) => {
           const text = parsed.raw || "";
-          // scope like (1-0) or (01.02), "phase 3", "plan-2", "task 4"
+          // scope like (1-0) or (01.02), "phase 3", "plan-2", "task 4", "wave 2",
+          // requirement ids such as ABC-01 and decision ids such as D-12
           const planNumbering =
-            /\(\s*\d+\s*[-.]\s*\d+\s*\)|\b(phase|plan|task)[\s-]?\d+\b/i;
+            /\(\s*\d+\s*[-.]\s*\d+\s*\)|\b(phase|plan|task)[\s-]?\d+\b|\bwave[\s-]?\d+\b|\b(OPS|CUT|REPO|GOV|VEND|CAT|ROUT|DOC|IND|INT|RET|TEST|NOTF|COMP|INTV2|OPSV2)-\d{1,3}\b|\bD-\d{2}\b/i;
           return [
             !planNumbering.test(text),
-            "commit text must not contain plan, phase or task numbering (for example feat(1-0): or phase 3)",
+            "commit text must not contain plan, phase, task, wave, decision or requirement numbering (for example feat(1-0): or phase 3)",
           ];
         },
       },
