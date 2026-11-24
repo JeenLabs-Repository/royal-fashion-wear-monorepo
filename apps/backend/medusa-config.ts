@@ -157,6 +157,7 @@ module.exports = defineConfig({
     },
     { resolve: "./src/modules/staff-access" },
     { resolve: "./src/modules/audit-log" },
+    { resolve: "./src/modules/vendor" },
 
     {
       resolve: "@medusajs/medusa/notification",
