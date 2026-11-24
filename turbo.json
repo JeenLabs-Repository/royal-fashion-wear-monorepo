@@ -20,6 +20,11 @@
     },
     "seed": {
       "outputs": []
+    },
+    "seed:test-data": {
+      "outputs": [],
+      "cache": false,
+      "passThroughEnv": ["NODE_ENV", "TEST_DATA_SEED"]
     }
   }
 }

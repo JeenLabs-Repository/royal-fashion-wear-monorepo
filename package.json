@@ -21,6 +21,7 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "backend:seed": "turbo seed --filter=@dtc/gorgo-medusa-backend",
+    "backend:seed:test": "turbo seed:test-data --filter=@dtc/gorgo-medusa-backend",
     "backend:dev": "turbo dev --filter=@dtc/gorgo-medusa-backend",
     "storefront:dev": "turbo dev --filter=@dtc/gorgo-medusa-storefront",
     "guards": "node scripts/run-guards.mjs",
