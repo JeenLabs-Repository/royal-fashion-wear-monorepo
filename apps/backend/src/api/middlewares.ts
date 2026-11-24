@@ -6,8 +6,9 @@
 // chain first.
 
 import { defineMiddlewares } from "@medusajs/framework/http";
+import { storeGuardRoutes } from "../lib/anonymity/store-guard";
 import { adminMiddlewareRoutes } from "../lib/rbac/admin-chain";
 
 export default defineMiddlewares({
-  routes: [...adminMiddlewareRoutes],
+  routes: [...adminMiddlewareRoutes, ...storeGuardRoutes],
 });
