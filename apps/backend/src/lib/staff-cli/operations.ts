@@ -93,9 +93,22 @@ export const normalizeEmail = (raw: string | undefined): string => {
   return email;
 };
 
-// pnpm can pass a literal "--" through to the script, so drop it.
-export const positionalArgs = (args: string[] | undefined): string[] =>
-  (args ?? []).filter((arg) => arg !== "--");
+// Prefer ExecArgs.args when Medusa filled them. When the script is started as
+// `pnpm run <script> -- <words>`, pnpm inserts a bare `--` and Medusa's
+// `exec [file] [args..]` then receives an empty args array; the words stay on
+// process.argv after that `--`, so fall back to reading them from there.
+export const positionalArgs = (args: string[] | undefined): string[] => {
+  const fromArgs = (args ?? []).filter((arg) => arg !== "--" && arg.length > 0);
+  if (fromArgs.length > 0) {
+    return fromArgs;
+  }
+  const argv = process.argv;
+  const separator = argv.lastIndexOf("--");
+  if (separator === -1) {
+    return [];
+  }
+  return argv.slice(separator + 1).filter((arg) => arg !== "--" && arg.length > 0);
+};
 
 const osUserName = (): string => {
   const raw = process.env.USER ?? process.env.USERNAME ?? process.env.LOGNAME ?? "";

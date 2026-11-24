@@ -20,6 +20,7 @@ import {
   upsertAccountsRows,
 } from "../credentials-file";
 import { PASSWORD_ALPHABET, generatePassword } from "../password";
+import { positionalArgs } from "../operations";
 
 const TEMPLATE = [
   "# Test Credentials",
@@ -74,6 +75,40 @@ const rowsFor = (supportPassword: string | null) => [
     reset: "run the seed with reset-passwords",
   },
 ];
+
+describe("positionalArgs", () => {
+  const originalArgv = [...process.argv];
+
+  afterEach(() => {
+    process.argv = [...originalArgv];
+  });
+
+  it("keeps words from ExecArgs.args and drops a bare --", () => {
+    expect(positionalArgs(["reset-mfa", "--", "reset-passwords"])).toEqual([
+      "reset-mfa",
+      "reset-passwords",
+    ]);
+  });
+
+  it("reads words after a bare -- on process.argv when ExecArgs.args is empty", () => {
+    process.argv = [
+      "node",
+      "medusa",
+      "exec",
+      "./src/scripts/seed-staff-demo.ts",
+      "--",
+      "reset-passwords",
+      "reset-mfa",
+    ];
+    expect(positionalArgs([])).toEqual(["reset-passwords", "reset-mfa"]);
+    expect(positionalArgs(undefined)).toEqual(["reset-passwords", "reset-mfa"]);
+  });
+
+  it("returns an empty list when neither source has words", () => {
+    process.argv = ["node", "medusa", "exec", "./src/scripts/list-staff.ts"];
+    expect(positionalArgs([])).toEqual([]);
+  });
+});
 
 describe("generatePassword", () => {
   it("returns 24 characters from the unambiguous alphabet", () => {
