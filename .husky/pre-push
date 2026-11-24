@@ -1,0 +1,42 @@
+# Refuse bad branch names, pushes to protected branches and unsigned commits.
+# git passes: <remote name> <remote url>, then one line per ref on stdin.
+zero=0000000000000000000000000000000000000000
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ -z "$local_ref" ] && continue
+
+  # Deleting a ref has nothing to check.
+  [ "$local_sha" = "$zero" ] && continue
+
+  case "$remote_ref" in
+    refs/heads/*)
+      branch="${remote_ref#refs/heads/}"
+      if ! node scripts/check-branch-name.mjs "$branch"; then
+        exit 1
+      fi
+      case "$branch" in
+        main | dev)
+          if [ "${OWNER_PROMOTION:-0}" != "1" ]; then
+            echo "Refusing to push to protected branch $branch. Only the owner promotes it (OWNER_PROMOTION=1)." >&2
+            exit 1
+          fi
+          ;;
+      esac
+      ;;
+  esac
+
+  commit=$(git rev-parse "$local_sha^{commit}") || exit 1
+  if [ "$remote_sha" = "$zero" ]; then
+    range="$commit --not --remotes"
+  else
+    range="$remote_sha..$commit"
+  fi
+
+  # shellcheck disable=SC2086
+  if ! STRICT=1 sh scripts/verify-signatures.sh $range; then
+    echo "Refusing to push: every pushed commit must carry a good signature." >&2
+    exit 1
+  fi
+done
+
+exit 0
