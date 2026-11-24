@@ -10,7 +10,7 @@ Floating versions and a wide Node range make builds differ between machines and 
 
 ## Decision
 
-Pin every `@medusajs/*` package at exactly 2.22.7, all together. One documented exception exists. `@medusajs/ui` follows its own version line and is pinned exactly at 4.2.14. Pin `@gorgo/medusa-integration` to the version the lockfile resolved, 0.2.8, with no `latest` and no caret on any of these. Enforce Node 22.23.4 or newer through `engines`, `.nvmrc`, Dockerfiles and CI. Use pnpm only, commit the lockfile and freeze installs. Treat the Medusa 2.23 upgrade as its own later release, because it brings Express 5, React 19, Vite 8 and Tailwind 4 together.
+Pin every `@medusajs/*` package at exactly 2.22.7, all together. One documented exception exists. `@medusajs/ui` follows its own version line and is pinned exactly at 4.2.14. Pin `@gorgo/medusa-integration` to the version the lockfile resolved, 2.0.0, with no `latest` and no caret on any of these. Enforce Node 22.23.4 or newer through `engines`, `.nvmrc`, Dockerfiles and CI. Use pnpm 12.18.0 only (`packageManager` and `engines.pnpm` for the 12.x line), commit the lockfile and freeze installs. Treat the Medusa 2.23 upgrade as its own later release, because it brings Express 5, React 19, Vite 8 and Tailwind 4 together.
 
 ## Consequences
 
