@@ -54,7 +54,7 @@ medusaIntegrationTestRunner({
         });
         expect(regions).toHaveLength(1);
         expect(regions[0]).toMatchObject({ name: "India", currency_code: "inr" });
-        expect(regions[0].countries.map((country: { iso_2: string }) => country.iso_2)).toEqual(["in"]);
+        expect(regions[0].countries?.map((country) => country?.iso_2)).toEqual(["in"]);
 
         const pricing = container.resolve(Modules.PRICING);
         const preferences = await pricing.listPricePreferences({
@@ -79,7 +79,7 @@ medusaIntegrationTestRunner({
           filters: { type: "publishable" },
         });
         expect(keys).toHaveLength(1);
-        expect(keys[0].sales_channels.map((channel: { id: string }) => channel.id)).toContain(
+        expect(keys[0].sales_channels?.map((channel) => channel?.id)).toContain(
           stores[0].default_sales_channel_id,
         );
 
