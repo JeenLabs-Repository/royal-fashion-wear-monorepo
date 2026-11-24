@@ -27,6 +27,7 @@ const CONFIG_KEYS = [
   "AUTH_CORS",
   "GORGO_DISABLE_TELEMETRY",
   "BREAK_GLASS_ALERT_EMAILS",
+  "VENDOR_PORTAL_URL",
   "SMTP_HOST",
   "S3_BUCKET",
 ];
@@ -55,6 +56,7 @@ const validProductionEnv = (): Env => ({
   AUTH_CORS: "https://shop.example.test,https://admin.example.test",
   GORGO_DISABLE_TELEMETRY: "true",
   BREAK_GLASS_ALERT_EMAILS: "owner@example.test",
+  VENDOR_PORTAL_URL: "https://backend.example.test/vendor-portal",
 });
 
 const withEnvFilesParked = <T>(run: () => T): T => {

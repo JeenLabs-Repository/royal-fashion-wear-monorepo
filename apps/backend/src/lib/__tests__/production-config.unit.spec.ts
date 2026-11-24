@@ -34,6 +34,7 @@ const validProductionEnv = (): Env => ({
   AUTH_CORS: "https://shop.example.test,https://admin.example.test",
   GORGO_DISABLE_TELEMETRY: "true",
   BREAK_GLASS_ALERT_EMAILS: "owner@example.test",
+  VENDOR_PORTAL_URL: "https://backend.example.test/vendor-portal",
 });
 
 const without = (env: Env, key: string): Env => {
@@ -236,6 +237,48 @@ describe("assertProductionConfig", () => {
 
     test("BREAK_GLASS_ALERT_EMAILS is not checked outside production", () => {
       expect(() => assertProductionConfig({ NODE_ENV: "development" })).not.toThrow();
+    });
+  });
+
+  describe("VENDOR_PORTAL_URL", () => {
+    test("unset throws and names the variable", () => {
+      expect(messageOf(without(validProductionEnv(), "VENDOR_PORTAL_URL"))).toContain(
+        "VENDOR_PORTAL_URL"
+      );
+    });
+
+    test("an http URL throws and names the variable", () => {
+      const env = {
+        ...validProductionEnv(),
+        VENDOR_PORTAL_URL: "http://backend.example.test/vendor-portal",
+      };
+      expect(messageOf(env)).toContain("VENDOR_PORTAL_URL");
+    });
+
+    test("an https URL without the base path throws and names the variable", () => {
+      const env = { ...validProductionEnv(), VENDOR_PORTAL_URL: "https://backend.example.test" };
+      expect(messageOf(env)).toContain("VENDOR_PORTAL_URL");
+    });
+
+    test("a value that is not a URL throws and names the variable", () => {
+      const env = { ...validProductionEnv(), VENDOR_PORTAL_URL: "not a url" };
+      expect(messageOf(env)).toContain("VENDOR_PORTAL_URL");
+    });
+
+    test("an https URL with the base path passes", () => {
+      const env = {
+        ...validProductionEnv(),
+        VENDOR_PORTAL_URL: "https://backend.example.test/vendor-portal",
+      };
+      expect(() => assertProductionConfig(env)).not.toThrow();
+    });
+
+    test("a trailing slash after the base path passes", () => {
+      const env = {
+        ...validProductionEnv(),
+        VENDOR_PORTAL_URL: "https://backend.example.test/vendor-portal/",
+      };
+      expect(() => assertProductionConfig(env)).not.toThrow();
     });
   });
 

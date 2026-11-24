@@ -22,6 +22,7 @@ How to configure the backend, which variables production requires, and what the 
 | `STOREFRONT_URL` | Set, a valid URL for this store. A host on the template vendor's domain is refused. |
 | `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS` | Set. The Medusa documentation site is refused as an origin. |
 | `GORGO_DISABLE_TELEMETRY` | Must be `true`. |
+| `VENDOR_PORTAL_URL` | Set, a valid https URL ending in `/vendor-portal` on the backend host. The vendor portal address used in invitation links. |
 | `COOKIE_SECURE` | Leave unset or set to `true`. Any other value is refused. Production cookies are always secure. |
 
 Also set `MEDUSA_DISABLE_TELEMETRY=true`. The check does not enforce it, but the template and the deployment files do.

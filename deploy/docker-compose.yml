@@ -71,6 +71,7 @@ services:
       TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
       BREAK_GLASS_ALERT_EMAILS: ${BREAK_GLASS_ALERT_EMAILS:-}
       ADMIN_APP_URL: ${ADMIN_APP_URL:-}
+      VENDOR_PORTAL_URL: ${VENDOR_PORTAL_URL:-}
 
   storefront:
     image: ${STOREFRONT_IMAGE:?set STOREFRONT_IMAGE to the storefront image reference}

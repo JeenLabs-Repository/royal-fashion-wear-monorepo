@@ -131,6 +131,26 @@ export const collectConfigIssues = (env: Env): ProductionConfigIssue[] => {
     }
   }
 
+  const portalUrl = (env.VENDOR_PORTAL_URL ?? "").trim();
+  if (portalUrl === "") {
+    issues.push(issue("VENDOR_PORTAL_URL", "unset", "is not set"));
+  } else {
+    try {
+      const parsed = new URL(portalUrl);
+      if (parsed.protocol !== "https:") {
+        issues.push(
+          issue("VENDOR_PORTAL_URL", "invalid-url", "must be an https URL in production")
+        );
+      } else if (!parsed.pathname.replace(/\/+$/, "").endsWith("/vendor-portal")) {
+        issues.push(
+          issue("VENDOR_PORTAL_URL", "invalid-url", "must end in the /vendor-portal base path")
+        );
+      }
+    } catch {
+      issues.push(issue("VENDOR_PORTAL_URL", "invalid-url", "is not a valid URL"));
+    }
+  }
+
   for (const key of CORS_KEYS) {
     const value = (env[key] ?? "").trim();
     if (value === "") {

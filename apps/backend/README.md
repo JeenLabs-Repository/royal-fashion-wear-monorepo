@@ -45,6 +45,7 @@ Copy [`.env.template`](.env.template) to `.env`. In development you need few val
 | `CACHE_REDIS_URL` | Separate Redis instance for the cache | `REDIS_URL` |
 | `INTEGRATION_ENCRYPTION_KEY` | Encrypts the secret fields the Integration Module stores. Use the same value on every backend process | none (required in production) |
 | `GORGO_DISABLE_TELEMETRY` | Turns the Gorgo module telemetry off. Production requires `true` | `true` |
+| `VENDOR_PORTAL_URL` | Vendor portal base URL (with the `/vendor-portal` path) used in invitation links. Production requires an https URL | `http://localhost:5173/vendor-portal` |
 | `MEDUSA_DISABLE_TELEMETRY` | Turns the Medusa telemetry off | `true` |
 | `RUN_MIGRATIONS` | Read by the image entrypoint. Set it to `false` to skip migrations at container start | `true` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | SMTP transport for transactional emails. Development points at Mailpit | `localhost`, `1025`, `false` |
