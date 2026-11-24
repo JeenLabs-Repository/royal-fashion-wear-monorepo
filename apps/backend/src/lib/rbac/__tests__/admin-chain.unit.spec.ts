@@ -157,6 +157,7 @@ describe("chain order", () => {
       "refuse-api-key",
       "mfa-gate",
       "staff-context",
+      "break-glass-watch",
       "permission",
       "guards",
       "audit",

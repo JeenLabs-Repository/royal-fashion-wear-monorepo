@@ -5,6 +5,7 @@
 //   refuse-api-key  secret API keys are refused on every admin route
 //   mfa-gate        a user who never enrolled in two-step sign-in is refused
 //   staff-context   the user must still exist; roles are read fresh, never cached
+//   break-glass-watch  the first use of the break-glass account in a 15-minute window raises the alert
 //   permission      the manifest rule decides; no rule means superadmin only
 //   guards          rule-specific checks (protect the break-glass account)
 //   audit           records the request when the response finishes
@@ -25,6 +26,7 @@ import type {
 import { MedusaError } from "@medusajs/framework/utils";
 import { randomUUID } from "node:crypto";
 import { armAuditOnFinish, auditAdminWrites } from "../audit/audit-admin-writes";
+import { breakGlassWatch } from "../break-glass/watch-break-glass";
 import { STAFF_MFA_ALLOWLIST } from "../mfa";
 import { requireMfaEnrollment } from "../mfa/require-mfa-enrollment";
 import { runGuards } from "./guards";
@@ -167,6 +169,7 @@ export const ADMIN_CHAIN_STEPS: StepDefinition[] = [
     handler: requireMfaEnrollment("user", { allowlist: STAFF_MFA_ALLOWLIST }),
   },
   { name: "staff-context", handler: loadStaffContext },
+  { name: "break-glass-watch", handler: breakGlassWatch },
   { name: "permission", handler: requireManifestPermission },
   { name: "guards", handler: runGuards },
   { name: "audit", handler: auditAdminWrites, options: { runWhenBypassed: true } },

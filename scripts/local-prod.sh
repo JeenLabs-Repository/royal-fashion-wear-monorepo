@@ -59,6 +59,8 @@ SMTP_PORT=1025
 SMTP_SECURE=false
 SMTP_FROM=store@example.test
 TRUST_PROXY_HOPS=0
+BREAK_GLASS_ALERT_EMAILS=owner@example.test
+ADMIN_APP_URL=http://localhost:19000/app
 ENV
   echo "Wrote $ENV_FILE with generated throwaway secrets."
 }
