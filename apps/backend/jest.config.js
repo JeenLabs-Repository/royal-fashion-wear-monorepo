@@ -3,9 +3,17 @@ loadEnv("test", process.cwd());
 
 module.exports = {
   transform: {
-    // Subscribers import React Email templates (`.tsx`); without tsx here the
-    // HTTP integration suite cannot boot the app under Jest.
-    "^.+\\.[jt]sx?$": [
+    "^.+\\.[jt]s$": [
+      "@swc/jest",
+      {
+        jsc: {
+          parser: { syntax: "typescript", decorators: true },
+        },
+      },
+    ],
+    // Email templates are .tsx. The tsx option stays off for .ts files because
+    // it makes angle-bracket casts ambiguous.
+    "^.+\\.tsx$": [
       "@swc/jest",
       {
         jsc: {
