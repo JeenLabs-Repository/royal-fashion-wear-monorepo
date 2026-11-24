@@ -325,10 +325,30 @@ export const signInWithForm = async (
   email: string,
   password: string
 ) => {
-  await page.goto(`${target.adminUrl}/login`)
-  await page.getByLabel(/email/i).fill(email)
-  await page.getByLabel(/password/i).fill(password)
+  await page.goto(`${target.adminUrl}/login`, { waitUntil: "domcontentloaded" })
+  await page.getByRole("heading", { name: /welcome to medusa/i }).waitFor({
+    state: "visible",
+    timeout: 60_000,
+  })
+  // Medusa Admin exposes Email as the textbox accessible name; Password is a
+  // placeholder only, so label-based locators miss it.
+  const emailField = page.getByRole("textbox", { name: /email/i })
+  const passwordField = page
+    .getByPlaceholder(/password/i)
+    .or(page.getByRole("textbox", { name: /password/i }))
+  await emailField.fill(email)
+  await passwordField.fill(password)
+  const loginResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === MFA_API.login.path &&
+      response.request().method() === "POST",
+    { timeout: 60_000 }
+  )
   await page.getByRole("button", { name: /continue|sign in|log in/i }).click()
+  const result = await loginResponse
+  if (result.status() >= 400) {
+    throw new Error(`Dashboard sign-in failed with status ${result.status()}.`)
+  }
 }
 
 const credentialsText = () => {
