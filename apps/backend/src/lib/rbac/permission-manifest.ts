@@ -117,6 +117,7 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     [
       "/admin/products",
       "/admin/product-variants",
+      "/admin/product-options",
       "/admin/product-categories",
       "/admin/product-tags",
       "/admin/product-types",
@@ -175,6 +176,7 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
       "/admin/regions",
       "/admin/tax-regions",
       "/admin/tax-rates",
+      "/admin/tax-providers",
       "/admin/currencies",
       "/admin/stores",
       "/admin/translations",
@@ -182,6 +184,24 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
       "/admin/plugins",
       "/admin/notifications",
       "/admin/workflows-executions",
+    ],
+    { read: "superadmin", write: "superadmin" }
+  ),
+  // Dashboard shell, search, views and dormant enterprise/plugin families.
+  // Shell GETs may later move to SELF_GET_PATTERNS from a measured probe; until
+  // then they stay superadmin so a mutating method never inherits a read grant.
+  ...family(
+    [
+      "/admin/layouts",
+      "/admin/modules",
+      "/admin/feature-flags",
+      "/admin/search",
+      "/admin/search-indexes",
+      "/admin/index",
+      "/admin/views",
+      "/admin/property-labels",
+      "/admin/audit-logs",
+      "/admin/cloud",
     ],
     { read: "superadmin", write: "superadmin" }
   ),
