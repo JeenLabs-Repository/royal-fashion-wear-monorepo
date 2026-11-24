@@ -36,6 +36,7 @@ export interface AlertWindowStore {
 type LockingApi = {
   acquire(keys: string[], args: { expire: number; ownerId: string }): Promise<unknown>;
   release(keys: string[], args?: { ownerId?: string }): Promise<unknown>;
+  releaseAll?(args?: { ownerId?: string }): Promise<unknown>;
 };
 
 type CacheApi = {
@@ -167,15 +168,31 @@ export async function resetAlertWindowForTests(
   const key = windowKey(actorId);
   MEMORY_STORE.clear(key);
 
+  // The running app and this test helper can load as two module copies, so the
+  // owner map here may be empty even when the app holds the lock. Prefer a
+  // targeted release, then drop every in-memory lock so the next request can
+  // open a new window (tests only; never called outside NODE_ENV=test).
   const ownerId = lastOwners.get(key);
-  if (ownerId) {
-    try {
-      // Spike S7: release with the owner id that opened the window.
-      await container.resolve<LockingApi>(Modules.LOCKING).release([key], { ownerId });
-    } catch {
-      // The key may already have expired.
+  try {
+    const locking = container.resolve<LockingApi>(Modules.LOCKING);
+    if (ownerId) {
+      try {
+        await locking.release([key], { ownerId });
+      } catch {
+        // Wrong copy of the owner map, or the key already expired.
+      }
+      lastOwners.delete(key);
     }
-    lastOwners.delete(key);
+    try {
+      await locking.release([key]);
+    } catch {
+      // Key may already be free.
+    }
+    if (typeof locking.releaseAll === "function") {
+      await locking.releaseAll();
+    }
+  } catch {
+    // No locking module, or the key already expired.
   }
   try {
     await container.resolve<CacheApi>(Modules.CACHE).invalidate?.(key);
