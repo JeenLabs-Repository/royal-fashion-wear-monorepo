@@ -37,9 +37,9 @@ export const createAdminUser = async (
   );
 
   const secret = config.projectConfig.http.jwtSecret;
-  if (!secret) {
+  if (typeof secret !== "string" || !secret) {
     throw new Error(
-      "The test app has no jwtSecret to sign an admin token with."
+      "The test app has no string jwtSecret to sign an admin token with."
     );
   }
 
