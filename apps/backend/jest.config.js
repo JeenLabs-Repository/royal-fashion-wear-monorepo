@@ -3,17 +3,20 @@ loadEnv("test", process.cwd());
 
 module.exports = {
   transform: {
-    "^.+\\.[jt]s$": [
+    // Subscribers import React Email templates (`.tsx`); without tsx here the
+    // HTTP integration suite cannot boot the app under Jest.
+    "^.+\\.[jt]sx?$": [
       "@swc/jest",
       {
         jsc: {
-          parser: { syntax: "typescript", decorators: true },
+          parser: { syntax: "typescript", tsx: true, decorators: true },
+          transform: { react: { runtime: "automatic" } },
         },
       },
     ],
   },
   testEnvironment: "node",
-  moduleFileExtensions: ["js", "ts", "json"],
+  moduleFileExtensions: ["js", "ts", "tsx", "json"],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/.medusa/"],
   setupFiles: ["./integration-tests/setup.js"],
 };
