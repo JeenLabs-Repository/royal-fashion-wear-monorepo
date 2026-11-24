@@ -1,7 +1,11 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
+import {
+  getAuthHeaders,
+  getCacheOptions,
+  getFetchCacheMode,
+} from "./cookies"
 import type { HttpTypes } from "@medusajs/types"
 
 export const listCartPaymentMethods = async (regionId: string) => {
@@ -21,7 +25,7 @@ export const listCartPaymentMethods = async (regionId: string) => {
         query: { region_id: regionId },
         headers,
         next,
-        cache: "force-cache",
+        cache: getFetchCacheMode(headers),
       }
     )
     .then(({ payment_providers }) =>

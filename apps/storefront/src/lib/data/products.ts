@@ -10,7 +10,12 @@ import {
 } from "@lib/util/color-option"
 import type { HttpTypes } from "@medusajs/types"
 import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { getAuthHeaders, getCacheOptions, getCountryCode } from "./cookies"
+import {
+  getAuthHeaders,
+  getCacheOptions,
+  getCountryCode,
+  getFetchCacheMode,
+} from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
 import { DEFAULT_REGION } from "@lib/util/env"
 import { locales } from "@i18n/config"
@@ -82,7 +87,7 @@ export const listProducts = async ({
         },
         headers,
         next,
-        cache: "force-cache",
+        cache: getFetchCacheMode(headers),
       }
     )
     .then(({ products, count }) => {
@@ -133,7 +138,7 @@ export const listProductOptionFilters = async (
       },
       headers,
       next,
-      cache: "force-cache",
+      cache: getFetchCacheMode(headers),
     })
     .catch(() => ({ products: [] as HttpTypes.StoreProduct[] }))
 

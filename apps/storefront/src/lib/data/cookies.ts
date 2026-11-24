@@ -23,6 +23,15 @@ export const getAuthHeaders = async (): Promise<
   }
 }
 
+// Next's shared data cache is keyed by the URL and the fetch options, not by
+// the visitor. A request that carries credentials has to opt out of it, or one
+// customer's response can be handed to the next visitor asking for the same URL.
+export const getFetchCacheMode = (
+  headers: Record<string, unknown>
+): "no-store" | "force-cache" => {
+  return "authorization" in headers ? "no-store" : "force-cache"
+}
+
 export const getCacheTag = async (tag: string): Promise<string> => {
   try {
     const cookies = await nextCookies()
