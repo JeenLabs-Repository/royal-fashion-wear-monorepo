@@ -13,7 +13,6 @@ import {
   SUBCATEGORY_QUERY_KEY,
   parseSubcategoryHandles,
 } from "@lib/util/subcategory-filters"
-import { useLocaleDirection } from "@lib/hooks/use-locale-direction"
 
 type CategoryMenuPanelProps = {
   categories: HttpTypes.StoreProductCategory[]
@@ -23,22 +22,17 @@ type CategoryMenuPanelProps = {
 
 type Direction = "forward" | "backward"
 
-/**
- * `x` offsets are physical, so the drill-in/drill-out slide has to be inverted
- * for RTL locales: "forward" travels leftwards there.
- */
-type SlideCustom = { nav: Direction; rtl: boolean }
-
-const slidesLeft = ({ nav, rtl }: SlideCustom) => (nav === "forward") !== rtl
+/** Drilling in slides the panel leftwards, drilling out slides it rightwards. */
+type SlideCustom = { nav: Direction }
 
 const slideVariants = {
-  enter: (custom: SlideCustom) => ({
-    x: slidesLeft(custom) ? "60%" : "-60%",
+  enter: ({ nav }: SlideCustom) => ({
+    x: nav === "forward" ? "60%" : "-60%",
     opacity: 0,
   }),
   center: { x: 0, opacity: 1 },
-  exit: (custom: SlideCustom) => ({
-    x: slidesLeft(custom) ? "-60%" : "60%",
+  exit: ({ nav }: SlideCustom) => ({
+    x: nav === "forward" ? "-60%" : "60%",
     opacity: 0,
   }),
 }
@@ -56,7 +50,6 @@ const CategoryMenuPanel = ({
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [direction, setDirection] = useState<Direction>("forward")
-  const isRtl = useLocaleDirection() === "rtl"
   const [selectedSubs, setSelectedSubs] = useState<Set<string>>(new Set())
 
   const topLevel = categories.filter((c) => !c.parent_category_id)
@@ -120,7 +113,7 @@ const CategoryMenuPanel = ({
                   onClick={goBack}
                   className="flex items-center gap-1 text-ui-fg-subtle transition-colors hover:text-ui-fg-base"
                 >
-                  <ChevronLeftMini className="rtl:rotate-180" />
+                  <ChevronLeftMini />
                   {activeCategory.name}
                 </button>
               ) : (
@@ -137,14 +130,11 @@ const CategoryMenuPanel = ({
             </div>
 
             <div className="relative flex-1 overflow-hidden">
-              <AnimatePresence
-                custom={{ nav: direction, rtl: isRtl }}
-                initial={false}
-              >
+              <AnimatePresence custom={{ nav: direction }} initial={false}>
                 {!activeCategory ? (
                   <m.div
                     key="root"
-                    custom={{ nav: direction, rtl: isRtl }}
+                    custom={{ nav: direction }}
                     variants={slideVariants}
                     initial="enter"
                     animate="center"
@@ -166,7 +156,7 @@ const CategoryMenuPanel = ({
                               className="flex items-center gap-1 text-2xl text-ui-fg-base transition-colors hover:text-ui-fg-subtle"
                             >
                               {category.name}
-                              <ChevronRightMini className="rtl:rotate-180" />
+                              <ChevronRightMini />
                             </button>
                           </li>
                         ) : (
@@ -186,7 +176,7 @@ const CategoryMenuPanel = ({
                 ) : (
                   <m.div
                     key={activeCategory.id}
-                    custom={{ nav: direction, rtl: isRtl }}
+                    custom={{ nav: direction }}
                     variants={slideVariants}
                     initial="enter"
                     animate="center"

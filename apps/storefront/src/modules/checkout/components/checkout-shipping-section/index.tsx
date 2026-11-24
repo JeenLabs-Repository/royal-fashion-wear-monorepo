@@ -20,7 +20,6 @@ import type { HttpTypes } from "@medusajs/types"
 import { usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { useErrorMessage } from "@lib/util/use-error-message"
-import { useLocaleDirection } from "@lib/hooks/use-locale-direction"
 import ShippingOptionCard from "@modules/checkout/components/shipping-option"
 import {
   useSelectedShippingOptionId,
@@ -65,7 +64,6 @@ export default function CheckoutShippingSection({
   currentCountry,
 }: CheckoutShippingSectionProps) {
   const t = useTranslations("CheckoutPage")
-  const dir = useLocaleDirection()
   const getErrorMessage = useErrorMessage()
   const locale = useLocale()
   const currentPath = usePathname()
@@ -389,7 +387,7 @@ export default function CheckoutShippingSection({
           </p>
         </div>
 
-        <DropdownMenu dir={dir}>
+        <DropdownMenu>
           <DropdownMenu.Trigger
             className={clx(
               "mb-6 flex items-center gap-x-1.5 txt-compact-medium-plus text-ui-fg-subtle hover:text-ui-fg-base transition-colors",
@@ -433,7 +431,6 @@ export default function CheckoutShippingSection({
       <div className="overflow-x-auto no-scrollbar px-px pb-1">
         {shippingOptions && shippingOptions.length > 0 ? (
           <RadioGroup
-            dir={dir}
             value={shippingMethodId ?? undefined}
             onValueChange={handleSelectShipping}
             className="flex items-stretch gap-x-2"
