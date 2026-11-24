@@ -4,12 +4,18 @@ import BreakGlassReviewReminderEmail, {
 } from "../break-glass-review-reminder";
 import BreakGlassUsedEmail, { type BreakGlassUsedProps } from "../break-glass-used";
 import StaffAlertEmail, { type StaffAlertProps } from "../staff-alert";
+import VendorInviteEmail, {
+  type VendorInviteProps,
+  vendorInviteSubject,
+  vendorInviteText,
+} from "../vendor-invite";
 import { safeHttpUrl } from "./safe-url";
 
 // Later work adds entries here. Every template declares its own props type and
 // the sender accepts only that type: there is no free-form props escape hatch.
 // That is how a later audit can prove what each email is able to contain.
 export type EmailTemplates = {
+  "vendor-invite": VendorInviteProps;
   "staff-alert": StaffAlertProps;
   "break-glass-used": BreakGlassUsedProps;
   "break-glass-review-reminder": BreakGlassReviewReminderProps;
@@ -22,6 +28,11 @@ export type TemplateEntry<P> = {
 };
 
 export const EMAIL_TEMPLATES: { [K in keyof EmailTemplates]: TemplateEntry<EmailTemplates[K]> } = {
+  "vendor-invite": {
+    Component: VendorInviteEmail,
+    subject: vendorInviteSubject,
+    text: vendorInviteText,
+  },
   "staff-alert": {
     Component: StaffAlertEmail,
     subject: (props) => props.subject,
