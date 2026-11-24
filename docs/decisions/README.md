@@ -28,3 +28,7 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0011 | Branch Protection and Owner Promotion | accepted |
 | 0012 | Staff Governance Spike Results | accepted |
 | 0013 | Staff Dashboard Shell Reads | accepted |
+| 0014 | Vendor Actor and Two-Step Sign-In Mechanics | accepted |
+| 0015 | Workflow Hook Registration | accepted |
+| 0016 | Integration Card Reader Behavior | accepted |
+| 0017 | Admin Extension and Portal Routing | accepted |
