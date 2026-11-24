@@ -1,0 +1,19 @@
+---
+description: Testing, test accounts, production-build checks and docs
+globs: **/*.spec.ts,**/*.test.ts,apps/**/integration-tests/**,docs/**,e2e/**
+alwaysApply: false
+---
+
+# Testing, environments and docs
+
+- Browser flows are **Playwright specs saved in the repo**, not ad-hoc clicking. Re-run them after every fix.
+- **Create every field value needed for testing yourself**, using obviously fake demo data (accounts for each role, form inputs, vendor and product details, addresses with valid Indian state and PIN pairs, orders, settings-card values), and record all of it in the **untracked** `TEST-CREDENTIALS.local.md`, which is in `.gitignore` before it exists, so the owner can check it and reuse it in manual testing. A seed script creates the baseline set; append anything else a test needed. For each entry say what it is, which flow created it, and how to reset it. Values you cannot invent (Razorpay test keys, real SMTP credentials) go under "owner to provide"; in dev send email to a local mail catcher. Never real or production data.
+- Backend suites from `apps/backend`: `test:unit`, `test:integration:http`, `test:integration:modules`.
+- Required tests to keep green: the anonymity canary scan, the generated cross-vendor matrix, and the permission-manifest check that fails on unmapped `/admin*` routes.
+- After dev testing, run the **production build** (`medusa build`, `next build`) and test there, GUI included. If the build fails, fix and rebuild. CI runs lint, typecheck and both builds on every push. The server never builds.
+- Dev credentials are never used in production. Razorpay stays in test mode until one final small live payment. `gitleaks` runs in a hook and in CI.
+- Update `docs/` in the same change as the code (Medusa-docs style: task guides plus concept pages). Record key choices as short decision records.
+
+- Load, UAT, parcel, restore and end-to-end runs use databases separate from production (see the launch rule); never create test accounts or orders in the production database.
+- Every `<verify>`-style check you write must fail before the change and pass after it. Do not use exact `grep -c` counts of 2 or more, do not make a check pass when the tool it relies on did not run (for example without Docker), and give tests that depend on a missing owner input (such as Razorpay test keys) a clear skip that is reported as not run, never as passed.
+

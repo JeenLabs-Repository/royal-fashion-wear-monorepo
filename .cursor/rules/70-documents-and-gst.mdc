@@ -1,0 +1,17 @@
+---
+description: GST invoices, credit notes, packing slips, returns and document emails; apply to any document or return code
+globs: apps/backend/src/modules/documents/**,apps/backend/src/lib/documents/**,apps/backend/src/workflows/**,apps/backend/src/emails/**,apps/backend/src/jobs/**
+alwaysApply: false
+---
+
+# Documents, GST and returns
+
+- **Owner and accountant decisions are never invented.** The invoice issue point has no default; until it is set and supplier identity is complete, invoicing stops and staff are alerted. Which state decides CGST and SGST versus IGST, HSN digits, seller of record and TCS or e-invoicing stay configurable. Never pass a vendor's state to the tax function.
+- **Every reason that makes issuing skip an order raises the staff alert**: issue point not set, supplier incomplete, missing HSN, missing ship-to state, amount not representable. Only not due, order canceled and nothing to invoice are silent. One exported list defines the alerting reasons, and a table-driven test covers each.
+- **Catch-up job:** oldest first, at most 50 issued and 200 attempted per run, so stuck orders cannot starve newer ones. A separate daily backlog alert (once per IST date at 09:00 IST) reports old uninvoiced orders and in-window orders still waiting after a day. A script invoices named orders at any age on purpose.
+- **Numbering is gapless and invoices are immutable.** The series row is locked in the same transaction as the insert, with concurrency and rollback tests. Snapshots copy the footer, prefix and logo at issue time, so changing a card setting never changes an issued invoice. Amount columns are 32-bit with a guard before allocating a number (about 21 million rupees).
+- **Credit notes are retry-safe** through the refund-reference intent table, with a retry job. Refunds go through the shared workflow with an idempotency key.
+- **Cancellation:** unrouted lines cancel at once; shipped lines cannot be cancelled (the core cancel route is guarded and returns 409). Lines cancelled before a vendor reported shipped may be refunded through the refund-only mode.
+- **Returns go to the owner's address**, never the vendor. Guests contact support.
+- The packing slip is rendered from an owner-only type with no vendor field. Every email template belongs to a per-audience allowlist, and a completeness test fails on an unlisted template. PDFs and email metadata are extracted and canary-tested.
+- Purchase invoices have a 100-paise tolerance between total and taxable plus GST, and reject future dates.

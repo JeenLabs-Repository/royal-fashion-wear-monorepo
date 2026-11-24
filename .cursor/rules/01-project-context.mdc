@@ -1,0 +1,45 @@
+---
+description: What this project is, decisions already made and why, what must not be guessed, and the build order
+alwaysApply: true
+---
+
+# Project context (the planning documents are not in this repo)
+
+## What we are building
+
+A multivendor store for India on the Gorgo Medusa DTC Starter (Medusa 2.22.7, Next.js 15). The owner runs the store and invites vendors, who can have several locations. Customers see one store brand and only the **state** a product ships from, never the vendor. Every order goes to the owner, who **manually** routes each line to a vendor location, preferring the customer's state. Vendors use a separate portal to draft products (the owner approves), update stock per location and fulfil routed orders.
+
+## Decisions already made (do not reopen without asking the owner)
+
+- **One customer order, no split carts.** Splitting per vendor would reveal that several vendors exist.
+- **Routing is manual.** No automatic nearest-vendor logic.
+- **Vendors are a custom actor type, not Admin users.** Medusa's Admin has no data-scoped vendor accounts, and a separate surface is easier to lock down.
+- **Staff RBAC is custom.** Medusa's RBAC and audit modules need a paid licence with an online check, which conflicts with an offline break-glass account. Core TOTP MFA is free and is forced for staff and vendors.
+- **Vendor data is never linked to commerce models**, and every response goes through an allowlist serializer. Anonymity holds by construction, then is proven by tests.
+- **Razorpay through our own payment provider.** Stripe India is invite-only and the community Razorpay plugins are pinned to old Medusa versions.
+- **GST uses Medusa's native tax rules** (one India region, tax-inclusive prices). Invoices are issued in the owner's name. Final invoice rules are pending an accountant.
+- **Redis stays.** Without it, sessions fall back to memory and every deploy logs everyone out.
+- **Dokploy was chosen by the owner**, with mitigations: at least 4 GB RAM, panel behind a VPN or allowlist, a patched version, builds done in CI (never on the server).
+- **Medusa stays pinned at 2.22.7.** 2.23 is a breaking bump; upgrading is a separate later task.
+- **Out of scope:** vendor payouts and commission (owner pays manually), cash on delivery, WhatsApp and SMS alerts (to be built later as their own Integration Module provider), staff alert channels beyond email, courier-booking API, live KYC verification, a dedicated search engine, a separate SSO server.
+- **Every plugin's settings go through the Gorgo Integration Module**, including starter built-ins such as SMTP where possible, and four business settings cards (documents, customer-facing identity and return policy, vendor onboarding, routing preferences). Adopted third-party plugins get a wrapper descriptor. See `50-integrations` for the list.
+- **Vendor KYC, vendor GSTIN and bank details are not in launch scope.** They come later as a Gorgo-style plugin; the vendor module is built plugin-ready (see `20-backend`) and the owner activates vendors by hand. The owner's own GST (tax region, invoices) stays.
+- **Plugin repositories:** Gorgo plugins this project creates each live in their **own repository** (three repos: a Razorpay payment provider, a store-settings plugin holding every settings card, and later a vendor compliance plugin). The app depends on them by exact pinned version from a private registry, installed from signed tags. Plugins import nothing from the app's internals and expose a documented public surface. Each plugin repo follows the same three branches, commit rules, signing, CI and docs as the app repo.
+- **The vendor portal is a static app** on the same backend, not another server.
+- The app server is self-hosted with 4 cores, 8 GB RAM and 100 GB storage and runs Dokploy, the backend, the storefront and Redis. Postgres runs on a **separate owner-operated host reached over a private network** (never exposed to the internet; plan for Postgres 17 and keep the version a variable). Prefer no new services and measure memory before launch.
+
+## Do not guess; ask the owner
+
+Seller of record and GST invoice rules (which state decides CGST and SGST versus IGST, invoice per dispatch or per order); Legal Metrology declarations (they conflict with anonymity); launch product categories; brand name; return address policy; courier aggregator and who books; which languages beyond English; the SSH signing key; whether to add a docs site. Keep these configurable and flag them rather than choosing.
+
+## Build order (earlier areas unblock later ones)
+
+Baseline hardening and India scope cut, then repository tooling; staff governance (roles, MFA, audit, break-glass); vendor domain with the scoped API and anonymity tests; catalog and per-location stock; India commerce (payments, GST, PIN lookup) can run alongside those; manual routing and fulfilment; documents, returns and notifications; launch readiness. Do not build a vendor screen before the scoped API and serializers exist, and do not build approvals or routing before staff roles and the audit log exist.
+
+## Spikes to run before depending on them
+
+Where Medusa places a stock reservation when several vendor locations share a channel, and whether the reservation can be moved or split on assignment; whether fulfilment with an explicit vendor `location_id` works with a single hub shipping option; whether a custom `/admin*` middleware can see the signed-in user and reject core and plugin routes; whether the payment webhook completes a cart on 2.22.7. Record each result as a short decision record in `docs/`.
+
+## More context
+
+`PRODUCT.md` (audiences, terminology, constraints) and `docs/` (guides and decision records).

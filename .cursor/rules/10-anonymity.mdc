@@ -1,0 +1,24 @@
+---
+description: Vendor anonymity rules, the core product rule; apply to any customer-facing or vendor-facing code
+globs: apps/backend/src/**,apps/storefront/src/**,apps/vendor-portal/**
+alwaysApply: false
+---
+
+# Vendor anonymity
+
+The customer must never learn which vendor supplies anything: pages, JSON-LD, sitemap, `llms.txt`, RSC payloads, Store API, emails, invoices, packing slips, courier labels, tracking pages, return labels.
+
+- No vendor name, vendor SKU, handle, `metadata`, image path or EXIF, or real stock-location name on anything customer-facing. The platform assigns SKUs and handles. Locations are opaque (`LOC-0042`). Images are re-encoded and stored under random keys.
+- **No module links** between vendor data and commerce models; use plain ID columns (a Store API `fields=` expansion could otherwise reach vendor data).
+- Every vendor, store and document response goes through an **allowlist serializer** in `src/lib/serializers/`. A guard on `/store*` rejects forbidden `fields` and `expand` terms.
+- Show only "Ships from {State}" on products.
+- Vendors never see customer email, phone, order totals or other lines: only the assigned items plus shipping name, address, PIN and state.
+- A **canary test** seeds distinctive vendor strings and fails if they appear in any customer-facing output. Keep it passing; extend it for every new surface (emails, PDFs, pages).
+- Customer-facing documents, labels and tracking show the store brand as sender and the owner's return address.
+
+## Vendor-facing routes and labels
+
+- Vendor routes use the **assignment reference** as the id in URLs and emails, never an internal id. Vendors see only the assigned items and the shipping name, address, PIN and state.
+- **Courier label release:** a staff-uploaded label is released to a vendor only when the masked phone policy allows it (policy `none`). Under `courier_label_only` release is refused outright in the release workflow, the upload route and the vendor label route (re-checked on every request, with the same 404 as any other refusal), and the courier panel disables the option. Labels and tracking show the owner as sender and never the vendor.
+- Routing candidates are limited to the vendor that owns the variant (one vendor per product at launch); routing between that vendor's locations works, routing to a different vendor does not.
+

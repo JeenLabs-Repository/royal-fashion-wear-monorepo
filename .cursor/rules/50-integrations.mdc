@@ -1,0 +1,32 @@
+---
+description: Gorgo Integration Module rules for any provider or plugin settings
+globs: apps/backend/src/**,apps/backend/medusa-config.ts
+alwaysApply: false
+---
+
+# Integration Module (Settings → Integrations)
+
+Every provider this project adds exposes its settings through the Gorgo Integration Module.
+
+- Declare a descriptor: `secret: true` **and** `control: "secret"` on credentials (without the control the field renders as plain text), `minLength: 1` on required strings, and a `testConnection` where possible.
+- Read options **at call time** with `resolveIntegrationOptions`, never in a constructor, so changes apply without a restart (options are cached 60 s per process).
+- Settings stay in the module; **bootstrap secrets stay in env**: `DATABASE_URL`, `INTEGRATION_ENCRYPTION_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, the MFA key, Redis URL, CORS lists, provider registration.
+- `INTEGRATION_ENCRYPTION_KEY` must be identical on the server and every worker. Changing or losing it makes stored secrets unreadable.
+- Keep `@gorgo/medusa-integration` pinned. Do not modify the module's code. Set `GORGO_DISABLE_TELEMETRY=true`.
+- Third-party keys for lookups (for example a PIN service) are read through the module by a backend route, never exposed to the browser.
+
+## Settings cards to build (v1)
+
+Razorpay; GST and owner legal identity; SMTP (wrapper around the starter's provider); **document and invoice settings** (issue point per dispatch or per order, number format and series prefix, logo and footer text, packing-slip text); **customer-facing identity and return policy** (sender display name, owner return address, masked-phone policy); **vendor onboarding settings** (invite expiry, current agreement version); **routing preferences** (same-state-first toggle, hours before an order counts as aged, reminder timing). Already-issued invoices never change when a document setting changes.
+
+Any third-party plugin we adopt gets a wrapper descriptor; a plugin without one is not adopted.
+
+Not in the module: courier, WhatsApp and SMS, staff alert channels (v1 alerts go by email through SMTP), the vendor compliance plugin (KYC, vendor GSTIN, bank details, verification) which is built later, file storage, error-tracking DSN, search engine settings, and any security policy (session lifetime, MFA roles stay in code and review).
+
+## Plugin pins and the registry secret
+
+- Plugins are installed by **exact version** from the private registry, never by file, link or local-publish path in committed config; a check fails on those forms.
+- The registry token reaches installs and image builds only as a secret (a build secret mount, never an argument or layer). Until the first plugin dependency lands the mount and the `.npmrc` auth line are optional and safe when the token is unset or empty; the change that adds the first plugin dependency makes the mount required in the same commit, and a guard enforces it.
+- A plugin is released from a signed tag by its own CI, then the app's pin is bumped in a separate commit.
+- Orders with a zero total cannot complete once the default system payment provider is removed. That is an open owner question: do not add a zero-total completion path, and keep the test that pins the behaviour.
+

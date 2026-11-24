@@ -1,0 +1,15 @@
+---
+description: Staff access, audit, break-glass and vendor request-chain rules; apply to any admin or vendor route code
+globs: apps/backend/src/api/**,apps/backend/src/lib/rbac/**,apps/backend/src/lib/audit/**,apps/backend/src/modules/staff-access/**,apps/backend/src/modules/audit-log/**
+alwaysApply: false
+---
+
+# Access, audit and break-glass
+
+- **Every request re-checks that the actor still exists.** The staff context loader confirms the user is present in the User module on every `/admin*` request, before reading any role assignment: missing user gives 401 `staff_user_not_found`, a failing lookup gives 500 `staff_lookup_failed`. No caching, no exemption (break-glass included). A deleted user's old token or cookie must authorise nothing, even if an assignment row is left behind. The vendor chain follows the same rule and also checks vendor status on every request.
+- **Default deny.** A route is allowed only if the permission manifest lists it. Unlisted `/admin*` routes need superadmin. A CI check fails on an unmapped route. Secret API keys are refused on every admin route.
+- **Audit every non-GET `/admin*` request**, including routes core handles itself and routes that bypass the permission chain (such as accepting a staff invite), recording key names only, never values. Every recovery script and CLI command also writes an audit entry. The audit table is append-only by database trigger.
+- **Last-superadmin protection** must hold on every path. Revoking a role and deleting a user take the same shared lock, and concurrent delete and revoke cases are tested in both orders.
+- **Break-glass use** raises one alert per window: the window opens with an atomic lock acquire (900 seconds, never released, fresh owner id per attempt), backed by a unique open-review index and a notification idempotency key. Break-glass cannot be demoted or deleted by a normal admin, and a review closes it.
+- **MFA** is enforced by a gate factory per actor type; enrolment is required before any admin or vendor screen works.
+- Stay on the spike-recorded decisions for anything that depends on how Medusa behaves (middleware order, actor type values, MFA endpoints). If a recorded spike says STOP, halt and tell the owner.

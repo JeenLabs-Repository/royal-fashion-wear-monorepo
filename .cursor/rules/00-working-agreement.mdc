@@ -1,0 +1,41 @@
+---
+description: Working agreement for every task: skills first, dev loop, git rules, branch model
+alwaysApply: true
+---
+
+# Working agreement
+
+Read `AGENTS.md` (the starter's guide) and `PRODUCT.md` before design or copy work. Where this project's rules conflict with `AGENTS.md`, these rules win: no `supersecret` defaults, Node 22.23.4+, no 36-language demo scope in production.
+
+## Skills first (local files, not the web)
+
+Cursor does not run Claude skills, so **read the `SKILL.md` file** before coding in that area:
+- backend: `.claude/skills/building-with-medusa/SKILL.md`
+- storefront: `.claude/skills/building-storefronts/SKILL.md`, `.claude/skills/storefront-best-practices/SKILL.md`
+- admin UI: `.claude/skills/building-admin-dashboard-customizations/SKILL.md`
+- migrations: `.claude/skills/db-generate/SKILL.md`, `.claude/skills/db-migrate/SKILL.md`
+- design: `.claude/skills/impeccable/SKILL.md` **or** `.claude/skills/design-taste-frontend/SKILL.md`, never both
+
+## Loop per change
+
+Write code, test, find bugs, fix, retest, retest in a real browser with Playwright, check how the UI looks and fix it, retest everything, update `docs/`.
+
+## Git
+
+- Work only on `active-dev`. Never push to `dev` or `main`, never merge to `main`, never force-push. Commit or push only when asked.
+- Conventional Commits, short and plain: `feat: add vendor invite route`. Full commit rules, examples and the signing check are in `03-git-commits`.
+- No plan, phase, task or requirement numbers anywhere in git (branch names, messages, bodies, PRs, comments).
+- Every commit is signed; never bypass signing. If it fails, stop and tell the owner.
+- One logical change per commit, each building on its own; backend before the storefront change that needs it. Use `git commit --fixup` and `rebase --autosquash`.
+
+## Context and git detail
+
+Read `01-project-context` for what this project is, the decisions already made and what not to guess. `02-branches-and-pull-requests` has the branch model, promotion checklist and PR notes template.
+
+## Side by side
+
+Storefront and backend change together, so expect many small commits on `active-dev` while fixes land. After dev testing, build and run the production build, test there, and if the build fails fix and rebuild.
+
+## Versions
+
+Medusa packages stay exactly 2.22.7. `@gorgo/medusa-integration` stays pinned. Do not upgrade Medusa.

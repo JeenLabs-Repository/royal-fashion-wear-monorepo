@@ -1,0 +1,14 @@
+---
+description: Launch gates, test data separation and evidence rules; apply to launch scripts, checklists and runbooks
+globs: docs/launch/**,docs/runbooks/**,scripts/**,deploy/**,.github/workflows/**
+alwaysApply: false
+---
+
+# Launch gates and evidence
+
+- **Owner gates are never ticked by tooling or by you**: accountant and lawyer sign-off, Razorpay live approval and one real live payment and refund, courier masking confirmed in the live dashboard, the UAT, the physical parcel and return, the forced-failure monitoring drill, and the soft launch. A gate checker may refuse to pass; it never writes a pass. Do not write `Result: pass` without a real run by the owner.
+- **UAT results record the 40-character build commit.** The commit check compares the recorded commit to the release candidate with `git diff --name-only --no-renames`, matches only the slash-terminated evidence folders (`docs/launch/`, `docs/runbooks/`), and fails on any other path, a rename into an evidence folder, a lookalike folder, or a recorded commit that is not an ancestor.
+- **Test data never enters the production database.** Issued invoices and audit rows are immutable by trigger, so load tests, the UAT, the parcel, restore rehearsals and end-to-end runs use separate databases. At go-live the proof is read-only: no test accounts or orders exist in production. The go-live steps that depend on this stay blocked until the owner confirms the decision record reads accepted.
+- Load, memory and restore results are recorded from real runs (recovery point and time included), never assumed. Memory limits come from measured idle and peak use on the 4-core, 8 GB host.
+- Plugin repositories are part of launch: CI green on each `main`, the app's exact pins match signed release tags, the registry token exists only as a secret in CI and the host's build settings, a clean-cache image build succeeds, and branch protection and signing are verified in every repo.
+- Owner-written evidence files are listed in the guide, not created by tooling.

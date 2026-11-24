@@ -1,0 +1,48 @@
+---
+description: Git commit message format, signing and commit hygiene; applies to every commit
+alwaysApply: true
+---
+
+# Git commits
+
+## Format
+
+`<type>[optional scope]: <summary>`
+
+- Conventional Commits. Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- Summary: imperative, lowercase, no trailing period, about 72 characters or fewer, saying plainly what changed.
+- Scope is optional and must name **code**, never the plan: `vendor-api`, `storefront`, `admin`, `checkout`, `docs`.
+- Body is optional; use it to explain **why**, not to repeat the diff. Use `BREAKING CHANGE:` in a footer when it applies.
+
+Good:
+- `feat: add vendor invite route`
+- `fix(storefront): stop caching authenticated cart requests`
+- `refactor(vendor-api): move ownership check into one helper`
+- `test: add cross-vendor access matrix`
+- `docs: explain how order routing moves reservations`
+
+Bad (rejected or sent back):
+- `feat(1-0): vendor stuff` (plan numbering)
+- `feat(phase-3): vendor api`, `task 4`, requirement IDs in any form
+- `wip`, `fixes`, `update`, `changes`, `misc`, gibberish
+- `Fix.` or a sentence that says nothing about what changed
+
+## Nothing in git refers to the plan
+
+The planning documents are not in this repository, so any phase, plan, task or requirement number would point at nothing. This applies to commit messages, bodies, branch names, PRs and code comments.
+
+## Signing
+
+Every commit is signed with SSH signing. Never use `--no-gpg-sign` or `-c commit.gpgsign=false`. After committing, `git log --show-signature -1` should show a good signature. If signing fails or is not configured, **stop and tell the owner**; do not commit unsigned.
+
+## Hygiene
+
+- One logical change per commit, and each commit builds on its own. Backend changes land before the storefront changes that depend on them.
+- Formatting-only changes get their own commit, never mixed into a feature diff.
+- Never commit secrets, `.env` files, or `TEST-CREDENTIALS.local.md`. Check `git status` and the staged diff before committing.
+- Changes to `.gitignore`, hooks or CI config get their own commit.
+- Commit or push only when the owner asks. Never skip hooks (`--no-verify`); fix what the hook reports.
+
+## Fixing earlier commits
+
+Use `git commit --fixup=<sha>` while working, then squash before the owner promotes: `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash <base>` (this runs without an interactive editor, so it works for AI tools). Only rewrite commits on `active-dev` that have not been promoted. Never rewrite `dev` or `main`, and never force-push.

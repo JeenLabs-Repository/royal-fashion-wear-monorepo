@@ -1,0 +1,61 @@
+---
+description: Three-branch model, promotion checklist, hooks, signing and the pull-request notes template
+alwaysApply: true
+---
+
+# Branches, promotion and pull requests
+
+| Branch | Role | Who changes it |
+|---|---|---|
+| `main` | Production | Only a pull request from `dev`, opened and merged by the owner |
+| `dev` | Verified work and the production-build test target | Promotions from `active-dev` |
+| `active-dev` | All AI work and testing | You, in small signed conventional commits |
+
+You work only on `active-dev`. You never push to `dev` or `main`, never merge to `main`, never force-push. The owner triggers promotions. Short-lived branches off `active-dev` are fine for risky experiments or parallel agents; merge them back into `active-dev`.
+
+## Before the owner promotes `active-dev` to `dev`
+
+Make sure all of this is true, and say plainly if anything is not:
+- tests pass (backend suites, anonymity canary, cross-vendor matrix, permission-manifest check)
+- Playwright specs pass and the UI has been checked visually
+- docs are updated in the same change
+- lint, typecheck and both builds pass
+- fixups are squashed with `rebase --autosquash`
+- no secret or test credential is staged
+
+The merge into `dev` is a signed `--no-ff` merge done locally.
+
+## Pull request from `dev` to `main`
+
+The owner opens it by hand. Before that, the production build is run from `dev` and tested in a production-like setup (GUI included). When asked, draft the PR notes from the commits and the diff only, using this template, with **no plan, phase or requirement references**:
+
+- **Summary**
+- **Backend changes**
+- **Storefront changes**
+- **How it was tested** (commands and results, the Playwright run, the production-build result)
+- **Migrations** (back up the database first; migrations must be backwards-compatible so a rollback needs no restore)
+- **New or changed environment variables and secrets**
+- **Rollback plan**
+- **Known risks**
+- **Screenshots**
+
+Use the **"Create a merge commit"** method. Squash and rebase merges create commits the owner's key did not sign. Tag each production release with a **signed tag** (for example `v0.1.0`).
+
+## Hotfixes and drift
+
+A fix on `main` branches from `main`, goes through a PR to `main`, and is merged back into `dev` and `active-dev` immediately. After every release merge `main` into `dev` and `dev` into `active-dev`.
+
+## Tooling that enforces the rules
+
+- A commit-msg hook (commitlint with Conventional Commits) rejects non-conventional messages and any plan, phase or requirement numbering such as `feat(1-0):`.
+- Commits are signed with **SSH signing** (`gpg.format ssh`, `commit.gpgsign true`). Nothing bypasses it. A pre-push or CI check reports unsigned commits.
+- `gitleaks` runs in a hook and in CI. CI runs lint, typecheck and both builds on every push.
+- `main` and `dev` are protected: no direct or force pushes, required checks, signed commits.
+- Changes to `.gitignore`, hooks or CI config get their own commit.
+
+## Versions and releases
+
+Plain semver on signed annotated tags: `v0.x` before launch, `v1.0.0` at launch, then one major number per product stage (v2, v3, v4); there are no outside API consumers, so a major number marks a stage. Minor releases are smaller feature or maintenance releases (for example the dependency upgrade) and patch releases are fixes. Tag text describes the changes in words. The changelog is generated from conventional commits. No API versioning: the backend and the vendor portal deploy together from the same tag.
+
+Dependencies are pinned exactly (Medusa 2.22.7 with every `@medusajs/*` package together, the Gorgo module, Node 22.23.4+), with a committed lockfile and no `latest` or `^`. Upgrade one thing at a time on `active-dev` with the full suite. The Medusa 2.23 upgrade is its own later release because it brings Express 5, React 19, Vite 8 and Tailwind 4 together. Dependency bots may propose patch updates but never auto-merge.
+

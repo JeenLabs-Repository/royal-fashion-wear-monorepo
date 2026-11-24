@@ -1,0 +1,22 @@
+---
+description: Medusa backend rules: modules, vendor actor, staff RBAC, routing, payments, GST
+globs: apps/backend/**
+alwaysApply: false
+---
+
+# Backend
+
+First read `.claude/skills/building-with-medusa/SKILL.md`.
+
+- Custom modules: `vendor`, `vendorCatalog`, `orderRouting`, `documents`, `staffAccess`, `auditLog`. Modules are CRUD; business rules live in **workflows**; routes stay thin.
+- **Vendors are a custom `vendor` actor type, never Admin users.** `vendor_id` comes from `auth_context.app_metadata`, never from request input. Strict zod schemas (no mass assignment) and an ownership check on every `/vendor/*` route. A suspended vendor loses access on the next request. Every new vendor route needs coverage in the cross-vendor matrix test.
+- **Staff RBAC is custom** (Medusa's RBAC and audit modules need a paid licence). Every `/admin*` route is denied unless listed in the permission manifest; unlisted routes need superadmin. `/admin/integrations*` is superadmin only and refuses secret API keys. Core TOTP MFA is forced for staff and vendors. The audit table is append-only, enforced by a database trigger.
+- **Routing is manual.** The reservation follows the assignment (move or split), every fulfilment passes an explicit `location_id`, and a job checks for drift. Do not assume Medusa's reservation behaviour; spike it first.
+- **Payments:** Razorpay via our own provider. The webhook completes the order without the browser, verifies the signature on the **raw body**, and ignores duplicate event IDs. Refunds carry an idempotency key. Use one tested `toPaise()` helper. The default system payment provider must not be enabled in the India region.
+- **GST:** one India region, tax-inclusive prices, rates by product type. Invoice numbers come from a gapless per-GSTIN, per-financial-year sequence (never the order display id); invoices are immutable snapshots; PDFs use `pdfmake` with a rupee-capable font. Seller of record and invoice timing are accountant decisions, so keep them configurable.
+- Do not put non-subscriber helpers under `subscribers/`. Do not modify the Gorgo module's own code.
+- The backend must refuse to boot in production when `JWT_SECRET`, `COOKIE_SECRET`, `INTEGRATION_ENCRYPTION_KEY` or the MFA key is unset or equals `supersecret`, or cookies are not secure.
+
+## Vendor module is plugin-ready; no KYC in core
+
+Vendor KYC, vendor GSTIN and bank details are **not** built now. They arrive later as a separate plugin, so **never add PAN, GSTIN, bank or KYC fields to any core model**. The owner activates vendors by hand. Build the vendor module with these extension points: workflow hooks on vendor activation, location create or update, and suspension (plugins register handlers; the base never imports a plugin); plugin-owned data keyed by plain `vendor_id` and `vendor_location_id`, never module links; public utilities a plugin can import (vendor auth middleware, ownership helper, allowlist serializer helper, an audit call); a place for plugin sections on admin vendor pages; and a vendor onboarding steps list that holds only agreement acceptance for now. Cover the activation hook with a test-only stub plugin that blocks activation. Verify the hook and admin-extension mechanics on 2.22.7 with a small spike before relying on them.

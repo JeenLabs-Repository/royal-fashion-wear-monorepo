@@ -1,0 +1,16 @@
+---
+description: Next.js storefront rules: skills, caching, secrets, build checks, design
+globs: apps/storefront/**
+alwaysApply: false
+---
+
+# Storefront
+
+First read `.claude/skills/building-storefronts/SKILL.md` and `.claude/skills/storefront-best-practices/SKILL.md`. Read `PRODUCT.md` before any design or copy work. For visual design use **either** `impeccable` **or** `design-taste-frontend`, never both.
+
+- No `force-cache` on any request that carries authorization. Verify with a two-customer test (customer A's cart never appears for customer B).
+- No secrets in `NEXT_PUBLIC_*`. Address lookup goes through a backend route using the bundled India Post PIN directory with an ISO state dropdown. No DaData, no geolocation lookup.
+- India only: do not reintroduce the demo's 36 languages or 241 regions.
+- `next build` runs typecheck and lint and must pass. Never add `ignoreBuildErrors` or `ignoreDuringBuilds`; justify any `eslint-disable` next to it.
+- Product pages show "Ships from {State}" and nothing that identifies a vendor.
+- Cover each UI change with a Playwright spec and re-run it after fixes.

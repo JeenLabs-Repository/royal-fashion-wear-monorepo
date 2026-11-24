@@ -1,0 +1,13 @@
+---
+description: Vendor portal and Medusa Admin extension rules
+globs: apps/vendor-portal/**,apps/backend/src/admin/**
+alwaysApply: false
+---
+
+# Vendor portal and Admin extensions
+
+- Admin widgets and pages: first read `.claude/skills/building-admin-dashboard-customizations/SKILL.md`.
+- The vendor portal is a **static Vite + React 18.3** app (not React 19, because `@medusajs/ui` peers on 18) with React Router 7, TanStack Query 5 and `@medusajs/js-sdk`. It is built in CI and served as static files on its own hostname. No extra Node server.
+- It talks only to `/vendor/*` routes. Never call `/admin/*` from the portal.
+- Vendors must enroll TOTP before using it. Show vendors only their own data and, on routed orders, only items plus shipping name, address, PIN and state.
+- Admin pages that act on routing, approvals or integrations must respect the permission manifest; do not rely on hiding menu entries (Medusa's sidebar can still show forbidden items), enforce on the API.
