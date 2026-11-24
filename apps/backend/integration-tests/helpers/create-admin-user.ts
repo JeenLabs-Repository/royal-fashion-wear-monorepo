@@ -12,7 +12,7 @@ const base64Url = (value: string | Buffer) =>
 
 // An HS256 token carrying the claims the admin authentication middleware reads.
 // Written out with node:crypto so the tests need no extra package.
-const signToken = (payload: Record<string, unknown>, secret: string) => {
+export const signToken = (payload: Record<string, unknown>, secret: string) => {
   const issuedAt = Math.floor(Date.now() / 1000);
   const header = base64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
   const body = base64Url(

@@ -1,6 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils";
 import { createApiKeysWorkflow } from "@medusajs/medusa/core-flows";
-import { createAdminUser } from "../helpers/create-admin-user";
+import { createStaffUser, staffHeaders } from "../helpers/staff-users";
 
 jest.setTimeout(60 * 1000);
 
@@ -37,11 +37,14 @@ medusaIntegrationTestRunner({
       });
 
       test("GET /admin/custom answers 404", async () => {
-        const adminHeaders = await createAdminUser(getContainer());
+        // Default deny answers 403 to a user without a role, so proving the
+        // route is gone needs a signed-in superadmin.
+        const superadmin = await createStaffUser(getContainer(), {
+          roleKeys: ["superadmin"],
+        });
+        const headers = await staffHeaders(api, superadmin);
 
-        const status = await statusOf(
-          api.get("/admin/custom", adminHeaders)
-        );
+        const status = await statusOf(api.get("/admin/custom", { headers }));
 
         expect(status).toBe(404);
       });
