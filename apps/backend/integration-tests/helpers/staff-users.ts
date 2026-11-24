@@ -77,11 +77,11 @@ export const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
 const readSecret = (container: MedusaContainer): string => {
   const config = container.resolve<ConfigModule>(ContainerRegistrationKeys.CONFIG_MODULE);
   const secret = config.projectConfig.http.jwtSecret;
-  if (!secret) {
+  // Token helpers take a string. Tests always configure a string secret.
+  if (typeof secret !== "string" || secret.length === 0) {
     throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "The test app has no jwtSecret");
   }
-  // jwtSecret is typed as string | Buffer; token helpers take a string.
-  return typeof secret === "string" ? secret : Buffer.from(secret).toString("utf8");
+  return secret;
 };
 
 /** Registers an emailpass identity with a password. Returns its id. */
