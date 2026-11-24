@@ -132,7 +132,7 @@ function readPluginNames(backendRoot: string): string[] {
   const previous = process.env.NODE_ENV;
   process.env.NODE_ENV = "test";
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // Dynamic CommonJS load so the check sees the same plugins medusa-config registers.
     const loaded = require(path.join(backendRoot, "medusa-config"));
     const config = loaded.default ?? loaded;
     const plugins: unknown[] = config?.plugins ?? [];
