@@ -26,6 +26,7 @@
     "backend:dev": "turbo dev --filter=@dtc/gorgo-medusa-backend",
     "storefront:dev": "turbo dev --filter=@dtc/gorgo-medusa-storefront",
     "guards": "node scripts/run-guards.mjs",
+    "check:vendor-schema": "node scripts/check-vendor-schema.mjs",
     "release:prepare": "sh scripts/release-prepare.sh",
     "release:tag": "sh scripts/release-tag.sh",
     "prepare": "husky",

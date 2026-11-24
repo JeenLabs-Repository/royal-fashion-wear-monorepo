@@ -1,0 +1,10 @@
+{
+  "scan": ["vendor", "vendorCatalog", "orderRouting"],
+  "pattern": "(^|_)(pan|gstin|gst_?(no|number|reg)|bank|ifsc|account_?(no|number)|kyc|aadhaar|upi)(_|$)",
+  "required": ["vendor"],
+  "allowlist": {
+    "documents": {
+      "columns": []
+    }
+  }
+}
