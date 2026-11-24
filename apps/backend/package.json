@@ -21,7 +21,7 @@
     "gorgo"
   ],
   "scripts": {
-    "build": "medusa build && node scripts/copy-migration-data.js",
+    "build": "medusa build && node scripts/copy-migration-data.js && node scripts/copy-vendor-agreements.js",
     "start": "medusa start",
     "dev": "medusa develop",
     "seed": "ALLOW_DEMO_SEED=1 medusa exec ./src/migration-scripts/initial-data-seed.ts",
