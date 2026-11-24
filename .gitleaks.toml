@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lockfile integrity hashes look like keys but are not secrets"
+paths = ['''pnpm-lock\.yaml''']

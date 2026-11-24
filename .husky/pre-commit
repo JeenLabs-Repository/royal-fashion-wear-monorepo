@@ -1,0 +1,2 @@
+# Scan staged changes for secrets and forbidden files.
+sh scripts/gitleaks-staged.sh
