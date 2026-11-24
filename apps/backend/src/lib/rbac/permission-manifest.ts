@@ -27,7 +27,15 @@ export const GUARD_NAMES = ["protect-staff-target"] as const;
 export type GuardName = (typeof GUARD_NAMES)[number];
 
 /** GET patterns that may use the `self` pseudo permission. */
-export const SELF_GET_PATTERNS: readonly string[] = ["/admin/users/me", "/admin/staff/me"];
+export const SELF_GET_PATTERNS: readonly string[] = [
+  "/admin/users/me",
+  "/admin/staff/me",
+  // Sidebar Header calls useStore() and throws on 403; without this every
+  // non-superadmin page becomes Medusa's Access Denied before a custom
+  // no-access panel can render. Store name and currency qualify as shell data
+  // (same policy as the later dashboard shell probe). Mutations stay denied.
+  "/admin/stores*",
+];
 
 const MUTATING_METHODS = ["POST", "DELETE", "PUT", "PATCH"] as const;
 const ALL_METHODS = ["GET", ...MUTATING_METHODS] as const;
@@ -78,6 +86,12 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
   // Self and core-handled
   { method: "GET", pattern: "/admin/users/me", permission: "self" },
   { method: "GET", pattern: "/admin/staff/me", permission: "self" },
+  {
+    method: "GET",
+    pattern: "/admin/stores*",
+    permission: "self",
+    note: "Dashboard shell: sidebar store name. Mutations stay superadmin below.",
+  },
   {
     method: "POST",
     pattern: "/admin/invites/accept",
@@ -178,7 +192,6 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
       "/admin/tax-rates",
       "/admin/tax-providers",
       "/admin/currencies",
-      "/admin/stores",
       "/admin/translations",
       "/admin/locales",
       "/admin/plugins",
@@ -187,6 +200,8 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     ],
     { read: "superadmin", write: "superadmin" }
   ),
+  // Store mutations stay owner-only; GET /admin/stores* is self above.
+  ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/stores*", "superadmin"),
   // Dashboard shell, search, views and dormant enterprise/plugin families.
   // Shell GETs may later move to SELF_GET_PATTERNS from a measured probe; until
   // then they stay superadmin so a mutating method never inherits a read grant.

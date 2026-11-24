@@ -19,6 +19,7 @@ export const STAFF_MFA_ALLOWLIST: readonly MfaAllowlistEntry[] = [
   { method: "*", pattern: "/auth*" },
   { method: "GET", pattern: "/admin/users/me" },
   { method: "GET", pattern: "/admin/staff/me" },
+  { method: "GET", pattern: "/admin/stores*" },
   { method: "GET", pattern: "/admin/layouts*" },
   { method: "GET", pattern: "/admin/modules" },
   { method: "GET", pattern: "/admin/search-indexes" },
