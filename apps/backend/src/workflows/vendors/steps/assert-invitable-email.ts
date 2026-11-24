@@ -8,7 +8,7 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // These messages are for staff, so they may be specific.
 export const assertInvitableEmailStep = createStep(
-  "assert-invitable-vendor-email",
+  "assert-invitable-email",
   async (input: { contact_email: string }, { container }) => {
     const email = String(input.contact_email ?? "").trim().toLowerCase();
     if (!EMAIL_SHAPE.test(email)) {

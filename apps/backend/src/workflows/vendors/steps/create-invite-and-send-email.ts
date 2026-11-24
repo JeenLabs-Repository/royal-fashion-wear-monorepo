@@ -49,7 +49,7 @@ export function formatIstLabel(date: Date): string {
 // reaches another step, a workflow result or the log. It is returned only
 // inside accept_url, and only when include_accept_url is true (tests and seed code).
 export const createInviteAndSendEmailStep = createStep(
-  "create-vendor-invite-and-send-email",
+  "create-invite-and-send-email",
   async (input: CreateInviteInput, { container }) => {
     const logger = container.resolve(ContainerRegistrationKeys.LOGGER) as {
       info: (m: string) => void;

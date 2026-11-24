@@ -12,7 +12,7 @@ export type ResendTarget = {
 
 // A resend is only for a vendor who has not registered yet.
 export const assertResendableStep = createStep(
-  "assert-vendor-resendable",
+  "assert-resendable",
   async (input: { vendor_id: string }, { container }) => {
     const vendor = container.resolve(VENDOR_MODULE) as VendorModuleService;
     const [record] = await vendor.listVendors({ id: input.vendor_id }, { take: 1 });
@@ -46,7 +46,7 @@ export const assertResendableStep = createStep(
 // An earlier link is retired by moving its expiry to the past, so `used_at`
 // keeps meaning "this invitation registered the vendor".
 export const expireEarlierInvitesStep = createStep(
-  "expire-earlier-vendor-invites",
+  "expire-earlier-invites",
   async (input: { user_id: string }, { container }) => {
     const vendor = container.resolve(VENDOR_MODULE) as VendorModuleService;
     const live = await vendor.listVendorInvites({
