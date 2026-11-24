@@ -38,14 +38,16 @@ export const isAlreadySeeded = async (container: MedusaContainer) => {
 
 export const seedStore = async (container: MedusaContainer) => {
   const query = getQuery(container);
-  let salesChannel = await getSalesChannel(container);
-  if (!salesChannel) {
+  let salesChannelId = (await getSalesChannel(container))?.id as
+    | string
+    | undefined;
+  if (!salesChannelId) {
     const {
       result: [created],
     } = await createSalesChannelsWorkflow(container).run({
       input: { salesChannelsData: [SEED_STORE.sales_channel] },
     });
-    salesChannel = created;
+    salesChannelId = created.id;
   }
 
   const { data: existingKeys } = await query.graph({
@@ -53,10 +55,15 @@ export const seedStore = async (container: MedusaContainer) => {
     fields: ["id", "title", "sales_channels.id"],
     filters: { type: "publishable" },
   });
-  let publishableApiKey = existingKeys.find(
-    (key) => key.title === SEED_STORE.publishable_api_key.title,
-  ) ?? existingKeys[0];
-  if (!publishableApiKey) {
+  const matchedKey =
+    existingKeys.find(
+      (key) => key.title === SEED_STORE.publishable_api_key.title,
+    ) ?? existingKeys[0];
+  let publishableApiKeyId = matchedKey?.id as string | undefined;
+  let linked = matchedKey?.sales_channels?.some(
+    (channel) => channel?.id === salesChannelId,
+  );
+  if (!publishableApiKeyId) {
     const {
       result: [created],
     } = await createApiKeysWorkflow(container).run({
@@ -70,15 +77,13 @@ export const seedStore = async (container: MedusaContainer) => {
         ],
       },
     });
-    publishableApiKey = created;
+    publishableApiKeyId = created.id;
+    linked = false;
   }
 
-  const linked = publishableApiKey.sales_channels?.some(
-    (channel) => channel?.id === salesChannel.id,
-  );
   if (!linked) {
     await linkSalesChannelsToApiKeyWorkflow(container).run({
-      input: { id: publishableApiKey.id, add: [salesChannel.id] },
+      input: { id: publishableApiKeyId, add: [salesChannelId] },
     });
   }
 
@@ -101,7 +106,7 @@ export const seedStore = async (container: MedusaContainer) => {
     supported_locales: SEED_LOCALES.map((locale_code) => ({
       locale_code,
     })),
-    default_sales_channel_id: salesChannel.id,
+    default_sales_channel_id: salesChannelId,
   };
 
   const { data: stores } = await query.graph({
