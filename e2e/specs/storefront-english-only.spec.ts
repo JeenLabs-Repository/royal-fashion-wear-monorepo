@@ -9,6 +9,7 @@ test.describe("english only storefront", () => {
 
     await expect(page).toHaveURL(/\/en$/)
     await expect(page.locator("html")).toHaveAttribute("lang", "en")
+    await expect(page.locator("html")).not.toHaveAttribute("dir", /.+/)
   })
 
   test("a removed language path falls back to english", async ({ page }) => {
