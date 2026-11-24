@@ -99,8 +99,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -C apps/backend run test:unit --passWithNoTests
-      - run: pnpm -C apps/backend run test:integration:http --passWithNoTests
+      - run: pnpm -C apps/backend run test:unit
+      - run: pnpm -C apps/backend run test:integration:http
 
   guards:
     runs-on: ubuntu-latest
