@@ -25,7 +25,7 @@ Decision for the plans: a priority 100 rule for the three backend prefixes and a
 
 ## Decision
 
-Sections are links. The path-rule shape (priority 100 for `/vendor`, `/auth/vendor`, `/auth/mfa`; priority 1 catch-all for static) works on Traefik v3.8. Launch serving uses the backend static route from D-A2, not a separate vendors hostname.
+Sections are links. The path-rule shape (priority 100 for `/vendor`, `/auth/vendor`, `/auth/mfa`; priority 1 catch-all for static) works on Traefik v3.8. Launch serving uses the backend static route at `/vendor-portal/`, not a separate vendors hostname.
 
 ## Consequences
 
