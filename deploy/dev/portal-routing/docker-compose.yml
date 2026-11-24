@@ -1,0 +1,36 @@
+# Local check of the portal routing rules. Not a deployment file.
+# PORTAL_IMAGE lets the same file test the real portal image later.
+services:
+  traefik:
+    image: traefik:v3.8
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=false
+      - --log.level=INFO
+    ports:
+      - "8088:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  portal:
+    image: ${PORTAL_IMAGE:-nginxinc/nginx-unprivileged:1.27-alpine}
+    volumes:
+      - ./stub-site:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portal.entrypoints=web
+      - "traefik.http.routers.portal.rule=Host(`vendors.localhost`)"
+      - traefik.http.routers.portal.priority=1
+      - traefik.http.services.portal.loadbalancer.server.port=8080
+
+  backend:
+    image: traefik/whoami:v1.10.3
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vendor-api.entrypoints=web
+      - "traefik.http.routers.vendor-api.rule=Host(`vendors.localhost`) && (PathPrefix(`/vendor`) || PathPrefix(`/auth/vendor`) || PathPrefix(`/auth/mfa`))"
+      - traefik.http.routers.vendor-api.priority=100
+      - traefik.http.services.vendor-api.loadbalancer.server.port=80
