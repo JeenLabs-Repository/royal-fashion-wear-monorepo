@@ -45,7 +45,9 @@ export const recordAgreementAcceptanceStep = createStep(
         version: existing.version,
         accepted_at: toIso(existing.accepted_at),
       };
-      return new StepResponse(unchanged, { created_id: null });
+      return new StepResponse(unchanged, {
+        created_id: null as string | null,
+      });
     }
 
     const [created] = await vendorModule.createVendorAgreementAcceptances([
@@ -61,7 +63,9 @@ export const recordAgreementAcceptanceStep = createStep(
       version: created.version,
       accepted_at: toIso(created.accepted_at),
     };
-    return new StepResponse(result, { created_id: created.id });
+    return new StepResponse(result, {
+      created_id: created.id as string | null,
+    });
   },
   async (compensation, { container }) => {
     if (!compensation?.created_id) {
