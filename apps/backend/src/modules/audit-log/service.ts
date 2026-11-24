@@ -60,18 +60,23 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
 
   // Defence in depth. The trigger on the table is the real guarantee.
   // MedusaService exposes these as instance properties, so they must be
-  // overridden as arrow properties rather than methods.
-  override updateAuditEntries = (..._args: unknown[]): Promise<never> =>
-    appendOnly();
+  // overridden as arrow properties rather than methods. They are async so
+  // callers that await get a rejection instead of a synchronous throw.
+  override updateAuditEntries = async (
+    ..._args: unknown[]
+  ): Promise<never> => appendOnly();
 
-  override deleteAuditEntries = (..._args: unknown[]): Promise<never> =>
-    appendOnly();
+  override deleteAuditEntries = async (
+    ..._args: unknown[]
+  ): Promise<never> => appendOnly();
 
-  override softDeleteAuditEntries = (..._args: unknown[]): Promise<never> =>
-    appendOnly();
+  override softDeleteAuditEntries = async (
+    ..._args: unknown[]
+  ): Promise<never> => appendOnly();
 
-  override restoreAuditEntries = (..._args: unknown[]): Promise<never> =>
-    appendOnly();
+  override restoreAuditEntries = async (
+    ..._args: unknown[]
+  ): Promise<never> => appendOnly();
 }
 
 export default AuditLogModuleService;
