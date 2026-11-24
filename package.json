@@ -27,11 +27,14 @@
     "guards": "node scripts/run-guards.mjs",
     "release:prepare": "sh scripts/release-prepare.sh",
     "release:tag": "sh scripts/release-tag.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install --with-deps chromium"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
+    "@playwright/test": "1.65.1",
     "husky": "9.1.7",
     "prettier": "^3.2.5",
     "turbo": "^2.0.14"
