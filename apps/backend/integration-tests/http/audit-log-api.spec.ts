@@ -86,12 +86,13 @@ medusaIntegrationTestRunner({
           const query = `action_prefix=${prefix}.${cursor ? `&cursor=${cursor}` : ""}`;
           const result = await probe(api, headers, "GET", `/admin/audit-log?${query}`);
           expect(result.status).toBe(200);
-          sizes.push(result.body.entries.length);
-          for (const entry of result.body.entries) {
+          const entries = (result.body?.entries ?? []) as Array<{ id: string }>;
+          sizes.push(entries.length);
+          for (const entry of entries) {
             expect(seen.has(entry.id)).toBe(false);
             seen.add(entry.id);
           }
-          cursor = result.body.next_cursor;
+          cursor = (result.body?.next_cursor as string | null | undefined) ?? null;
           if (!cursor) {
             break;
           }
@@ -106,8 +107,9 @@ medusaIntegrationTestRunner({
         const prefix = marker();
         await seed(10, prefix);
         const result = await probe(api, headers, "GET", `/admin/audit-log?action_prefix=${prefix}.`);
-        const keys = result.body.entries.map(
-          (entry: { at: string; id: string }) => `${new Date(entry.at).toISOString()}|${entry.id}`
+        const entries = (result.body?.entries ?? []) as Array<{ at: string; id: string }>;
+        const keys = entries.map(
+          (entry) => `${new Date(entry.at).toISOString()}|${entry.id}`
         );
         expect(keys).toEqual([...keys].sort().reverse());
       });
@@ -126,9 +128,22 @@ medusaIntegrationTestRunner({
         const headers = await superadmin();
         const prefix = marker();
         await seed(20, prefix);
-        const get = async (query: string) =>
-          (await probe(api, headers, "GET", `/admin/audit-log?action_prefix=${prefix}.${query}`)).body
-            .entries as { actor_id: string; actor_label: string; action: string; target_id: string; at: string }[];
+        type AuditListEntry = {
+          actor_id: string;
+          actor_label: string;
+          action: string;
+          target_id: string;
+          at: string;
+        };
+        const get = async (query: string) => {
+          const result = await probe(
+            api,
+            headers,
+            "GET",
+            `/admin/audit-log?action_prefix=${prefix}.${query}`
+          );
+          return (result.body?.entries ?? []) as AuditListEntry[];
+        };
 
         const byId = await get("&actor=user_seed1");
         expect(byId.length).toBeGreaterThan(0);
@@ -139,7 +154,8 @@ medusaIntegrationTestRunner({
         expect(byLabel.every((entry) => entry.actor_label.startsWith("alpha-"))).toBe(true);
 
         const created = await probe(api, headers, "GET", `/admin/audit-log?action_prefix=${prefix}.created`);
-        expect(created.body.entries.every((entry: { action: string }) => entry.action.endsWith("created"))).toBe(true);
+        const createdEntries = (created.body?.entries ?? []) as Array<{ action: string }>;
+        expect(createdEntries.every((entry) => entry.action.endsWith("created"))).toBe(true);
 
         const byTarget = await get("&target_id=target_2");
         expect(byTarget.every((entry) => entry.target_id === "target_2")).toBe(true);
@@ -165,7 +181,7 @@ medusaIntegrationTestRunner({
             `/admin/audit-log?action_prefix=${prefix}.&actor=${encodeURIComponent(actor)}`
           );
           expect(result.status).toBe(200);
-          expect(result.body.entries).toHaveLength(0);
+          expect(result.body?.entries as unknown[]).toHaveLength(0);
         }
         const bad = await probe(api, headers, "GET", "/admin/audit-log?action_prefix=%25");
         expect(bad.status).toBe(400);
@@ -176,7 +192,8 @@ medusaIntegrationTestRunner({
         const prefix = marker();
         await seed(1, prefix);
         const result = await probe(api, headers, "GET", `/admin/audit-log?action_prefix=${prefix}.`);
-        expect(Object.keys(result.body.entries[0]).sort()).toEqual(COLUMNS);
+        const entries = (result.body?.entries ?? []) as Array<Record<string, unknown>>;
+        expect(Object.keys(entries[0]).sort()).toEqual(COLUMNS);
       });
 
       it("answers 403 to every other role and to a user with no role", async () => {
