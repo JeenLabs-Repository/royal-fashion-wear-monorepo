@@ -33,6 +33,7 @@ const validProductionEnv = (): Env => ({
   ADMIN_CORS: "https://admin.example.test",
   AUTH_CORS: "https://shop.example.test,https://admin.example.test",
   GORGO_DISABLE_TELEMETRY: "true",
+  BREAK_GLASS_ALERT_EMAILS: "owner@example.test",
 });
 
 const without = (env: Env, key: string): Env => {
@@ -198,6 +199,43 @@ describe("assertProductionConfig", () => {
         GORGO_DISABLE_TELEMETRY: "true",
       };
       expect(() => assertProductionConfig(env)).not.toThrow();
+    });
+  });
+
+  describe("BREAK_GLASS_ALERT_EMAILS", () => {
+    test("BREAK_GLASS_ALERT_EMAILS unset throws and names the variable", () => {
+      const env = without(validProductionEnv(), "BREAK_GLASS_ALERT_EMAILS");
+      expect(() => assertProductionConfig(env)).toThrow(/^Refusing to start in production:/);
+      expect(messageOf(env)).toContain("BREAK_GLASS_ALERT_EMAILS");
+    });
+
+    test("BREAK_GLASS_ALERT_EMAILS empty or blank throws", () => {
+      for (const value of ["", "   ", " , "]) {
+        const env = { ...validProductionEnv(), BREAK_GLASS_ALERT_EMAILS: value };
+        expect(messageOf(env)).toContain("BREAK_GLASS_ALERT_EMAILS");
+      }
+    });
+
+    test("BREAK_GLASS_ALERT_EMAILS with an invalid address throws and never prints the value", () => {
+      const bad = "not-an-address";
+      const env = { ...validProductionEnv(), BREAK_GLASS_ALERT_EMAILS: `owner@example.test,${bad}` };
+      const message = messageOf(env);
+      expect(message).toContain("BREAK_GLASS_ALERT_EMAILS");
+      expect(message).not.toContain(bad);
+      expect(message).not.toContain("owner@example.test");
+    });
+
+    test("BREAK_GLASS_ALERT_EMAILS with two valid addresses passes", () => {
+      const env = {
+        ...validProductionEnv(),
+        BREAK_GLASS_ALERT_EMAILS: "owner@example.test, second@example.test",
+      };
+      expect(collectConfigIssues(env)).toEqual([]);
+      expect(() => assertProductionConfig(env)).not.toThrow();
+    });
+
+    test("BREAK_GLASS_ALERT_EMAILS is not checked outside production", () => {
+      expect(() => assertProductionConfig({ NODE_ENV: "development" })).not.toThrow();
     });
   });
 

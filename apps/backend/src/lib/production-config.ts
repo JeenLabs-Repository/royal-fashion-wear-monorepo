@@ -1,3 +1,5 @@
+import { parseAlertEmails } from "./break-glass/parse-alert-emails";
+
 // Rules that decide whether the backend may start in production.
 //
 // Everything here is a plain function with no Medusa imports and no work at
@@ -46,7 +48,8 @@ export type ProductionConfigIssue = {
     | "not-true"
     | "invalid-url"
     | "vendor-host"
-    | "docs-origin";
+    | "docs-origin"
+    | "invalid-email";
   message: string;
 };
 
@@ -154,6 +157,17 @@ export const collectConfigIssues = (env: Env): ProductionConfigIssue[] => {
         "not-true",
         "must be true in production"
       )
+    );
+  }
+
+  // The owner is told by email when the break-glass account is used, so the list
+  // needs at least one address and every entry has to be valid.
+  const alertEmails = parseAlertEmails(env.BREAK_GLASS_ALERT_EMAILS);
+  if (alertEmails.valid.length === 0 && alertEmails.invalid.length === 0) {
+    issues.push(issue("BREAK_GLASS_ALERT_EMAILS", "unset", "is not set"));
+  } else if (alertEmails.invalid.length > 0) {
+    issues.push(
+      issue("BREAK_GLASS_ALERT_EMAILS", "invalid-email", "lists an entry that is not a valid email address")
     );
   }
 

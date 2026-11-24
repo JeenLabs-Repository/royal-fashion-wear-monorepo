@@ -26,6 +26,7 @@ const CONFIG_KEYS = [
   "ADMIN_CORS",
   "AUTH_CORS",
   "GORGO_DISABLE_TELEMETRY",
+  "BREAK_GLASS_ALERT_EMAILS",
   "SMTP_HOST",
   "S3_BUCKET",
 ];
@@ -53,6 +54,7 @@ const validProductionEnv = (): Env => ({
   ADMIN_CORS: "https://admin.example.test",
   AUTH_CORS: "https://shop.example.test,https://admin.example.test",
   GORGO_DISABLE_TELEMETRY: "true",
+  BREAK_GLASS_ALERT_EMAILS: "owner@example.test",
 });
 
 const withEnvFilesParked = <T>(run: () => T): T => {
