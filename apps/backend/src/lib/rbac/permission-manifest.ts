@@ -43,6 +43,8 @@ export const SELF_GET_PATTERNS: readonly string[] = [
   "/admin/search-indexes",
   "/admin/notifications*",
   "/admin/cloud/announcements*",
+  // Measured 2026-11-25 by the dashboard shell probe: flag names only.
+  "/admin/feature-flags",
 ];
 
 const MUTATING_METHODS = ["POST", "DELETE", "PUT", "PATCH"] as const;
@@ -129,6 +131,12 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     pattern: "/admin/cloud/announcements*",
     permission: "self",
     note: "Dashboard shell: Medusa cloud announcements banner.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/feature-flags",
+    permission: "self",
+    note: "Dashboard shell read, measured on 2026-11-25; flag names only.",
   },
   {
     method: "POST",

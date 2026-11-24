@@ -159,3 +159,44 @@ describe("resolution table", () => {
     expect(resolve("GET", "/admin/%69ntegrations;x=1")?.permission).toBe("integrations:manage");
   });
 });
+
+describe("self reads", () => {
+  const concrete = (pattern: string) =>
+    pattern.replace(/\*$/, "").replace(/:[A-Za-z_]+/g, "x1") || "/admin";
+
+  it.each([...SELF_GET_PATTERNS])("%s resolves to self for GET only", (pattern) => {
+    const path = concrete(pattern);
+    expect(resolveRule(PERMISSION_MANIFEST, "GET", path)?.rule.permission).toBe("self");
+    for (const method of ["POST", "DELETE", "PUT", "PATCH"] as const) {
+      expect(resolveRule(PERMISSION_MANIFEST, method, path)?.rule.permission).not.toBe("self");
+    }
+  });
+
+  it("has a GET self rule for every listed pattern and no other self rule", () => {
+    const selfRules = PERMISSION_MANIFEST.filter((rule) => rule.permission === "self");
+    expect(selfRules.every((rule) => rule.method === "GET")).toBe(true);
+    expect(selfRules.map((rule) => rule.pattern).sort()).toEqual([...SELF_GET_PATTERNS].sort());
+  });
+
+  it("never lists an upper-case pattern as a self read", () => {
+    for (const pattern of SELF_GET_PATTERNS) {
+      expect(pattern).toBe(pattern.toLowerCase());
+    }
+  });
+
+  // Family wildcards are allowed only for measured shell prefixes that expose no
+  // business data (store, layouts, notifications, cloud announcements).
+  it("only allows measured shell wildcards in self reads", () => {
+    const allowedWildcards = new Set([
+      "/admin/stores*",
+      "/admin/layouts*",
+      "/admin/notifications*",
+      "/admin/cloud/announcements*",
+    ]);
+    for (const pattern of SELF_GET_PATTERNS) {
+      if (pattern.includes("*")) {
+        expect(allowedWildcards.has(pattern)).toBe(true);
+      }
+    }
+  });
+});

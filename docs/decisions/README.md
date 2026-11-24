@@ -27,3 +27,4 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0010 | Test Data Convention | accepted |
 | 0011 | Branch Protection and Owner Promotion | accepted |
 | 0012 | Staff Governance Spike Results | accepted |
+| 0013 | Staff Dashboard Shell Reads | accepted |
