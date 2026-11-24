@@ -172,6 +172,13 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     note: "Booking and delivery rules are added with their routes.",
   }),
 
+  // Vendor management. Reads for every staff role that sees vendors and writes
+  // for superadmin only. The invite, the lifecycle actions and the location
+  // routes are all POST, and the other write methods are mapped too so no
+  // later route can slip through as a read.
+  { method: "GET", pattern: "/admin/vendors*", permission: PERM.vendorsRead },
+  ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/vendors*", PERM.vendorsManage),
+
   // Core families, read then write
   ...family(
     [
