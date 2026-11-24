@@ -105,6 +105,12 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || DEV_FALLBACK_SECRET,
       cookieSecret: process.env.COOKIE_SECRET || DEV_FALLBACK_SECRET,
+      // Bearer tokens last one day; the dashboard session below lasts 8 hours.
+      jwtExpiresIn: "1d",
+    },
+    // Milliseconds: 8 hours.
+    sessionOptions: {
+      ttl: 8 * 60 * 60 * 1000,
     },
     cookieOptions: {
       // "lax" stays: the storefront's payment return flow needs the cookie on
@@ -130,6 +136,7 @@ module.exports = defineConfig({
   ],
   modules: [
     { resolve: "@medusajs/medusa/translation" },
+    { resolve: "./src/modules/staff-access" },
     {
       resolve: "@medusajs/medusa/notification",
       options: {
