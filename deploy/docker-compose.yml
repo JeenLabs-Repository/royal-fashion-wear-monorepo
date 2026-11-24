@@ -1,0 +1,88 @@
+# Production stack for Dokploy: backend, storefront and Redis from registry images.
+#
+# The database runs on a separate owner-operated host and is reached through
+# DATABASE_URL over a private network. Nothing in this file starts a database.
+# CI builds the images and this host only pulls and runs them, so no service
+# here compiles anything. Dokploy attaches the domains and its proxy network, so
+# no port is published from this file.
+#
+# Every required value uses the ${NAME:?message} form, so a deploy without a
+# secret fails before any container starts. Real values live in Dokploy's
+# environment tab. Key names and placeholders are in .env.production.template.
+
+services:
+  redis:
+    image: redis:7.4.12-alpine
+    command: redis-server --appendonly yes --appendfsync everysec --maxmemory 64mb --maxmemory-policy noeviction
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE to the backend image reference}
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    expose:
+      - "9000"
+    volumes:
+      - backend_static:/app/.medusa/server/static
+    environment:
+      NODE_ENV: production
+      GORGO_DISABLE_TELEMETRY: "true"
+      MEDUSA_DISABLE_TELEMETRY: "true"
+      REDIS_URL: redis://redis:6379
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL to the private database connection string}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET}
+      INTEGRATION_ENCRYPTION_KEY: ${INTEGRATION_ENCRYPTION_KEY:?set INTEGRATION_ENCRYPTION_KEY}
+      AUTH_MFA_ENCRYPTION_KEY: ${AUTH_MFA_ENCRYPTION_KEY:?set AUTH_MFA_ENCRYPTION_KEY}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?set REVALIDATE_SECRET}
+      STORE_CORS: ${STORE_CORS:?set STORE_CORS to the storefront origin}
+      ADMIN_CORS: ${ADMIN_CORS:?set ADMIN_CORS to the admin origin}
+      AUTH_CORS: ${AUTH_CORS:?set AUTH_CORS to the storefront and admin origins}
+      STOREFRONT_URL: ${STOREFRONT_URL:?set STOREFRONT_URL to the public storefront URL}
+      DATABASE_SSL: ${DATABASE_SSL:-}
+      DATABASE_SSL_REJECT_UNAUTHORIZED: ${DATABASE_SSL_REJECT_UNAUTHORIZED:-}
+      STOREFRONT_DEFAULT_LOCALE: ${STOREFRONT_DEFAULT_LOCALE:-en}
+      STORE_NAME: ${STORE_NAME:-}
+      STORE_EMAIL: ${STORE_EMAIL:-}
+      STORE_PHONE: ${STORE_PHONE:-}
+      STORE_ADDRESS: ${STORE_ADDRESS:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_REGION: ${S3_REGION:-}
+
+  storefront:
+    image: ${STOREFRONT_IMAGE:?set STOREFRONT_IMAGE to the storefront image reference}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    expose:
+      - "8000"
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?set REVALIDATE_SECRET}
+      MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL:-}
+
+volumes:
+  redis_data:
+  backend_static:
