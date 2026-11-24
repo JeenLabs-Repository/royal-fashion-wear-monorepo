@@ -74,15 +74,23 @@ class VendorModuleService extends MedusaService({
   LocationCodeSeq,
 }) {
   // No caller can store a mixed-case email: both write paths lower-case it here.
-  override async createVendorUsers(...args: any[]): Promise<any> {
+  // MedusaService generates these as instance properties, so they must be
+  // overridden as properties (not methods) or the production build fails TS2425.
+  createVendorUsers = async (...args: any[]): Promise<any> => {
     const [data, ...rest] = args;
-    return await (super.createVendorUsers as any).call(this, lowerEmails(data), ...rest);
-  }
+    const parent = Object.getPrototypeOf(VendorModuleService.prototype) as {
+      createVendorUsers: (...a: any[]) => Promise<any>;
+    };
+    return await parent.createVendorUsers.call(this, lowerEmails(data), ...rest);
+  };
 
-  override async updateVendorUsers(...args: any[]): Promise<any> {
+  updateVendorUsers = async (...args: any[]): Promise<any> => {
     const [data, ...rest] = args;
-    return await (super.updateVendorUsers as any).call(this, lowerEmails(data), ...rest);
-  }
+    const parent = Object.getPrototypeOf(VendorModuleService.prototype) as {
+      updateVendorUsers: (...a: any[]) => Promise<any>;
+    };
+    return await parent.updateVendorUsers.call(this, lowerEmails(data), ...rest);
+  };
 
   /**
    * Next location code. One statement: the upsert takes the row lock, so
