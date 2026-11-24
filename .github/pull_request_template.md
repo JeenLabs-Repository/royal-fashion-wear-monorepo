@@ -8,6 +8,12 @@
 
 <!-- Routes, modules, workflows, jobs and configuration that change. -->
 
+- [ ] New or changed admin routes have rules in the permission manifest, and the route check passes (`pnpm --dir apps/backend run check:admin-routes`).
+- [ ] New permission strings live only in the permission file `apps/backend/src/lib/rbac/permissions.ts`.
+- [ ] New audit actions are in `apps/backend/src/lib/audit/actions.ts`, and the code records them with `recordAudit`.
+- [ ] New emails use a typed template, and staff alerts use the staff alert helper.
+- [ ] Any actor type gated by MFA uses the shared gate factory.
+
 ## Storefront changes
 
 <!-- Pages, components and behavior that change. -->

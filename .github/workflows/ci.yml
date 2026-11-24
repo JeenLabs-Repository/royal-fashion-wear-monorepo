@@ -103,7 +103,10 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Check admin routes
+        run: pnpm -C apps/backend run check:admin-routes
       - run: pnpm -C apps/backend run test:unit
+      - run: pnpm -C apps/backend run test:integration:modules
       - run: pnpm -C apps/backend run test:integration:http
 
   guards:
