@@ -354,9 +354,6 @@ importers:
       react-country-flag:
         specifier: ^3.1.0
         version: 3.1.0(react@19.0.5)
-      react-dadata:
-        specifier: 2.28.0-beta.0
-        version: 2.28.0-beta.0(react-dom@19.0.5(react@19.0.5))(react@19.0.5)
       react-dom:
         specifier: 19.0.5
         version: 19.0.5(react@19.0.5)
@@ -5591,9 +5588,6 @@ packages:
   date-fns@4.4.0:
     resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
-  debounce@1.2.1:
-    resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
-
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -6369,10 +6363,6 @@ packages:
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
-
-  highlight-words@1.2.2:
-    resolution: {integrity: sha512-Mf4xfPXYm8Ay1wTibCrHpNWeR2nUMynMVFkXCi4mbl+TEgmNOe+I4hV7W3OCZcSvzGL6kupaqpfHOemliMTGxQ==}
-    engines: {node: '>= 16', npm: '>= 8'}
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
@@ -7950,12 +7940,6 @@ packages:
     resolution: {integrity: sha512-ZSs1ZJjiOPN6FOl0hny091oX2vtPRMyqY4+OLdn/w3SJwFOkOQBvx4m/TmI0laDTq1XtYziB/FD4y45B4Msa5g==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  react-dadata@2.28.0-beta.0:
-    resolution: {integrity: sha512-qoilqB9sUmPYDZ6sujSfcAqeF0ifS85aHN8+PUsCK132n+sX4NYk9L/E1ry48T/WzBbxnPw/Q+4QdV3ENN6blA==}
-    peerDependencies:
-      react: ^15.6 || ^16.0 || ^17.0 || ^18.0 || ^19.0
-      react-dom: ^15.6 || ^16.0 || ^17.0 || ^18.0 || ^19.0
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
@@ -15811,8 +15795,6 @@ snapshots:
 
   date-fns@4.4.0: {}
 
-  debounce@1.2.1: {}
-
   debug@2.6.9(supports-color@8.1.1):
     dependencies:
       ms: 2.0.0
@@ -16740,8 +16722,6 @@ snapshots:
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
-
-  highlight-words@1.2.2: {}
 
   html-escaper@2.0.2: {}
 
@@ -18564,15 +18544,6 @@ snapshots:
   react-currency-input-field@4.0.14(react@19.0.5):
     dependencies:
       react: 19.0.5
-
-  react-dadata@2.28.0-beta.0(react-dom@19.0.5(react@19.0.5))(react@19.0.5):
-    dependencies:
-      debounce: 1.2.1
-      highlight-words: 1.2.2
-      nanoid: 3.3.20
-      react: 19.0.5
-      react-dom: 19.0.5(react@19.0.5)
-      shallowequal: 1.1.0
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:
