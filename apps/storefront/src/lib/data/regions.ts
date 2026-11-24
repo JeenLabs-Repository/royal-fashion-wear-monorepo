@@ -1,6 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import { DEFAULT_REGION } from "@lib/util/env"
 import type { HttpTypes } from "@medusajs/types"
 import { getCacheOptions } from "./cookies"
 
@@ -52,7 +53,9 @@ export const getRegion = async (countryCode: string) => {
     })
   })
 
-  const region = countryCode ? regionMap.get(countryCode) : regionMap.get("ru")
+  const region = countryCode
+    ? regionMap.get(countryCode)
+    : regionMap.get(DEFAULT_REGION)
 
   return region
 }
