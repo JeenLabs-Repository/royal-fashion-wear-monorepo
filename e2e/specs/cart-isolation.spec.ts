@@ -51,19 +51,30 @@ const profileEmail = async (page: Page) => {
 
 const addFirstAvailableVariantToCart = async (page: Page) => {
   await page.goto("/en/products/t-shirt")
-  const addButton = page.getByTestId("add-product-button")
-  await expect(addButton).toBeVisible()
-
   // The button stays disabled until every option has a value, so pick the
-  // first value of each option group.
-  const groups = page.getByTestId("product-options")
+  // first value of each option group. Scope to the product panel so related
+  // products and the mobile sheet are ignored.
+  const groups = page
+    .getByTestId("product-container")
+    .getByTestId("product-options")
   const groupCount = await groups.count()
   for (let index = 0; index < groupCount; index += 1) {
     await groups.nth(index).getByTestId("option-button").first().click()
   }
 
-  await expect(addButton).toBeEnabled()
+  // Suspense can briefly keep a disabled fallback button; click the enabled one.
+  const addButton = page
+    .getByTestId("product-container")
+    .getByTestId("add-product-button")
+    .and(page.locator(":enabled"))
+  await expect(addButton).toBeVisible()
   await addButton.click()
+  // click() does not wait for the async server action; leaving the page early
+  // aborts the add. Wait for a nav badge (header and bottom nav both render one).
+  await expect(page.getByTestId("cart-item-count").first()).toHaveText(
+    /[1-9]/,
+    { timeout: 20_000 }
+  )
 }
 
 const openCartWithItem = async (page: Page) => {
