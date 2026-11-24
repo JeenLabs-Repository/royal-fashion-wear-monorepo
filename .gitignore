@@ -64,6 +64,10 @@ tsconfig.tsbuildinfo
 TEST-CREDENTIALS.local.md
 *.local.md
 
+# Impeccable product / design context (planning — not committed)
+PRODUCT.md
+DESIGN.md
+
 # Agent skills & local agent tooling — Cursor-local, never commit
 .agents/
 .cursor/skills/
