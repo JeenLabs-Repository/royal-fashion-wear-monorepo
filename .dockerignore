@@ -1,0 +1,22 @@
+# Keep secrets, planning material and build output out of the build context.
+**/node_modules
+.git
+.planning
+.husky
+.claude
+.cursor
+**/.next
+**/.medusa
+**/dist
+**/.turbo
+e2e
+docs
+deploy
+playwright-report
+test-results
+TEST-CREDENTIALS.local.md
+**/.env
+**/.env.*
+!**/.env.template
+# No markdown is needed inside an image.
+**/*.md
