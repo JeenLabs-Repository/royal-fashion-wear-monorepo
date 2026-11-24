@@ -112,6 +112,18 @@ module.exports = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || DEV_FALLBACK_SECRET,
       // Bearer tokens last one day; the dashboard session below lasts 8 hours.
       jwtExpiresIn: "1d",
+      // The vendor actor signs in with email and password like staff do. Without
+      // an entry here Medusa refuses every sign-in for it.
+      authMethodsPerActor: {
+        user: ["emailpass"],
+        customer: ["emailpass"],
+        vendor: ["emailpass"],
+      },
+      // An identity with no actor link must not receive a usable token (actor
+      // mechanics record).
+      requireActorAssociation: {
+        emailpass: true,
+      },
     },
     // Milliseconds: 8 hours.
     sessionOptions: {
