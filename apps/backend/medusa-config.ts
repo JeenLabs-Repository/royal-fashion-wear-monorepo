@@ -137,6 +137,8 @@ module.exports = defineConfig({
   modules: [
     { resolve: "@medusajs/medusa/translation" },
     { resolve: "./src/modules/staff-access" },
+    { resolve: "./src/modules/audit-log" },
+
     {
       resolve: "@medusajs/medusa/notification",
       options: {
