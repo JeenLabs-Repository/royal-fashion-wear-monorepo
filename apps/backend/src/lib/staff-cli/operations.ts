@@ -280,26 +280,24 @@ const removeMfaFactors = async (
   }
 
   const factors = await auth.listAuthMfa({ auth_identity_id: identityId });
-  const needsForce: string[] = [];
+  const openIds = factors
+    .filter((factor) => factor.status !== "disabled")
+    .map((factor) => factor.id);
 
-  for (const factor of factors) {
-    if (factor.status === "disabled") {
-      continue;
-    }
+  for (const id of openIds) {
     try {
       // Spike S3: disableAuthMfa({ id }) is the removal path.
-      await auth.disableAuthMfa({ id: factor.id });
+      // Pending factors often "succeed" without leaving the row disabled, so
+      // every open id is force-cleared below regardless of this call.
+      await auth.disableAuthMfa({ id });
     } catch {
-      needsForce.push(factor.id);
+      // Challenge policy or a missing code; force-clear handles it.
     }
   }
 
-  if (needsForce.length > 0) {
-    await forceClearMfaRows(container, identityId, needsForce);
-  } else {
-    // Still clear recovery codes when every factor disabled cleanly (no public API).
-    await forceClearMfaRows(container, identityId, []);
-  }
+  // Always force-clear open factors and recovery codes so a pending row cannot
+  // block the next enrolment (create rejects when any non-disabled TOTP remains).
+  await forceClearMfaRows(container, identityId, openIds);
 
   const left = await listFactorIds(auth, identityId, "enabled");
   if (left.length > 0) {
