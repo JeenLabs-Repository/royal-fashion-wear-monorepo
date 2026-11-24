@@ -1,0 +1,50 @@
+[
+  {
+    "label": "mumbai",
+    "state": "Maharashtra",
+    "iso": "IN-MH",
+    "city": "Mumbai",
+    "pin": "400001",
+    "address_1": "1 Demo Street"
+  },
+  {
+    "label": "bengaluru",
+    "state": "Karnataka",
+    "iso": "IN-KA",
+    "city": "Bengaluru",
+    "pin": "560001",
+    "address_1": "2 Demo Street"
+  },
+  {
+    "label": "new-delhi",
+    "state": "Delhi",
+    "iso": "IN-DL",
+    "city": "New Delhi",
+    "pin": "110001",
+    "address_1": "3 Demo Street"
+  },
+  {
+    "label": "chennai",
+    "state": "Tamil Nadu",
+    "iso": "IN-TN",
+    "city": "Chennai",
+    "pin": "600001",
+    "address_1": "4 Demo Street"
+  },
+  {
+    "label": "kolkata",
+    "state": "West Bengal",
+    "iso": "IN-WB",
+    "city": "Kolkata",
+    "pin": "700001",
+    "address_1": "5 Demo Street"
+  },
+  {
+    "label": "ahmedabad",
+    "state": "Gujarat",
+    "iso": "IN-GJ",
+    "city": "Ahmedabad",
+    "pin": "380001",
+    "address_1": "6 Demo Street"
+  }
+]
