@@ -31,17 +31,17 @@ export function EmailLayout({
   children,
   locale = DEFAULT_EMAIL_LOCALE,
 }: EmailLayoutProps) {
-  const { t, dir } = getEmailTranslator(locale);
+  const { t } = getEmailTranslator(locale);
   const contactLine = [STORE_ADDRESS, STORE_EMAIL, STORE_PHONE]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <Html lang={locale} dir={dir}>
+    <Html lang={locale}>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={s.body}>
-        <Container style={{ ...s.container, direction: dir }}>
+        <Container style={s.container}>
           <Section style={s.header}>
             <Text style={s.brand}>{STORE_NAME}</Text>
           </Section>

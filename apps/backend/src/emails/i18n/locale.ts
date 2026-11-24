@@ -6,17 +6,10 @@ export const EMAIL_LOCALES = Object.keys(emailMessages).sort() as EmailLocale[];
 
 export const FALLBACK_EMAIL_LOCALE = "en" as const satisfies EmailLocale;
 
-export type LocaleDirection = "ltr" | "rtl";
-
-const RTL_LOCALES: readonly EmailLocale[] = ["ar", "he"];
-
-const LOCALE_ALIASES: Record<string, string> = {
-  fil: "tl",
-  in: "id",
-  iw: "he",
-  nn: "nb",
-  no: "nb",
-};
+// Alternate language codes mapped to the code of a catalog, for example
+// `no: "nb"`. It is empty while English is the only catalog; adding a language
+// later is a catalog file plus, when the language has other codes, an entry here.
+const LOCALE_ALIASES: Record<string, string> = {};
 
 function isEmailLocale(value: string): value is EmailLocale {
   return (EMAIL_LOCALES as readonly string[]).includes(value);
@@ -54,8 +47,4 @@ export function getLocaleFromMetadata(
 ): string | undefined {
   const value = metadata?.locale;
   return typeof value === "string" ? value : undefined;
-}
-
-export function getLocaleDir(locale: EmailLocale): LocaleDirection {
-  return RTL_LOCALES.includes(locale) ? "rtl" : "ltr";
 }

@@ -1,11 +1,6 @@
 import IntlMessageFormat from "intl-messageformat";
 import { STORE_NAME } from "./constants";
-import {
-  type EmailLocale,
-  type LocaleDirection,
-  FALLBACK_EMAIL_LOCALE,
-  getLocaleDir,
-} from "./locale";
+import { type EmailLocale, FALLBACK_EMAIL_LOCALE } from "./locale";
 import { emailMessages } from "./messages";
 
 export type MessageValues = Record<string, string | number>;
@@ -53,7 +48,6 @@ function escapeHtml(value: string | number): string {
 
 export type EmailTranslator = {
   locale: EmailLocale;
-  dir: LocaleDirection;
   t: (key: string, values?: MessageValues) => string;
   html: (key: string, values?: MessageValues) => string;
   money: (amount: number, currencyCode?: string | null) => string;
@@ -65,7 +59,6 @@ export function getEmailTranslator(locale: EmailLocale): EmailTranslator {
 
   return {
     locale,
-    dir: getLocaleDir(locale),
     t: (key, values = {}) => format(key, values),
     html: (key, values = {}) => {
       const escaped: MessageValues = {};
