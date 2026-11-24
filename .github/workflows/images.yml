@@ -1,0 +1,123 @@
+# Builds the backend and storefront images from a signed release tag and pushes
+# them to the GitHub container registry. The app host only pulls these images.
+# Storefront build arguments are public values from repository variables, since
+# they end up in the browser bundle. The only secret used is the automatic
+# workflow token that pushes the packages.
+name: images
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [backend, storefront]
+    steps:
+      - name: Require a tag
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          if [ "$REF_TYPE" != "tag" ]; then
+            echo "Images are built from release tags only." >&2
+            exit 1
+          fi
+
+      - name: Check out the tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Verify the tag signature
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git fetch --tags --force
+          output=$(git -c gpg.ssh.allowedSignersFile=.github/allowed_signers verify-tag "$TAG" 2>&1) || {
+            echo "$output" >&2
+            echo "The tag $TAG has no good signature from an allowed signer." >&2
+            exit 1
+          }
+          echo "$output"
+          echo "$output" | grep -q 'Good "git" signature'
+
+      - name: Require the public build variables
+        if: matrix.app == 'storefront'
+        env:
+          NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${{ vars.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
+          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_SITE_NAME: ${{ vars.NEXT_PUBLIC_SITE_NAME }}
+        run: |
+          missing=""
+          [ -n "$NEXT_PUBLIC_MEDUSA_BACKEND_URL" ] || missing="$missing NEXT_PUBLIC_MEDUSA_BACKEND_URL"
+          [ -n "$NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY" ] || missing="$missing NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY"
+          [ -n "$NEXT_PUBLIC_BASE_URL" ] || missing="$missing NEXT_PUBLIC_BASE_URL"
+          [ -n "$NEXT_PUBLIC_SITE_NAME" ] || missing="$missing NEXT_PUBLIC_SITE_NAME"
+          if [ -n "$missing" ]; then
+            echo "Set these repository variables before tagging:$missing" >&2
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Log in to the registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Describe the image
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          tags: |
+            type=ref,event=tag
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push the backend image
+        if: matrix.app == 'backend'
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push the storefront image
+        if: matrix.app == 'storefront'
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: apps/storefront/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=storefront
+          cache-to: type=gha,mode=max,scope=storefront
+          build-args: |
+            NEXT_PUBLIC_MEDUSA_BACKEND_URL=${{ vars.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
+            NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL }}
+            NEXT_PUBLIC_SITE_NAME=${{ vars.NEXT_PUBLIC_SITE_NAME }}
+            NEXT_PUBLIC_DEFAULT_REGION=in
