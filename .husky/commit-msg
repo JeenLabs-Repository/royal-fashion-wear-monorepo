@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Husky commit-msg hook. Save as .husky/commit-msg in the code repository.
+# Works under npm, pnpm and yarn because it calls the local binary directly.
+npx --no-install commitlint --edit "$1"
