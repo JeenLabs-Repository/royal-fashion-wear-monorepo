@@ -136,6 +136,25 @@ test.beforeAll(() => {
   )
 })
 
+test.afterAll(() => {
+  // The drill seed rewrote TEST-CREDENTIALS.local.md for the copy. Re-sync the
+  // live development database so later specs against port 9000 still match.
+  const liveUrl = process.env.DATABASE_URL
+  if (!liveUrl || liveUrl === databaseUrl()) {
+    return
+  }
+  execFileSync(
+    "pnpm",
+    ["--dir", "apps/backend", "run", "seed:staff-demo", "--", "reset-passwords", "reset-mfa"],
+    {
+      cwd: findRepoRoot(),
+      env: { ...process.env, DATABASE_URL: liveUrl },
+      encoding: "utf8",
+      shell: process.platform === "win32",
+    }
+  )
+})
+
 test.beforeEach(({}, testInfo) => {
   test.skip(testInfo.project.name !== "chromium", "the drill runs once on the desktop project")
 })
