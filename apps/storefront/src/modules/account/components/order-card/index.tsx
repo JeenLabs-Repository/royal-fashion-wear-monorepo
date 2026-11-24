@@ -48,7 +48,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
         <OrderStatusBadge kind="payment" status={order.payment_status} />
       </div>
 
-      <div className="flex items-center divide-x rtl:divide-x-reverse divide-ui-border-base txt-small text-ui-fg-subtle">
+      <div className="flex items-center divide-x divide-ui-border-base txt-small text-ui-fg-subtle">
         <span className="pe-2" data-testid="order-created-at">
           {formatDate({ date: order.created_at, locale, dateStyle: "medium" })}
         </span>

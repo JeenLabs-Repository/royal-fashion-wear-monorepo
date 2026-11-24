@@ -22,7 +22,6 @@ const InteractiveLink = ({
     >
       <Text className="text-ui-fg-interactive">{children}</Text>
       <TriangleRightMini
-        className="rtl:rotate-180"
         color="var(--fg-interactive)"
       />
     </Link>

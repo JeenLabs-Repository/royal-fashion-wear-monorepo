@@ -48,7 +48,7 @@ export function CheckoutModalBackButton({
       )}
       data-testid="checkout-modal-back"
     >
-      <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+      <ArrowLeft className="h-5 w-5" />
     </button>
   )
 }

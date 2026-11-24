@@ -43,7 +43,7 @@ export default function CheckoutInfoRow({
         </div>
       </div>
       {!disabled && (
-        <ChevronRight className="text-ui-fg-base flex-shrink-0 rtl:rotate-180" />
+        <ChevronRight className="text-ui-fg-base flex-shrink-0" />
       )}
     </button>
   )

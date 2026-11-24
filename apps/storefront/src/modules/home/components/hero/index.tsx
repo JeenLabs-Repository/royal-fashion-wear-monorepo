@@ -66,7 +66,7 @@ const Hero = async () => {
                 variant="primary"
                 className="!rounded-full txt-compact-large-plus"
               >
-                {t("readDocs")} <ArrowRight className="rtl:rotate-180" />
+                {t("readDocs")} <ArrowRight />
               </Button>
             </a>
           </div>

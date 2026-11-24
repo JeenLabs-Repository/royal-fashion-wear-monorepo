@@ -35,7 +35,7 @@ const OrderDetailsTemplate = async ({ order }: OrderDetailsTemplateProps) => {
           className="flex w-fit items-center gap-x-1 txt-compact-small text-ui-fg-subtle hover:text-ui-fg-base"
           data-testid="back-to-overview-button"
         >
-          <ChevronDown className="rotate-90 rtl:-rotate-90" size={16} />
+          <ChevronDown className="rotate-90" size={16} />
           {t("backToOrders")}
         </Link>
 
