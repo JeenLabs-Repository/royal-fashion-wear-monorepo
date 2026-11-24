@@ -136,3 +136,34 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = ROLE_KEYS.map(
     permissions: ROLE_GRANTS[key],
   })
 );
+
+/**
+ * Named handles for the catalogue strings. Rule tables and routes refer to a
+ * permission by name so the string itself is written only in this file. The
+ * `satisfies` check fails the build if a value drifts out of the catalogue.
+ */
+export const PERM = {
+  staffManage: "staff:manage",
+  integrationsManage: "integrations:manage",
+  auditRead: "audit:read",
+  vendorsRead: "vendors:read",
+  vendorsManage: "vendors:manage",
+  catalogRead: "catalog:read",
+  catalogReview: "catalog:review",
+  catalogEdit: "catalog:edit",
+  ordersRead: "orders:read",
+  customersRead: "customers:read",
+  ordersWrite: "orders:write",
+  routingRead: "routing:read",
+  routingAssign: "routing:assign",
+  routingBook: "routing:book",
+  routingDeliver: "routing:deliver",
+  purchaseInvoicesWrite: "purchase-invoices:write",
+  returnsRead: "returns:read",
+  returnsDecide: "returns:decide",
+  financeRead: "finance:read",
+  documentsRead: "documents:read",
+  documentsExport: "documents:export",
+  financeRefund: "finance:refund",
+} as const satisfies Record<string, Permission>;
+
