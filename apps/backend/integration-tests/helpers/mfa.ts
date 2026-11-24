@@ -155,8 +155,17 @@ export async function getVendorSession(
   if (!options.enrolled) {
     return { headers: vendorBearer(token) };
   }
-  // Drop the timing claims so the signer sets its own.
+  // Drop the timing claims so the signer sets its own. Medusa refuses a token
+  // that claims enrolment without a completed challenge timestamp, so the mint
+  // matches the staff helper and sets both claims together.
   const { iat: _iat, exp: _exp, ...claims } = decodeJwtPayload(token);
-  const minted = signToken({ ...claims, [MFA_CLAIM]: true }, credentials.token_secret);
+  const minted = signToken(
+    {
+      ...claims,
+      [MFA_CLAIM]: true,
+      mfa_challenge_completed_at: new Date().toISOString(),
+    },
+    credentials.token_secret
+  );
   return { headers: vendorBearer(minted) };
 }
