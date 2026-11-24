@@ -1,13 +1,21 @@
 import { isAppLocale, defaultLocale, matchBrowserLocale } from "@i18n/config"
 import { COOKIE_NAMES, persistentCookieOpts } from "@lib/cookie-config"
-import { resolveCountry, type RegionMap } from "@lib/geolocation"
+import { DEFAULT_REGION } from "@lib/util/env"
 import type { HttpTypes } from "@medusajs/types"
 import { type NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+// Server-only address first, so a container can reach the backend by its internal
+// name while the browser keeps the public address in NEXT_PUBLIC_MEDUSA_BACKEND_URL.
+const BACKEND_URL =
+  process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 
 const INTL_LOCALE_HEADER = "X-NEXT-INTL-LOCALE"
+
+type RegionMap = Map<string, HttpTypes.StoreRegion>
+
+const COUNTRY_MAX_AGE = 60 * 60 * 24 * 365
+const FALLBACK_COUNTRY_MAX_AGE = 60 * 5
 
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
@@ -19,7 +27,7 @@ async function getRegionMap(cacheId: string) {
 
   if (!BACKEND_URL) {
     throw new Error(
-      "Middleware.ts: Error fetching regions. Did you set up regions in your Medusa Admin and define a NEXT_PUBLIC_MEDUSA_BACKEND_URL environment variable."
+      "Middleware.ts: Error fetching regions. Did you set up regions in your Medusa Admin and define a MEDUSA_BACKEND_URL or NEXT_PUBLIC_MEDUSA_BACKEND_URL environment variable."
     )
   }
 
@@ -61,6 +69,38 @@ async function getRegionMap(cacheId: string) {
   return regionMapCache.regionMap
 }
 
+/**
+ * Chooses the country for a visitor without any outside lookup: the existing
+ * country cookie when it names a known region, otherwise the default region.
+ * Returns a function that writes the cookie onto the response.
+ */
+function resolveCountryCookie(
+  request: NextRequest,
+  regionMap: RegionMap
+): (res: NextResponse) => NextResponse {
+  const existing = request.cookies.get(COOKIE_NAMES.country)?.value
+
+  let countryCode = DEFAULT_REGION
+  let settled = true
+
+  if (existing && regionMap.has(existing)) {
+    countryCode = existing
+  } else if (!regionMap.has(DEFAULT_REGION)) {
+    // The default region is not configured in the backend: use the first
+    // region there is, and keep the cookie short-lived so it is chosen again.
+    countryCode = regionMap.keys().next().value ?? DEFAULT_REGION
+    settled = false
+  }
+
+  return (res) => {
+    res.cookies.set(COOKIE_NAMES.country, countryCode, {
+      ...persistentCookieOpts,
+      maxAge: settled ? COUNTRY_MAX_AGE : FALLBACK_COUNTRY_MAX_AGE,
+    })
+    return res
+  }
+}
+
 export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.includes(".")) {
     return NextResponse.next()
@@ -70,11 +110,9 @@ export async function middleware(request: NextRequest) {
   const cacheId = cacheIdCookie?.value || crypto.randomUUID()
   const regionMap: RegionMap = await getRegionMap(cacheId)
 
-  // Region detection is owned by @lib/geolocation. It reads the visitor's
-  // country from the _medusa_country cookie, or resolves it through the
-  // configured geolocation provider, and returns a function that writes the
-  // cookie (plus the x-geo-* debug headers) onto the response we return below.
-  const applyCountry = await resolveCountry(request, regionMap)
+  // The country comes from the _medusa_country cookie or the default region;
+  // nothing about the visitor leaves the server.
+  const applyCountry = resolveCountryCookie(request, regionMap)
 
   const segments = request.nextUrl.pathname.split("/").filter(Boolean)
   const firstSegment = segments[0]

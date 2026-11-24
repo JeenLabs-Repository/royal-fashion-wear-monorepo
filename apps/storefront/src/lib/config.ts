@@ -4,8 +4,12 @@ import Medusa, { type FetchArgs, type FetchInput } from "@medusajs/js-sdk"
 // Defaults to standard port for Medusa server
 let MEDUSA_BACKEND_URL = "http://localhost:9000"
 
-if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
-  MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+// Server-only address first (empty in the browser bundle), then the public one.
+const serverBackendUrl =
+  process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+
+if (serverBackendUrl) {
+  MEDUSA_BACKEND_URL = serverBackendUrl
 }
 
 export const sdk = new Medusa({
