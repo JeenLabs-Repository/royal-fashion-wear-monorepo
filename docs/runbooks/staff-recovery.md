@@ -95,3 +95,4 @@ The drill is rehearsed on a restored copy of the database. Add one row per passi
 
 | Date | Operator | Environment | Scenario | Commands run | Result | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-25 | agent (AFK continuity) | restored copy of the development database, local, port 9100 | A sealed break-glass, B CLI recovery | staff:create-break-glass, staff:rotate-break-glass, staff:grant-superadmin, staff:list; pg_dump, createdb, pg_restore | pass | Demo path only: no sealed production credentials. Drill seed reset-mfa on the copy so loginAsDemo matched TEST-CREDENTIALS; live demo passwords re-synced afterwards. |
