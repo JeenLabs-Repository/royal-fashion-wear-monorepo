@@ -36,7 +36,7 @@ export function EmailLayout({
     .join(" · ");
 
   // Native html: react-email's Html component hard-defaults dir="ltr", which
-  // would leave a direction attribute after RTL support is removed (D-04).
+  // would leave a direction attribute after right-to-left support is removed.
   return (
     <html lang={locale}>
       <Head />
