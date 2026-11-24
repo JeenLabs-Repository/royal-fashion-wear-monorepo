@@ -1,5 +1,5 @@
 export const STOREFRONT_URL = (
-  process.env.STOREFRONT_URL || "https://dtc-starter-demo.gorgojs.com"
+  process.env.STOREFRONT_URL || "http://localhost:8000"
 ).replace(/\/$/, "");
 
 export const STORE_NAME = process.env.STORE_NAME || "Gorgo Medusa Store";
