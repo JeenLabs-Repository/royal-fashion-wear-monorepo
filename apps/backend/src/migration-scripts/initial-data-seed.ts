@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework";
+import { logger } from "@medusajs/framework/logger";
 import {
   isAlreadySeeded,
   seedCategories,
@@ -21,6 +22,16 @@ export default async function initial_data_seed({
 }: {
   container: MedusaContainer;
 }) {
+  // Medusa can run this folder during db:migrate, so the demo store and catalog
+  // appear only when someone asks for them. A real first deploy uses the
+  // bootstrap script instead.
+  if (process.env.ALLOW_DEMO_SEED !== "1") {
+    logger.info(
+      "[initial-data-seed] skipped. Set ALLOW_DEMO_SEED=1 to create the demo store and catalog.",
+    );
+    return;
+  }
+
   if (await isAlreadySeeded(container)) return;
 
   await step(seedStore(container), "store data");
