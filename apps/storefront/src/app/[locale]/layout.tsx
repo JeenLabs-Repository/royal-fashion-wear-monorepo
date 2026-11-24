@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl"
 import { getLocale } from "next-intl/server"
-import HtmlDirSync from "@modules/common/components/html-dir-sync"
+import HtmlLangSync from "@modules/common/components/html-lang-sync"
 import JsonLd from "@modules/common/components/json-ld"
 import { buildSiteJsonLd } from "@lib/util/json-ld"
 
@@ -14,7 +14,7 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider>
       <JsonLd data={buildSiteJsonLd(locale)} />
-      <HtmlDirSync />
+      <HtmlLangSync />
       {children}
     </NextIntlClientProvider>
   )
