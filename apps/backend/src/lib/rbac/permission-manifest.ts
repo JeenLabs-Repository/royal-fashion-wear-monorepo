@@ -35,6 +35,14 @@ export const SELF_GET_PATTERNS: readonly string[] = [
   // no-access panel can render. Store name and currency qualify as shell data
   // (same policy as the later dashboard shell probe). Mutations stay denied.
   "/admin/stores*",
+  // Dashboard shell GETs the Security screen needs while MFA enrolment is
+  // still open (spike S3). Content is layout config, module names, empty
+  // notification counts and cloud announcements — no business data.
+  "/admin/layouts*",
+  "/admin/modules",
+  "/admin/search-indexes",
+  "/admin/notifications*",
+  "/admin/cloud/announcements*",
 ];
 
 const MUTATING_METHODS = ["POST", "DELETE", "PUT", "PATCH"] as const;
@@ -91,6 +99,36 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     pattern: "/admin/stores*",
     permission: "self",
     note: "Dashboard shell: sidebar store name. Mutations stay superadmin below.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/layouts*",
+    permission: "self",
+    note: "Dashboard shell: layout configuration for Profile and Security.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/modules",
+    permission: "self",
+    note: "Dashboard shell: installed module names only.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/search-indexes",
+    permission: "self",
+    note: "Dashboard shell: search index metadata only.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/notifications*",
+    permission: "self",
+    note: "Dashboard shell: notification bell; no message bodies required at load.",
+  },
+  {
+    method: "GET",
+    pattern: "/admin/cloud/announcements*",
+    permission: "self",
+    note: "Dashboard shell: Medusa cloud announcements banner.",
   },
   {
     method: "POST",
@@ -195,19 +233,19 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
       "/admin/translations",
       "/admin/locales",
       "/admin/plugins",
-      "/admin/notifications",
       "/admin/workflows-executions",
     ],
     { read: "superadmin", write: "superadmin" }
   ),
-  // Store mutations stay owner-only; GET /admin/stores* is self above.
+  // Store and shell mutations stay owner-only; matching GETs are self above.
   ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/stores*", "superadmin"),
+  ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/layouts*", "superadmin"),
+  ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/notifications*", "superadmin"),
   // Dashboard shell, search, views and dormant enterprise/plugin families.
-  // Shell GETs may later move to SELF_GET_PATTERNS from a measured probe; until
-  // then they stay superadmin so a mutating method never inherits a read grant.
+  // Shell GETs listed in SELF_GET_PATTERNS stay above; everything else here
+  // stays superadmin so a mutating method never inherits a read grant.
   ...family(
     [
-      "/admin/layouts",
       "/admin/modules",
       "/admin/feature-flags",
       "/admin/search",
