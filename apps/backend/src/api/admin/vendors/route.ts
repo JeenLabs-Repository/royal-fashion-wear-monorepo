@@ -1,9 +1,14 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { getVendorOnboardingSettings } from "../../../lib/settings/vendor-onboarding";
-import { toAdminVendorListItems } from "../../../lib/serializers/admin/vendor";
-import { adminVendorQuery } from "../../../lib/vendor/admin-middlewares";
+import {
+  toAdminVendorListItem,
+  toAdminVendorListItems,
+} from "../../../lib/serializers/admin/vendor";
+import { adminVendorBody, adminVendorQuery, staffActor } from "../../../lib/vendor/admin-middlewares";
+import { loadVendor } from "../../../lib/vendor/eligibility";
 import { getVendorModule } from "../../../lib/vendor/vendor-module";
-import { ListVendorsQuerySchema } from "./validators";
+import { inviteVendorWorkflow } from "../../../workflows/vendors/invite-vendor";
+import { InviteVendorBody, ListVendorsQuerySchema } from "./validators";
 
 // Percent and underscore are wildcards in a LIKE pattern, so the search text
 // escapes them and finds them as ordinary characters.
@@ -32,3 +37,18 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
 
   res.json({ vendors: items, count, limit: query.limit, offset: query.offset, warnings });
 }
+
+export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
+  const body = adminVendorBody(InviteVendorBody, req);
+
+  const { result } = await inviteVendorWorkflow(req.scope).run({
+    input: { ...body, actor: staffActor(req) },
+  });
+
+  const vendor = await loadVendor(req.scope, result.vendor_id);
+  res.json({
+    vendor: await toAdminVendorListItem(req.scope, vendor),
+    invite: { expires_at: result.expires_at, email_sent: result.email_sent },
+  });
+}
+
