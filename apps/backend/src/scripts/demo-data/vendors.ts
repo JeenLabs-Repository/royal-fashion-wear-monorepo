@@ -108,3 +108,32 @@ export const freshInviteVendor = (number: number): DemoVendor => ({
   locations: [],
   purpose: "A fresh invitation for the accept flow.",
 });
+
+// Template for the fresh vendors created on demand for browser specs. The email,
+// the name and the password get a unique suffix per vendor.
+export const FRESH_VENDOR_TEMPLATE = {
+  name_prefix: "Demo Vendor Fresh",
+  email_prefix: "demo-vendor-fresh",
+  contact_name: "Demo Fresh Contact",
+  password_prefix: "Demo-Fresh-Passw0rd",
+  locations: [
+    {
+      label: "Fresh Warehouse Mumbai",
+      address_1: "1 Fresh Street",
+      city: "Mumbai",
+      state_code: "IN-MH",
+      pin: "400001",
+      pickup_contact_name: "Fresh Desk One",
+      pickup_contact_phone: "9990050001",
+    },
+    {
+      label: "Fresh Warehouse Bengaluru",
+      address_1: "2 Fresh Street",
+      city: "Bengaluru",
+      state_code: "IN-KA",
+      pin: "560001",
+      pickup_contact_name: "Fresh Desk Two",
+      pickup_contact_phone: "9990050002",
+    },
+  ],
+} as const;

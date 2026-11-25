@@ -25,11 +25,12 @@ import {
   freshInviteVendor,
   type DemoVendor,
 } from "./demo-data/vendors";
+import { createFreshVendor, removeFreshVendors } from "./lib/fresh-vendor";
 
 const VENDOR_SEED_START = "<!-- vendor-seed:start -->";
 const VENDOR_SEED_END = "<!-- vendor-seed:end -->";
 const USAGE =
-  "Usage: pnpm -C apps/backend exec medusa exec ./src/scripts/seed-vendors.ts [--fresh-invite] [--reset] [--out-dir <dir>]";
+  "Usage: pnpm -C apps/backend exec medusa exec ./src/scripts/seed-vendors.ts [--fresh-invite] [--fresh-vendor] [--status active] [--reset] [--out-dir <dir>]";
 
 const seedActor = { id: "seed-vendors", label: "seed-vendors" };
 
@@ -58,6 +59,8 @@ export type SeedSummary = {
 
 type Options = {
   freshInvite: boolean;
+  freshVendor: boolean;
+  freshVendorStatus: "invited" | "active";
   reset: boolean;
   outDir: string | null;
 };
@@ -68,6 +71,7 @@ function parseOptions(args: string[] | undefined): Options {
   const words = positionalArgs(args);
   const has = (name: string) => words.includes(`--${name}`) || words.includes(name);
   let outDir: string | null = null;
+  let status: "invited" | "active" = "invited";
   for (const [index, word] of words.entries()) {
     const match = /^(?:--)?out-dir=(.+)$/.exec(word);
     if (match) {
@@ -75,16 +79,43 @@ function parseOptions(args: string[] | undefined): Options {
     } else if (word === "--out-dir" || word === "out-dir") {
       outDir = words[index + 1] ?? null;
     }
+    const statusMatch = /^(?:--)?status=(.+)$/.exec(word);
+    if (statusMatch) {
+      status = statusMatch[1] === "active" ? "active" : "invited";
+    } else if (word === "--status" || word === "status") {
+      status = words[index + 1] === "active" ? "active" : "invited";
+    }
   }
-  const known = new Set(["--fresh-invite", "fresh-invite", "--reset", "reset", "--out-dir", "out-dir"]);
+  const known = new Set([
+    "--fresh-invite",
+    "fresh-invite",
+    "--fresh-vendor",
+    "fresh-vendor",
+    "--status",
+    "status",
+    "active",
+    "invited",
+    "--reset",
+    "reset",
+    "--out-dir",
+    "out-dir",
+  ]);
   for (const [index, word] of words.entries()) {
-    const isOutDirValue = outDir !== null && words[index - 1]?.replace(/^--/, "") === "out-dir";
-    if (!known.has(word) && !/^(?:--)?out-dir=/.test(word) && !isOutDirValue) {
+    const prev = words[index - 1]?.replace(/^--/, "");
+    const isOutDirValue = outDir !== null && prev === "out-dir";
+    const isStatusValue = prev === "status" && (word === "active" || word === "invited");
+    if (!known.has(word) && !/^(?:--)?out-dir=/.test(word) && !/^(?:--)?status=/.test(word) && !isOutDirValue && !isStatusValue) {
       // A plain Error is right here. Scripts under src/scripts never serve a request.
       throw new Error(USAGE);
     }
   }
-  return { freshInvite: has("fresh-invite"), reset: has("reset"), outDir };
+  return {
+    freshInvite: has("fresh-invite"),
+    freshVendor: has("fresh-vendor"),
+    freshVendorStatus: status,
+    reset: has("reset"),
+    outDir,
+  };
 }
 
 const tokenFromLink = (url: string): string => {
@@ -379,7 +410,24 @@ export default async function seedVendors({ container, args }: ExecArgs): Promis
     summary.credentials_path = credentialsPath;
   };
 
+  if (options.freshVendor) {
+    const fresh = await createFreshVendor(container, {
+      status: options.freshVendorStatus,
+      outDir: path.dirname(jsonPath),
+      credentialsPath,
+    });
+    summary.created.push(fresh.name);
+    summary.credentials_path = credentialsPath;
+    summary.json_path = jsonPath;
+    console.log(
+      `[seed-vendors] fresh vendor ${fresh.name} written to the seed file and the credentials file`
+    );
+    return summary;
+  }
+
   if (options.reset) {
+    const removedFresh = await removeFreshVendors(container);
+    console.log(`[seed-vendors] removed ${removedFresh} fresh vendor(s)`);
     summary.removed = await removeDemoVendors(container);
     writeCredentials(renderCredentialsBlock([], true));
     rmSync(jsonPath, { force: true });
