@@ -54,13 +54,13 @@ export const getCacheOptions = async (
     return {}
   }
 
+  // Always include the bare tag so `/api/revalidate`'s `revalidateTag("products")`
+  // (and the same for categories/collections) clears catalog data for every
+  // visitor. The cache-id suffix stays for per-session busting on locale change.
   const cacheTag = await getCacheTag(tag)
+  const tags = cacheTag && cacheTag !== tag ? [tag, cacheTag] : [tag]
 
-  if (!cacheTag) {
-    return {}
-  }
-
-  return { tags: [`${cacheTag}`] }
+  return { tags }
 }
 
 export const setAuthToken = async (token: string) => {

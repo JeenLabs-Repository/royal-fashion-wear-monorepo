@@ -1,5 +1,24 @@
+import { locales } from "@i18n/config"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
+
+// Route-file patterns (with the `(main)` group) plus the public URL layouts.
+// Next 15.5 matches cache entries by route file structure; URL layouts cover
+// every product/store page under each locale when a suspension or publish lands.
+const revalidateCatalogPaths = () => {
+  revalidatePath(`/[locale]/(main)/products/[handle]`, "page")
+  revalidatePath(`/[locale]/(main)/store`, "page")
+  revalidatePath(`/[locale]/(main)/categories/[...category]`, "page")
+  revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
+  for (const locale of locales) {
+    revalidatePath(`/${locale}/products`, "layout")
+    revalidatePath(`/${locale}/store`, "layout")
+    revalidatePath(`/${locale}/categories`, "layout")
+    revalidatePath(`/${locale}/collections`, "layout")
+  }
+  revalidatePath("/llms.txt")
+  revalidatePath("/sitemap.xml")
+}
 
 export async function POST(req: NextRequest) {
   const expected = process.env.REVALIDATE_SECRET
@@ -36,12 +55,7 @@ export async function POST(req: NextRequest) {
     body.type === "product-option.deleted"
   ) {
     revalidateTag("products")
-    revalidatePath(`/[locale]/(main)/products/[handle]`, "page")
-    revalidatePath(`/[locale]/(main)/store`, "page")
-    revalidatePath(`/[locale]/(main)/categories/[...category]`, "page")
-    revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
-    revalidatePath("/llms.txt")
-    revalidatePath("/sitemap.xml")
+    revalidateCatalogPaths()
   }
 
   if (
@@ -50,12 +64,7 @@ export async function POST(req: NextRequest) {
     body.type === "product-category.deleted"
   ) {
     revalidateTag("categories")
-    revalidatePath(`/[locale]/(main)/products/[handle]`, "page")
-    revalidatePath(`/[locale]/(main)/store`, "page")
-    revalidatePath(`/[locale]/(main)/categories/[...category]`, "page")
-    revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
-    revalidatePath("/llms.txt")
-    revalidatePath("/sitemap.xml")
+    revalidateCatalogPaths()
   }
 
   if (
@@ -66,6 +75,10 @@ export async function POST(req: NextRequest) {
     revalidateTag("collections")
     revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
     revalidatePath(`/[locale]/(main)/store`, "page")
+    for (const locale of locales) {
+      revalidatePath(`/${locale}/collections`, "layout")
+      revalidatePath(`/${locale}/store`, "layout")
+    }
     revalidatePath("/llms.txt")
     revalidatePath("/sitemap.xml")
   }
@@ -78,12 +91,7 @@ export async function POST(req: NextRequest) {
     revalidateTag("products")
     revalidateTag("categories")
     revalidateTag("collections")
-    revalidatePath(`/[locale]/(main)/products/[handle]`, "page")
-    revalidatePath(`/[locale]/(main)/store`, "page")
-    revalidatePath(`/[locale]/(main)/categories/[...category]`, "page")
-    revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
-    revalidatePath("/llms.txt")
-    revalidatePath("/sitemap.xml")
+    revalidateCatalogPaths()
   }
 
   return NextResponse.json({ revalidated: true })
