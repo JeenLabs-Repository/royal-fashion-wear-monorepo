@@ -261,10 +261,17 @@ export function withLiveVariantIds(live: ContentSnapshot, proposed: ContentSnaps
   } as ContentSnapshot;
 }
 
-/** Hash that ignores variant ids, so "no change" is judged on what the vendor controls. */
+/**
+ * Hash that ignores variant ids and option-value order, so "no change" is judged on what
+ * the vendor controls. Core may return option values in a different order than the body.
+ */
 export function comparableHash(content: ContentSnapshot): string {
   return contentHash({
     ...content,
+    options: content.options.map((option) => ({
+      title: option.title,
+      values: [...option.values].sort((a, b) => a.localeCompare(b)),
+    })),
     variants: content.variants.map(({ variant_id: _id, ...rest }) => rest),
   } as unknown as ContentSnapshot);
 }

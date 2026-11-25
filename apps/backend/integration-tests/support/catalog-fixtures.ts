@@ -235,6 +235,11 @@ export const matrixCatalog = {
   categoryId: "",
   createUploadId: "",
   detailProductId: "",
+  updateProductId: "",
+  updateBody: {} as Record<string, unknown>,
+  submitProductId: "",
+  withdrawProductId: "",
+  discardProductId: "",
 };
 
 /**
@@ -257,6 +262,42 @@ export async function seedCatalogMatrix(input: {
     "matrix-detail"
   );
   matrixCatalog.detailProductId = detail.productId;
+}
+
+/**
+ * Creates the rows the matrix fixtures of the lifecycle routes point at: a draft to edit, a draft
+ * to submit, a live product to withdraw and a live product with a pending revision to discard.
+ * Call it after `seedCatalogMatrix`.
+ */
+export async function seedLifecycleMatrix(input: {
+  api: ApiClient;
+  container: MedusaContainer;
+  vendorA: ActiveVendor;
+}): Promise<void> {
+  const { api, container, vendorA } = input;
+  const categoryId = matrixCatalog.categoryId;
+
+  const update = await createDraftFor(api, container, vendorA, categoryId, "matrix-update");
+  matrixCatalog.updateProductId = update.productId;
+  matrixCatalog.updateBody = { ...update.body, title: "Matrix Edited Title" };
+
+  const submit = await createDraftFor(api, container, vendorA, categoryId, "matrix-submit");
+  matrixCatalog.submitProductId = submit.productId;
+
+  const withdraw = await createDraftFor(api, container, vendorA, categoryId, "matrix-withdraw");
+  await forceApprove(container, withdraw.productId);
+  matrixCatalog.withdrawProductId = withdraw.productId;
+
+  const discard = await createDraftFor(api, container, vendorA, categoryId, "matrix-discard");
+  await forceApprove(container, discard.productId);
+  const edited = await probe(api, vendorA.headers, "POST", `/vendor/products/${discard.productId}`, {
+    ...discard.body,
+    title: "Matrix Pending Title",
+  });
+  if (edited.status !== 200) {
+    throw new Error(`Seeding a pending revision failed with status ${edited.status}`);
+  }
+  matrixCatalog.discardProductId = discard.productId;
 }
 
 // --- matrix seeds end ---

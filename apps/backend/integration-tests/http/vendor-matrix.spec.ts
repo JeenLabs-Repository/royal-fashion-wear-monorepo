@@ -7,7 +7,7 @@ import { suspendVendorWorkflow } from "../../src/workflows/vendors/suspend-vendo
 import { getVendorSession } from "../helpers/mfa";
 import { probe, rawProbe } from "../helpers/staff-users";
 import { createVendorFixture } from "../helpers/vendor-fixtures";
-import { seedCatalogMatrix } from "../support/catalog-fixtures";
+import { seedCatalogMatrix, seedLifecycleMatrix } from "../support/catalog-fixtures";
 import { toFormData } from "../helpers/multipart";
 import { findMatrixProblems, loadFixtures } from "../matrix/runner";
 import type { MatrixContext, MatrixEntry, MatrixVendor } from "../matrix/types";
@@ -158,11 +158,9 @@ medusaIntegrationTestRunner({
         };
 
         // Rows the catalog route fixtures point at.
-        await seedCatalogMatrix({
-          api,
-          container: getContainer(),
-          vendorA: { ...a.fixture, headers: a.vendor.headers },
-        });
+        const catalogVendorA = { ...a.fixture, headers: a.vendor.headers };
+        await seedCatalogMatrix({ api, container: getContainer(), vendorA: catalogVendorA });
+        await seedLifecycleMatrix({ api, container: getContainer(), vendorA: catalogVendorA });
       });
 
       it("has a fixture for every vendor route and exported method", () => {
