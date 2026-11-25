@@ -1,6 +1,29 @@
+import { unlink, writeFile } from "node:fs/promises"
+import { join } from "node:path"
 import { type APIRequestContext, type Browser, type BrowserContext, type TestInfo, expect, test } from "@playwright/test"
 import { loginAsDemo } from "../support/admin-login"
 import { appendCredentialEntry } from "../support/credentials-log"
+
+// Chromium and chromium-mobile share Demo Vendor Bravo; serialize the suspend
+// flow so the second project does not hit a 400 on an already-suspended vendor.
+const SUSPEND_LOCK = join(process.cwd(), "e2e/.auth/storefront-suspend.lock")
+
+const withSuspendLock = async <T>(run: () => Promise<T>): Promise<T> => {
+  const started = Date.now()
+  while (Date.now() - started < 120_000) {
+    try {
+      await writeFile(SUSPEND_LOCK, `${process.pid}\n`, { flag: "wx" })
+      break
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    }
+  }
+  try {
+    return await run()
+  } finally {
+    await unlink(SUSPEND_LOCK).catch(() => undefined)
+  }
+}
 
 // Precondition. The dev stack runs with the demo catalog seed applied, the
 // storefront is built and running, and STOREFRONT_URL and REVALIDATE_SECRET
@@ -156,53 +179,55 @@ test("keeps vendor text out of the page source, the RSC payload, JSON-LD and ima
 })
 
 test("hides a suspended vendor's product and brings it back on reactivation", async ({ browser, request }, info) => {
-  const demo = await loadDemoProducts(request)
-  const target = demo.find((product) => product.states.join() === "Delhi") as DemoProduct
-  expect(target, "the Delhi demo product").toBeDefined()
+  await withSuspendLock(async () => {
+    const demo = await loadDemoProducts(request)
+    const target = demo.find((product) => product.states.join() === "Delhi") as DemoProduct
+    expect(target, "the Delhi demo product").toBeDefined()
 
-  const { context, request: admin } = await adminSession(browser, info)
-  const listed = await admin.get(`${BACKEND}/admin/vendors?q=${encodeURIComponent("Demo Vendor Bravo")}&limit=5`)
-  expect(listed.status()).toBe(200)
-  const vendorId = ((await listed.json()) as { vendors: { id: string }[] }).vendors[0]?.id
-  expect(vendorId, "the Delhi demo vendor").toBeTruthy()
+    const { context, request: admin } = await adminSession(browser, info)
+    const listed = await admin.get(`${BACKEND}/admin/vendors?q=${encodeURIComponent("Demo Vendor Bravo")}&limit=5`)
+    expect(listed.status()).toBe(200)
+    const vendorId = ((await listed.json()) as { vendors: { id: string }[] }).vendors[0]?.id
+    expect(vendorId, "the Delhi demo vendor").toBeTruthy()
 
-  const reactivate = async () => {
-    // Reactivate requires a reason body (same shape as suspend).
-    const response = await admin.post(`${BACKEND}/admin/vendors/${vendorId}/reactivate`, {
-      data: { reason: "Storefront check finished, restoring the demo vendor." },
-    })
-    expect(response.status()).toBe(200)
-  }
-
-  try {
-    const suspend = await admin.post(`${BACKEND}/admin/vendors/${vendorId}/suspend`, {
-      data: { reason: "Storefront check, reactivated at the end of the run." },
-    })
-    expect(suspend.status()).toBe(200)
-
-    await waitForStatus(request, productPage(target.handle), 404)
-    const { products } = await storeJson<{ products: { id: string }[] }>(request, "/store/products?limit=100&fields=id")
-    expect(products.map((product) => product.id)).not.toContain(target.id)
-
-    await reactivate()
-    await waitForStatus(request, productPage(target.handle), 200)
-    const again = await loadDemoProducts(request)
-    expect(again.find((product) => product.id === target.id)?.states).toEqual(["Delhi"])
-  } finally {
-    // Always leave the demo vendor active, even when an assertion failed above.
-    const status = await admin.get(`${BACKEND}/admin/vendors/${vendorId}`)
-    if (status.ok() && JSON.stringify(await status.json()).includes('"suspended"')) {
-      await reactivate()
+    const reactivate = async () => {
+      // Reactivate requires a reason body (same shape as suspend).
+      const response = await admin.post(`${BACKEND}/admin/vendors/${vendorId}/reactivate`, {
+        data: { reason: "Storefront check finished, restoring the demo vendor." },
+      })
+      expect(response.status()).toBe(200)
     }
-    await context.close()
-    appendCredentialEntry({
-      section: "Storefront anonymity browser spec",
-      what: `Demo vendor ${vendorId} suspended and reactivated by the storefront product spec`,
-      flow: "storefront-product-anonymity spec, suspension test",
-      reset: "reactivate the demo vendor in the Admin vendors screen if a run was interrupted",
-      values: `product ${target.handle}`,
-    })
-  }
+
+    try {
+      const suspend = await admin.post(`${BACKEND}/admin/vendors/${vendorId}/suspend`, {
+        data: { reason: "Storefront check, reactivated at the end of the run." },
+      })
+      expect(suspend.status()).toBe(200)
+
+      await waitForStatus(request, productPage(target.handle), 404)
+      const { products } = await storeJson<{ products: { id: string }[] }>(request, "/store/products?limit=100&fields=id")
+      expect(products.map((product) => product.id)).not.toContain(target.id)
+
+      await reactivate()
+      await waitForStatus(request, productPage(target.handle), 200)
+      const again = await loadDemoProducts(request)
+      expect(again.find((product) => product.id === target.id)?.states).toEqual(["Delhi"])
+    } finally {
+      // Always leave the demo vendor active, even when an assertion failed above.
+      const status = await admin.get(`${BACKEND}/admin/vendors/${vendorId}`)
+      if (status.ok() && JSON.stringify(await status.json()).includes('"suspended"')) {
+        await reactivate()
+      }
+      await context.close()
+      appendCredentialEntry({
+        section: "Storefront anonymity browser spec",
+        what: `Demo vendor ${vendorId} suspended and reactivated by the storefront product spec`,
+        flow: "storefront-product-anonymity spec, suspension test",
+        reset: "reactivate the demo vendor in the Admin vendors screen if a run was interrupted",
+        values: `product ${target.handle}`,
+      })
+    }
+  })
 })
 
 test("search finds an approved title and never a vendor SKU", async ({ page, request }) => {
@@ -217,7 +242,8 @@ test("search finds an approved title and never a vendor SKU", async ({ page, req
   }
 
   await search(product.title)
-  await expect(page.getByRole("link", { name: new RegExp(product.title) }).first()).toBeVisible()
+  // The search dialog lists matches as buttons (not anchors).
+  await expect(page.getByRole("button", { name: new RegExp(product.title) }).first()).toBeVisible()
 
   // The demo vendor SKUs follow the seed's pattern; the canary SKU is searched as well.
   for (const needle of ["CANARY-SKU-ALPHA-1", "Demo Vendor Alpha"]) {
