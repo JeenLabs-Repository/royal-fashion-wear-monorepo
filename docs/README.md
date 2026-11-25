@@ -17,13 +17,19 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - `guides/add-a-canary-surface.md` explains how to register a new customer-facing output in the anonymity suite.
 - `concepts/vendor-domain.md` explains vendors, locations, invitations and the sales channel rule.
 - `concepts/anonymity-test-suite.md` explains the layers and the two end-to-end suites that protect vendor identity.
+- `concepts/catalog-and-stock.md` explains catalog states, approval, the anonymity pipeline and per-location stock.
 - `guides/vendor-portal-development.md` explains how to run, build, test and serve the vendor portal from the backend.
+- `guides/review-and-approve-products.md` shows staff how to review and decide on vendor products.
+- `guides/vendor-products-and-stock.md` shows vendors how to create products and update stock, including CSV.
 
 ## Page Index
 
 - [Develop the Vendor Portal](guides/vendor-portal-development.md) explains how to run, build, test and serve the vendor portal from the backend.
 - [Add a Vendor Route](guides/add-a-vendor-route.md) lists the steps and the matrix fixture a new vendor route needs.
 - [Know the Required Checks](guides/required-checks.md) lists every required check, what it proves and how to run it locally.
+- [Catalog And Stock](concepts/catalog-and-stock.md) explains catalog states, approval, the anonymity pipeline and per-location stock.
+- [Review And Approve Products](guides/review-and-approve-products.md) shows staff how to review and decide on vendor products.
+- [Manage Vendor Products And Stock](guides/vendor-products-and-stock.md) shows vendors how to create products and update stock, including CSV.
 
 ## Writing Rules
 
