@@ -1,6 +1,6 @@
 #!/bin/sh
 # Scaffolds a plugin repository into a temporary directory and checks the result.
-# Usage: sh scripts/test-plugin-scaffold.sh
+# Usage: sh scripts/test-plugin-scaffold.sh [repository-name]
 # The scaffolder makes signed commits, so load the signing key into ssh-agent first.
 # It refuses a dirty working tree, so commit your work before running this.
 set -u
@@ -26,7 +26,7 @@ expect() {
   fi
 }
 
-NAME=medusa-store-settings
+NAME=${1:-medusa-store-settings}
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/plugin-scaffold.XXXXXX")
 trap 'rm -rf "$WORK"' EXIT
 REPO="$WORK/$NAME"
@@ -74,6 +74,23 @@ fi
 EXPECTED_PACKAGE=$(node -p "require('./config/plugin-registry.json').repos['$NAME'].package")
 ACTUAL_PACKAGE=$(cd "$REPO" && node -p "require('./package.json').name")
 [ "$ACTUAL_PACKAGE" = "$EXPECTED_PACKAGE" ] && pass "package name is $EXPECTED_PACKAGE" || bad "package name is $EXPECTED_PACKAGE (found $ACTUAL_PACKAGE)"
+
+# rule files and docs scaffold
+EXPECTED_MSGS="chore: add repository tooling
+build: add plugin package and ci workflows
+docs: add rule files and docs scaffold"
+ACTUAL_MSGS=$(git -C "$REPO" log --reverse --format=%s)
+[ "$ACTUAL_MSGS" = "$EXPECTED_MSGS" ] && pass "commit messages are the three scaffold messages" || bad "commit messages are the three scaffold messages (found: $ACTUAL_MSGS)"
+
+for file in AGENTS.md CLAUDE.md .cursor/rules/01-project-context.mdc .cursor/rules/20-plugin.mdc README.md docs/decisions/README.md docs/guides/getting-started.md docs/guides/release.md .claude/skills/building-with-medusa/SKILL.md; do
+  expect "$file is tracked" git -C "$REPO" ls-files --error-unmatch "$file"
+done
+
+[ "$(cat "$REPO/CLAUDE.md")" = "@AGENTS.md" ] && pass "CLAUDE.md is the single import line" || bad "CLAUDE.md is the single import line"
+expect "plugin rule carries the independence phrase" grep -q 'imports nothing from the app' "$REPO/.cursor/rules/20-plugin.mdc"
+expect "context rule is always applied" grep -q 'alwaysApply: true' "$REPO/.cursor/rules/01-project-context.mdc"
+expect "release guide names the tag verifier" grep -q 'verify-release-tag' "$REPO/docs/guides/release.md"
+expect "pull request notes self-test passes in the new repository" sh -c "cd '$REPO' && node scripts/check-pr-notes.mjs --self-test"
 
 expect "workflow pin guard passes in the new repository" sh -c "cd '$REPO' && node scripts/check-workflow-pins.mjs"
 expect "plan-reference guard passes in the new repository" sh -c "cd '$REPO' && node scripts/check-no-plan-refs.mjs"
