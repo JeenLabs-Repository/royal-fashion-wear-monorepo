@@ -36,3 +36,24 @@ The city is the district name, because the directory has no city column. The sto
 ## Why Unknown PINs Are Still Accepted at Checkout
 
 A new PIN can be missing from an older copy of the directory. Blocking those customers would lose sales, so checkout accepts an unknown PIN with a manual state and city and marks the address as unverified. A later refresh then covers the new PIN.
+
+## How Addresses Are Validated
+
+The store checks every address the storefront can save, on the server, so a client that skips the form cannot store a bad PIN and state pair.
+
+The routes covered are updating a cart (shipping and billing address), creating a customer address and updating a customer address. Other store routes are not touched.
+
+The checks return these codes with HTTP status 400:
+
+| Code | Meaning |
+| --- | --- |
+| `invalid_pin_format` | The PIN is not six digits, or it starts with 0 |
+| `invalid_province` | The state is empty or is not one of the 36 states and union territories in the `in-xx` form |
+| `pin_state_mismatch` | The PIN is in the directory and belongs to another state |
+| `invalid_phone` | The phone is not a ten-digit mobile number starting with 6, 7, 8 or 9 |
+
+A phone is cleaned before the check: spaces, hyphens and brackets are removed, and a `+91` prefix, a `91` prefix on twelve digits or a leading `0` on eleven digits is dropped. The saved phone is always the ten-digit form.
+
+A PIN that is not in the directory is accepted with the state and city the customer typed. The saved address then carries `metadata.pin_unverified` set to true, so staff can see in the order queue later that the PIN was never matched. A PIN that is in the directory carries no such flag, and a flag left over from an earlier save is removed.
+
+An address in another country skips all of these checks.
