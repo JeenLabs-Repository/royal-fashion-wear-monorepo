@@ -85,6 +85,10 @@ apps/backend/static/
 # Personal compose overrides
 docker-compose.override.yml
 
+# Canary crawl server logs
+.canary-backend.log
+.canary-storefront.log
+
 # Local agent tooling roots (committed exceptions above)
 .agents/
 .cursor/*
