@@ -17,6 +17,11 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - `guides/add-a-canary-surface.md` explains how to register a new customer-facing output in the anonymity suite.
 - `concepts/vendor-domain.md` explains vendors, locations, invitations and the sales channel rule.
 - `concepts/anonymity-test-suite.md` explains the layers and the two end-to-end suites that protect vendor identity.
+- `guides/vendor-portal-development.md` explains how to run, build, test and serve the vendor portal from the backend.
+
+## Page Index
+
+- [Develop the Vendor Portal](guides/vendor-portal-development.md) explains how to run, build, test and serve the vendor portal from the backend.
 
 ## Writing Rules
 
