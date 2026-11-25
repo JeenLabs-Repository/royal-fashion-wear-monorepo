@@ -3,6 +3,7 @@ import { MedusaError } from "@medusajs/framework/utils";
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 import {
   createProductsWorkflow,
+  createShippingProfilesWorkflow,
   deleteInventoryItemWorkflow,
   deleteProductsWorkflow,
 } from "@medusajs/medusa/core-flows";
@@ -44,10 +45,20 @@ export const createDraftProductStep = createStep(
     const { content } = input;
     const query = getQuery(container);
 
-    const { data: profiles } = await query.graph({
+    let { data: profiles } = await query.graph({
       entity: "shipping_profile",
       fields: ["id", "type"],
     });
+    if (profiles.length === 0) {
+      // HTTP suites and a fresh database have no seed; create the default profile once.
+      await createShippingProfilesWorkflow(container).run({
+        input: { data: [{ name: "Default Shipping Profile", type: "default" }] },
+      });
+      ({ data: profiles } = await query.graph({
+        entity: "shipping_profile",
+        fields: ["id", "type"],
+      }));
+    }
     const profile = profiles.find((row) => row.type === "default") ?? profiles[0];
     if (!profile) {
       throw new MedusaError(
