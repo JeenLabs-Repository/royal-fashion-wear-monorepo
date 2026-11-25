@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { MedusaError } from "@medusajs/framework/utils";
 import { processImage } from "../../../lib/images/process-image";
+import { rejectRequest } from "../../../lib/rbac/reject";
 import { defineAllowlistSerializer } from "../../../lib/serializers";
 import { requireVendor } from "../../../lib/vendor/vendor-context";
 import { vendorRecordUploadWorkflow } from "../../../workflows/catalog/vendor-record-upload";
@@ -27,13 +28,27 @@ export async function POST(req: UploadRequest, res: MedusaResponse): Promise<voi
   }
   // The original file name is never read, logged, stored or passed on.
   const processed = await processImage(file.buffer);
-  const { result } = await vendorRecordUploadWorkflow(req.scope).run({
-    input: {
-      vendor_id: vendor.id,
-      vendor_user_id: vendor.user_id,
-      vendor_label: vendor.user_email,
-      image_base64: processed.data.toString("base64"),
-    },
-  });
-  res.status(200).json({ upload: uploadSerializer.serialize(result) });
+  try {
+    const { result } = await vendorRecordUploadWorkflow(req.scope).run({
+      input: {
+        vendor_id: vendor.id,
+        vendor_user_id: vendor.user_id,
+        vendor_label: vendor.user_email,
+        image_base64: processed.data.toString("base64"),
+      },
+    });
+    res.status(200).json({ upload: uploadSerializer.serialize(result) });
+  } catch (error) {
+    // Medusa's CONFLICT handler replaces the custom code with invalid_state_error.
+    if (MedusaError.isMedusaError(error) && error.code === "too_many_pending_uploads") {
+      rejectRequest(res, {
+        status: 409,
+        code: "too_many_pending_uploads",
+        type: "conflict",
+        message: error.message,
+      });
+      return;
+    }
+    throw error;
+  }
 }
