@@ -22,6 +22,8 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 ## Page Index
 
 - [Develop the Vendor Portal](guides/vendor-portal-development.md) explains how to run, build, test and serve the vendor portal from the backend.
+- [Add a Vendor Route](guides/add-a-vendor-route.md) lists the steps and the matrix fixture a new vendor route needs.
+- [Know the Required Checks](guides/required-checks.md) lists every required check, what it proves and how to run it locally.
 
 ## Writing Rules
 
