@@ -44,6 +44,20 @@ export default function CheckoutPaymentSection({
   const [, setPaymentComplete] = useState(false)
   const [billingOpen, setBillingOpen] = useState(false)
   const [showBillingDetails, setShowBillingDetails] = useState(false)
+  // True when the backend refused to start a payment session because the
+  // gateway is not configured. An empty method list is the other case.
+  const [initiationUnavailable, setInitiationUnavailable] = useState(false)
+  const paymentsUnavailable =
+    availablePaymentMethods.length === 0 || initiationUnavailable
+
+  const handleInitiationError = (e: unknown) => {
+    const message = e instanceof Error ? e.message : String(e)
+    if (/payments are temporarily unavailable/i.test(message)) {
+      setInitiationUnavailable(true)
+      return
+    }
+    setError(message)
+  }
 
   // Re-initiate payment session when it gets cleared (e.g. after promo code change)
   useEffect(() => {
@@ -56,7 +70,9 @@ export default function CheckoutPaymentSection({
       initiatePaymentSession(cart, {
         provider_id: selectedPaymentMethod,
         data: buildPaymentSessionData(selectedPaymentMethod, cart),
-      }).catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      })
+        .then(() => setInitiationUnavailable(false))
+        .catch(handleInitiationError)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart.payment_collection?.payment_sessions])
@@ -92,7 +108,9 @@ export default function CheckoutPaymentSection({
     initiatePaymentSession(cart, {
       provider_id: selectedPaymentMethod,
       data: sessionData,
-    }).catch((e) => setError(e instanceof Error ? e.message : String(e)))
+    })
+      .then(() => setInitiationUnavailable(false))
+      .catch(handleInitiationError)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receiptContextKey])
 
@@ -115,8 +133,9 @@ export default function CheckoutPaymentSection({
         provider_id: providerId,
         data: buildPaymentSessionData(providerId, cart),
       })
+      setInitiationUnavailable(false)
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
+      handleInitiationError(e)
     }
   }
 
@@ -135,7 +154,16 @@ export default function CheckoutPaymentSection({
   return (
     <div className="flex flex-col gap-y-6">
       {/* Payment methods */}
-      {!paidByGiftcard && availablePaymentMethods.length > 0 && (
+      {!paidByGiftcard && paymentsUnavailable && (
+        <div className="flex flex-col gap-y-1" data-testid="payments-unavailable">
+          <h2 className="h2-docs">{t("paymentHeading")}</h2>
+          <p role="alert" className="txt-compact-small text-ui-fg-subtle">
+            {t("paymentsUnavailable")}
+          </p>
+        </div>
+      )}
+
+      {!paidByGiftcard && !paymentsUnavailable && (
         <div className="flex flex-col gap-y-3">
           <h2 className="h2-docs">{t("paymentHeading")}</h2>
 
@@ -247,7 +275,7 @@ export default function CheckoutPaymentSection({
         <PaymentButton
           cart={cart}
           availableShippingOptions={availableShippingOptions}
-          selectedPaymentMethod={selectedPaymentMethod}
+          selectedPaymentMethod={paymentsUnavailable ? "" : selectedPaymentMethod}
           data-testid="submit-order-button"
         />
         <p className="txt-compact-2xsmall text-ui-fg-subtle text-center px-2">
