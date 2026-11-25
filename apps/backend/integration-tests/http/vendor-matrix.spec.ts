@@ -7,6 +7,7 @@ import { suspendVendorWorkflow } from "../../src/workflows/vendors/suspend-vendo
 import { getVendorSession } from "../helpers/mfa";
 import { probe, rawProbe } from "../helpers/staff-users";
 import { createVendorFixture } from "../helpers/vendor-fixtures";
+import { toFormData } from "../helpers/multipart";
 import { findMatrixProblems, loadFixtures } from "../matrix/runner";
 import type { MatrixContext, MatrixEntry, MatrixVendor } from "../matrix/types";
 
@@ -47,13 +48,13 @@ medusaIntegrationTestRunner({
         ...(options.extraQuery ?? {}),
       }).toString();
       const pathWithQuery = query ? `${url}?${query}` : url;
-      const result = await probe(
-        api,
-        headers,
-        entry.method,
-        pathWithQuery,
-        entry.method === "GET" ? undefined : (options.body ?? {})
-      );
+      const data =
+        entry.method === "GET"
+          ? undefined
+          : entry.multipart
+            ? toFormData(await entry.multipart(ctx), options.body)
+            : (options.body ?? {});
+      const result = await probe(api, headers, entry.method, pathWithQuery, data);
       return { status: result.status, data: result.body, code: result.code };
     };
 

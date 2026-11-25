@@ -21,6 +21,14 @@ export type MatrixContext = {
   currentAgreementVersion: string;
 };
 
+// A file sent as multipart form data.
+export type MatrixMultipart = {
+  field: string;
+  filename: string;
+  contentType: string;
+  bytes: Buffer;
+};
+
 export type MatrixEntry = {
   method: "GET" | "POST" | "DELETE";
   // The route path with :name for every dynamic segment, for example /vendor/me/locations.
@@ -29,6 +37,9 @@ export type MatrixEntry = {
   idParams?: Record<string, (context: MatrixContext) => string>;
   // A valid body for vendor A. Vendor B sends it too and must only affect itself.
   body?: (context: MatrixContext) => Record<string, unknown>;
+  // A multipart body for routes that take a file. Extra keys sent by the
+  // harness become text fields next to the file.
+  multipart?: (context: MatrixContext) => Promise<MatrixMultipart>;
   query?: Record<string, string>;
   // The route works for a vendor that has not enrolled two-factor sign-in.
   mfaExempt?: boolean;

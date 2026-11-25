@@ -82,9 +82,10 @@ describe("listVendorRouteFiles", () => {
         "/vendor/me/locations",
         "/vendor/me/password",
         "/vendor/accept-invite",
+        "/vendor/uploads",
       ])
     );
-    expect(routes).toHaveLength(7);
+    expect(routes).toHaveLength(8);
   });
 });
 
@@ -194,6 +195,7 @@ describe("findMatrixProblems", () => {
         "me__password",
         "onboarding",
         "plugin__compliance",
+        "uploads",
       ])
     );
   });
