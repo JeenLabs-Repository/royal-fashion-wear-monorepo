@@ -43,3 +43,4 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0026 | [Plugin Registry, Scope And Token Behaviour](0026-plugin-registry-and-tokens.md) | accepted |
 | 0027 | [Razorpay Webhook Path And Order Completion On Medusa 2.22.7](0027-razorpay-webhook-and-order-completion.md) | accepted |
 | 0028 | [Razorpay Refund And Payment State Behaviour On Medusa 2.22.7](0028-razorpay-refunds-and-session-states.md) | accepted |
+| 0029 | [Razorpay Node SDK Surface And Header Transport](0029-razorpay-sdk-surface.md) | accepted |
