@@ -18,14 +18,27 @@ pnpm dev
 
 Copy the publishable API key that `TEST-CREDENTIALS.local.md` lists into `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` in `apps/storefront/.env.local`, and restart the storefront. Install the browser once with `pnpm e2e:install`.
 
+## Environment
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `E2E_PUBLISHABLE_KEY` | Yes for Store API checks (product review flows) | none | Publishable key linked to the default sales channel |
+| `E2E_BACKEND_URL` | No | `http://localhost:9000` | Backend origin for Admin and vendor API calls |
+| `E2E_ADMIN_URL` | No | `{E2E_BACKEND_URL}/app` | Admin dashboard origin |
+| `E2E_STOREFRONT_URL` | No | `http://localhost:8000` | Storefront origin |
+| `E2E_PORTAL_URL` | No | `http://localhost:5173/vendor-portal` | Vendor portal origin |
+
+Copy the publishable key from `TEST-CREDENTIALS.local.md` into `E2E_PUBLISHABLE_KEY` for specs that assert on the Store API after approval.
+
 ## Run the Specs
 
 ```sh
 pnpm e2e
 pnpm e2e -- --project=chromium
+pnpm exec playwright test e2e/specs/admin-product-review.spec.ts --project=chromium
 ```
 
-Each run covers a desktop project and a mobile project, so functional and responsive checks happen together. Open `playwright-report/index.html` after a run to see the results. The report folder is ignored by git.
+Each run covers a desktop project and a mobile project, so functional and responsive checks happen together. The Admin product review flows run on the desktop project only. Open `playwright-report/index.html` after a run to see the results. The report folder is ignored by git.
 
 ## Write a Spec
 
