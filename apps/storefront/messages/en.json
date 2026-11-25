@@ -463,25 +463,11 @@
     "description": "View your previous orders and their status.",
     "heading": "Orders"
   },
-  "Payment": {
-    "anotherStep": "Another step will appear",
-    "continueToReview": "Continue to review",
-    "edit": "Edit",
-    "enterPaymentDetails": "Enter payment details",
-    "giftCard": "Gift card",
-    "heading": "Payment",
-    "paymentDetails": "Payment details",
-    "paymentMethod": "Payment method"
-  },
   "PaymentButton": {
     "paymentFailed": "The payment did not go through. Please try again.",
     "placeOrder": "Pay",
     "scriptLoadFailed": "Could not open the payment window. Check your connection and try again.",
     "selectPaymentMethod": "Select a payment method"
-  },
-  "PaymentContainer": {
-    "enterPaymentDetails": "Enter your payment details:",
-    "loadError": "Could not load the payment methods."
   },
   "PaymentDetails": {
     "heading": "Payment",
@@ -490,31 +476,9 @@
     "paymentMethod": "Payment method"
   },
   "PaymentMethods": {
-    "pp_medusa-payments_default": {
-      "title": "Credit card",
-      "subtitle": "Medusa Payments"
-    },
-    "pp_paypal_paypal": {
-      "title": "PayPal"
-    },
     "pp_razorpay_razorpay": {
       "title": "UPI, cards and netbanking",
       "subtitle": "Razorpay"
-    },
-    "pp_stripe-bancontact_stripe": {
-      "title": "Bancontact",
-      "subtitle": "Stripe"
-    },
-    "pp_stripe-ideal_stripe": {
-      "title": "iDeal",
-      "subtitle": "Stripe"
-    },
-    "pp_stripe_stripe": {
-      "title": "Credit card",
-      "subtitle": "Stripe"
-    },
-    "pp_system_default": {
-      "title": "Manual payment"
     }
   },
   "PaymentPending": {
@@ -523,10 +487,6 @@
     "heading": "Waiting for your payment",
     "stillWaiting": "Still waiting. This can take a few minutes for UPI payments.",
     "timeout": "We have not received confirmation yet. If money left your account, your order will be confirmed automatically and we will email you."
-  },
-  "PaymentTest": {
-    "attention": "Attention:",
-    "testingOnly": "For testing purposes only."
   },
   "ProductActions": {
     "addToCart": "Add to cart",

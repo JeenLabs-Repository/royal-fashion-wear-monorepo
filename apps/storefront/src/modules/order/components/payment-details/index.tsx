@@ -1,6 +1,6 @@
 import { Container } from "@medusajs/ui"
 
-import { isStripeLike, paymentInfoMap } from "@lib/constants"
+import { paymentInfoMap } from "@lib/constants"
 import { paymentMethodLabel } from "@lib/util/payment"
 import { formatDateTime } from "@lib/util/date"
 import { convertToLocale } from "@lib/util/money"
@@ -25,18 +25,14 @@ const PaymentDetails = async ({ order }: PaymentDetailsProps) => {
   }
 
   const { title, subtitle } = paymentMethodLabel(tm, payment.provider_id)
-  const card = isStripeLike(payment.provider_id) && payment.data?.card_last4
-  // The card the order was actually paid with says more than the schemes the
-  // method accepts, so it takes the subtitle when the payment carries one.
-  const methodSubtitle = card ? `•••• ${card}` : subtitle
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-3 gap-6">
       <OrderDetailColumn label={t("paymentMethod")}>
         <span data-testid="payment-method">{title}</span>
-        {methodSubtitle && (
+        {subtitle && (
           <span className="txt-compact-xsmall text-ui-fg-muted">
-            {methodSubtitle}
+            {subtitle}
           </span>
         )}
       </OrderDetailColumn>
