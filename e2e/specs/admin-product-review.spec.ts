@@ -172,14 +172,22 @@ const submitProduct = async (
 const findReviewRow = async (page: Page, title: string, tab = "New") => {
   await page.goto(`${adminUrl}/product-reviews`)
   await page.getByRole("tab", { name: tab }).click()
-  // The New tab is oldest first with 25 per page; page through until the title shows.
-  const row = page.getByRole("row", { name: new RegExp(title) })
+  const loading = page.getByText("Loading product reviews")
+  await expect(loading).toHaveCount(0, { timeout: 15_000 })
+  // Every tab is oldest first with 25 per page. Wait for the page summary to
+  // change after Next; a short sleep alone races the reload and stops early.
+  const row = page.getByRole("row", { name: new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) })
+  const summary = page.getByText(/\d+ to \d+ of \d+/)
   for (let pageIndex = 0; pageIndex < 40; pageIndex++) {
     if ((await row.count()) > 0) break
     const next = page.getByRole("button", { name: "Next" })
     if ((await next.count()) === 0 || (await next.isDisabled())) break
+    const before = (await summary.count()) > 0 ? await summary.first().innerText() : ""
     await next.click()
-    await page.waitForTimeout(300)
+    await expect(loading).toHaveCount(0, { timeout: 15_000 })
+    if (before) {
+      await expect(summary.first()).not.toHaveText(before, { timeout: 15_000 })
+    }
   }
   await expect(row).toBeVisible({ timeout: 15_000 })
   return row
@@ -405,17 +413,13 @@ test("request changes and reject each move the item to their tab", async ({ page
   await page.getByTestId("request-changes").click()
   await page.getByTestId("reason-input").fill("Please remove the logo.")
   await page.getByTestId("reason-confirm").click()
-  await page.goto(`${adminUrl}/product-reviews`)
-  await page.getByRole("tab", { name: "Changes requested" }).click()
-  await expect(page.getByRole("row", { name: new RegExp(asked.title) })).toBeVisible()
+  await findReviewRow(page, asked.title, "Changes requested")
 
   await reviewIdFor(page, refused.title)
   await page.getByTestId("reject").click()
   await page.getByTestId("reason-input").fill("This product is not suitable.")
   await page.getByTestId("reason-confirm").click()
-  await page.goto(`${adminUrl}/product-reviews`)
-  await page.getByRole("tab", { name: "Rejected" }).click()
-  await expect(page.getByRole("row", { name: new RegExp(refused.title) })).toBeVisible()
+  await findReviewRow(page, refused.title, "Rejected")
 })
 
 test("a live edit shows the title change and applying it keeps handle and SKUs", async ({

@@ -190,14 +190,21 @@ const storefrontStatus = async (page: Page, handle: string) =>
 const reviewFor = async (page: Page, title: string, tab: string) => {
   await page.goto(`${adminUrl}/product-reviews`)
   await page.getByRole("tab", { name: tab }).click()
-  // The New tab is oldest first with 25 per page; page through until the title shows.
-  const row = page.getByRole("row", { name: new RegExp(title) })
+  const loading = page.getByText("Loading product reviews")
+  await expect(loading).toHaveCount(0, { timeout: 15_000 })
+  // Oldest first with 25 per page; wait for the summary to change after Next.
+  const row = page.getByRole("row", { name: new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) })
+  const summary = page.getByText(/\d+ to \d+ of \d+/)
   for (let pageIndex = 0; pageIndex < 40; pageIndex++) {
     if ((await row.count()) > 0) break
     const next = page.getByRole("button", { name: "Next" })
     if ((await next.count()) === 0 || (await next.isDisabled())) break
+    const before = (await summary.count()) > 0 ? await summary.first().innerText() : ""
     await next.click()
-    await page.waitForTimeout(300)
+    await expect(loading).toHaveCount(0, { timeout: 15_000 })
+    if (before) {
+      await expect(summary.first()).not.toHaveText(before, { timeout: 15_000 })
+    }
   }
   await expect(row).toBeVisible({ timeout: 15_000 })
   await row.getByRole("link", { name: "Open" }).click()
