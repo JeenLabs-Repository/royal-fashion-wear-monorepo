@@ -4,7 +4,7 @@ import { MedusaError } from "@medusajs/framework/utils";
 import { randomBytes } from "node:crypto";
 import { registerVendorAdminSection } from "../../src/lib/vendor/admin-sections";
 import { getVendorModule } from "../../src/lib/vendor/vendor-module";
-import { vendorActivationGateWorkflow } from "../../src/workflows/vendors/vendor-activation-gate";
+import { onVendorActivating } from "../../src/modules/vendor/public";
 import { adminHeadersFor } from "../helpers/admin-as";
 import { findAuditEntries } from "../helpers/audit";
 import { probe } from "../helpers/staff-users";
@@ -12,11 +12,11 @@ import { createVendorFixture } from "../helpers/vendor-fixtures";
 
 jest.setTimeout(300 * 1000);
 
-// Registered at module load, before the application starts, the way the
-// hook-registration record describes. A flag decides whether a handler blocks.
+// Registered at module load via the shared onVendor* registry (catalog handlers
+// use the same slot). A flag decides whether a handler blocks.
 const hookState = { block: false, triggers: [] as string[] };
 
-vendorActivationGateWorkflow.hooks.vendorActivating(async ({ trigger }) => {
+onVendorActivating(async ({ trigger }) => {
   hookState.triggers.push(trigger);
   if (hookState.block) {
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Compliance check pending");

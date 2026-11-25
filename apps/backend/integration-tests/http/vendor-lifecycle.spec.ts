@@ -14,11 +14,11 @@ import {
   reconcileVendorChannelLinks,
 } from "../../src/lib/vendor/channel-links";
 import { getVendorModule } from "../../src/lib/vendor/vendor-module";
+import { onVendorActivating, onVendorSuspended } from "../../src/modules/vendor/public";
 import { activateVendorWorkflow } from "../../src/workflows/vendors/activate-vendor";
 import { reactivateVendorWorkflow } from "../../src/workflows/vendors/reactivate-vendor";
 import { assertSettableStatus } from "../../src/workflows/vendors/steps/set-vendor-status";
 import { suspendVendorWorkflow } from "../../src/workflows/vendors/suspend-vendor";
-import { vendorActivationGateWorkflow } from "../../src/workflows/vendors/vendor-activation-gate";
 import { findAuditEntries } from "../helpers/audit";
 
 jest.setTimeout(180 * 1000);
@@ -52,16 +52,17 @@ const hookState = {
   suspensionSeen: [] as { vendor_id: string; reason: string; status?: string }[],
 };
 
-// Registered at module load, before the application starts, as the
-// hook-registration record describes. A flag decides whether a handler blocks.
-vendorActivationGateWorkflow.hooks.vendorActivating(async ({ vendor_id, trigger }) => {
+// Registered at module load via the shared onVendor* registry so catalog
+// handlers (and this spec) share Medusa's single hook slot. A flag decides
+// whether a handler blocks.
+onVendorActivating(async ({ vendor_id, trigger }) => {
   hookState.activations.push({ vendor_id, trigger });
   if (hookState.blockActivation) {
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Compliance check pending");
   }
 });
 
-suspendVendorWorkflow.hooks.vendorSuspended(async ({ vendor_id, reason }, { container }) => {
+onVendorSuspended(async ({ vendor_id, reason }, { container }) => {
   const [vendor] = await getVendorModule(container).listVendors({ id: vendor_id }, { take: 1 });
   hookState.suspensionSeen.push({ vendor_id, reason, status: vendor?.status });
   if (hookState.failSuspension) {
