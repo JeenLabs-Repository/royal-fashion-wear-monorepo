@@ -36,3 +36,6 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0019 | Plain Ids Instead of Module Links | accepted |
 | 0020 | Reservation, Fulfilment And Hub Shipping Behaviour On Medusa 2.22.7 | accepted |
 | 0021 | Catalog Core Product Behaviour On Medusa 2.22.7 | accepted |
+| 0022 | Catalog Ownership And Approval | accepted |
+| 0023 | Image Pipeline And Random Keys | accepted |
+| 0024 | Stock Reserved Quantity And CSV Import | accepted |
