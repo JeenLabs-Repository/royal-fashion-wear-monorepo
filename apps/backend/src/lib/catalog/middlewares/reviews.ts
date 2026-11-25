@@ -1,10 +1,10 @@
 import type { MiddlewareRoute } from "@medusajs/framework/http";
+import { reviewDecisionEntries } from "./review-decisions";
 import { z } from "@medusajs/framework/zod";
 
-// Admin routes validate inside their handlers (the staff chain is the only
-// middleware entry for `/admin*`), so this slot stays an empty array. It is
-// still exported because the catalog aggregate spreads it.
-export const reviewsMiddlewares: MiddlewareRoute[] = [];
+// The list and content edit routes validate inside their handlers. The three decision
+// routes mount their body validators from review-decisions.ts, after the staff chain.
+export const reviewsMiddlewares: MiddlewareRoute[] = [...reviewDecisionEntries];
 
 export const REVIEW_TABS = ["new", "live_edits", "changes_requested", "rejected"] as const;
 export type ReviewTab = (typeof REVIEW_TABS)[number];
