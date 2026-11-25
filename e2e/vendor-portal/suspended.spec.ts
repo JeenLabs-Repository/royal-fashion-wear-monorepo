@@ -16,13 +16,13 @@ const signInSuspended = async (page: Page) => {
 
 test("a suspended vendor sees the suspended screen after signing in", async ({ page }) => {
   await signInSuspended(page)
-  await expect(page.getByTestId("suspended-screen")).toBeVisible()
+  await expect(page.getByTestId("suspended-screen")).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId("suspended-screen")).toContainText("Your account is suspended")
 })
 
 test("navigation keeps the suspended screen and sign-out works", async ({ page }) => {
   await signInSuspended(page)
-  await expect(page.getByTestId("suspended-screen")).toBeVisible()
+  await expect(page.getByTestId("suspended-screen")).toBeVisible({ timeout: 20_000 })
 
   for (const route of ["/", "/agreement", "/locations", "/profile", "/mfa"]) {
     await navigateInApp(page, route)

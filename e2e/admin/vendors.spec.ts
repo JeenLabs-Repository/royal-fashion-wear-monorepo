@@ -25,6 +25,9 @@ const open = async (page: Page, route: string) => {
 const openVendor = async (page: Page, name: string) => {
   await open(page, "/vendors")
   await expect(page.getByTestId("vendors-table")).toBeVisible()
+  // Search so a long vendor list still finds the demo row on the first page.
+  await page.getByRole("searchbox", { name: "Search by internal name" }).fill(name)
+  await expect(page.getByRole("link", { name, exact: true })).toBeVisible()
   await page.getByRole("link", { name, exact: true }).click()
   await expect(page.getByTestId("vendor-detail")).toBeVisible()
 }
@@ -47,11 +50,16 @@ test("list shows demo vendors, filters, search and the state strip", async ({ pa
   await open(page, "/vendors")
 
   await expect(page.getByTestId("vendors-page")).toBeVisible()
-  await expect(page.getByRole("link", { name: "Demo Vendor Alpha", exact: true })).toBeVisible()
-  await expect(page.getByRole("link", { name: "Demo Vendor Delta", exact: true })).toBeVisible()
   await expect(page.getByTestId("agreement-draft-callout")).toBeVisible()
   await expect(page.getByTestId("state-chip-IN-MH")).toBeVisible()
   await expect(page.locator('[data-single="true"]').first()).toBeVisible()
+
+  const search = page.getByRole("searchbox", { name: "Search by internal name" })
+  await search.fill("Demo Vendor Alpha")
+  await expect(page.getByRole("link", { name: "Demo Vendor Alpha", exact: true })).toBeVisible()
+  await search.fill("Demo Vendor Delta")
+  await expect(page.getByRole("link", { name: "Demo Vendor Delta", exact: true })).toBeVisible()
+  await search.fill("")
 
   await page.getByTestId("vendors-status-filter").getByRole("combobox").click()
   await page.getByRole("option", { name: "Suspended", exact: true }).click()
