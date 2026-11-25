@@ -55,3 +55,12 @@ app:.cursor/rules/02-branches-and-pull-requests.mdc
 app:.cursor/rules/03-git-commits.mdc
 app:docs/README.md
 app:docs/decisions/0000-template.md
+tpl:AGENTS.md.tpl => AGENTS.md
+tpl:CLAUDE.md.tpl => CLAUDE.md
+tpl:01-project-context.mdc.tpl => .cursor/rules/01-project-context.mdc
+tpl:20-plugin.mdc.tpl => .cursor/rules/20-plugin.mdc
+tpl:README.md.tpl => README.md
+tpl:decisions-README.md.tpl => docs/decisions/README.md
+tpl:getting-started.md.tpl => docs/guides/getting-started.md
+tpl:release.md.tpl => docs/guides/release.md
+app:.claude/skills/building-with-medusa => .claude/skills/building-with-medusa
