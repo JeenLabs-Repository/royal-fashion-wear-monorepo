@@ -2,14 +2,22 @@
 
 import React, { useActionState, useEffect, useMemo } from "react"
 
+import type { AddressFields } from "@modules/common/components/address-autocomplete"
+import IndiaAddressFields from "@modules/common/components/address-autocomplete/providers/india"
 import Input from "@modules/common/components/input"
-import NativeSelect from "@modules/common/components/native-select"
 
 import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
 import type { HttpTypes } from "@medusajs/types"
 import AccountInfo from "../account-info"
 import { useTranslations } from "next-intl"
 import { formatAddressLines } from "@lib/util/address"
+
+const fieldsOf = (address?: HttpTypes.StoreCustomerAddress): AddressFields => ({
+  address_1: address?.address_1 ?? "",
+  postal_code: address?.postal_code ?? "",
+  city: address?.city ?? "",
+  province: address?.province ?? "",
+})
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -38,6 +46,10 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const billingAddress = customer.addresses?.find(
     (addr) => addr.is_default_billing
+  )
+
+  const [fields, setFields] = React.useState<AddressFields>(() =>
+    fieldsOf(billingAddress)
   )
 
   const initialState: Record<string, unknown> = {
@@ -84,7 +96,14 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   }, [billingAddress, regionOptions, t])
 
   return (
-    <form action={formAction} onReset={() => clearState()} className="w-full">
+    <form
+      action={formAction}
+      onReset={() => {
+        clearState()
+        setFields(fieldsOf(billingAddress))
+      }}
+      className="w-full"
+    >
       <input type="hidden" name="addressId" value={billingAddress?.id} />
       <AccountInfo
         label={t("billingAddress")}
@@ -126,56 +145,13 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             defaultValue={billingAddress?.phone ?? customer?.phone ?? ""}
             data-testid="billing-phone-input"
           />
-          <Input
-            label={tf("address")}
-            name="address_1"
-            defaultValue={billingAddress?.address_1 || undefined}
-            required
-            data-testid="billing-address-1-input"
-          />
+          <IndiaAddressFields values={fields} onChange={setFields} required />
           <Input
             label={tf("addressLine2")}
             name="address_2"
             defaultValue={billingAddress?.address_2 || undefined}
             data-testid="billing-address-2-input"
           />
-          <div className="grid grid-cols-[144px_1fr] gap-x-2">
-            <Input
-              label={tf("postalCode")}
-              name="postal_code"
-              defaultValue={billingAddress?.postal_code || undefined}
-              required
-              data-testid="billing-postcal-code-input"
-            />
-            <Input
-              label={tf("city")}
-              name="city"
-              defaultValue={billingAddress?.city || undefined}
-              required
-              data-testid="billing-city-input"
-            />
-          </div>
-          <Input
-            label={tf("province")}
-            name="province"
-            defaultValue={billingAddress?.province || undefined}
-            data-testid="billing-province-input"
-          />
-          <NativeSelect
-            name="country_code"
-            defaultValue={billingAddress?.country_code || undefined}
-            required
-            data-testid="billing-country-code-select"
-          >
-            <option value="">-</option>
-            {regionOptions.map((option, i) => {
-              return (
-                <option key={i} value={option?.value}>
-                  {option?.label}
-                </option>
-              )
-            })}
-          </NativeSelect>
         </div>
       </AccountInfo>
     </form>
