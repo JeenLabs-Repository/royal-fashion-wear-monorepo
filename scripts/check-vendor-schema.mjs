@@ -68,14 +68,31 @@ const collect = (moduleDir) => {
   return found;
 };
 
+// Config keys are Medusa module names (camelCase). Directories follow the
+// repo style (kebab-case), so vendorCatalog resolves to vendor-catalog.
+const resolveModuleDir = (modulesDir, name) => {
+  const exact = path.join(modulesDir, name);
+  if (existsSync(exact)) {
+    return exact;
+  }
+  const kebab = name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  if (kebab !== name) {
+    const kebabDir = path.join(modulesDir, kebab);
+    if (existsSync(kebabDir)) {
+      return kebabDir;
+    }
+  }
+  return null;
+};
+
 export const scan = (root, cfg = config) => {
   const pattern = new RegExp(cfg.pattern, "i");
   const modulesDir = path.join(root, "apps", "backend", "src", "modules");
   const result = { scanned: [], missing: [], hits: [] };
 
   for (const name of cfg.scan) {
-    const dir = path.join(modulesDir, name);
-    if (!existsSync(dir)) {
+    const dir = resolveModuleDir(modulesDir, name);
+    if (!dir) {
       if (cfg.required.includes(name)) {
         result.missing.push(name);
       }
@@ -172,6 +189,14 @@ const selfTestCases = [
     build: (r) => {
       cleanVendor(r);
       write(r, "apps/backend/src/modules/vendorCatalog/models/bad.ts", modelFile(["gstin"]));
+    },
+  },
+  {
+    name: "a bad column under the kebab-case vendor-catalog directory fails",
+    expectFail: true,
+    build: (r) => {
+      cleanVendor(r);
+      write(r, "apps/backend/src/modules/vendor-catalog/models/bad.ts", modelFile(["gstin"]));
     },
   },
   {
