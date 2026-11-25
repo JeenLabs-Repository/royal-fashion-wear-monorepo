@@ -41,6 +41,9 @@ app:apps/backend/integration-tests/setup.js => integration-tests/setup.js
 tpl:package.json.tpl => package.json
 tpl:tsconfig.json.tpl => tsconfig.json
 tpl:npmrc.tpl => .npmrc
+tpl:ci.yml.tpl => .github/workflows/ci.yml
+tpl:publish.yml.tpl => .github/workflows/publish.yml
+
 
 
 [rules-and-docs]
