@@ -29,6 +29,9 @@ export type VendorProductsQuery = z.infer<typeof vendorProductsQuerySchema>;
 // unrecognized keys.
 VENDOR_QUERY_SCHEMAS["GET /vendor/products"] = vendorProductsQuerySchema;
 
+// Submit, withdraw and discard take no body: any key is a 400.
+const emptyBody = validateCatalogBody(z.strictObject({}));
+
 // The spread order in src/api/middlewares.ts puts these after the vendor chain, so
 // authentication, the two-factor gate and the status guard have already run.
 export const productsMiddlewares: MiddlewareRoute[] = [
@@ -41,5 +44,25 @@ export const productsMiddlewares: MiddlewareRoute[] = [
     method: ["GET"],
     matcher: "/vendor/products",
     middlewares: [strictQuery(vendorProductsQuerySchema)],
+  },
+  {
+    method: ["POST"],
+    matcher: "/vendor/products/:id",
+    middlewares: [validateCatalogBody(vendorContentSchema)],
+  },
+  {
+    method: ["POST"],
+    matcher: "/vendor/products/:id/discard-changes",
+    middlewares: [emptyBody],
+  },
+  {
+    method: ["POST"],
+    matcher: "/vendor/products/:id/submit",
+    middlewares: [emptyBody],
+  },
+  {
+    method: ["POST"],
+    matcher: "/vendor/products/:id/withdraw",
+    middlewares: [emptyBody],
   },
 ];
