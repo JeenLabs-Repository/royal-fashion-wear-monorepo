@@ -61,7 +61,7 @@ export const Shell = () => {
               to={link.to}
               end={link.end}
               className={({ isActive }) =>
-                `whitespace-nowrap border-b-2 px-1 py-2 txt-small-plus ${
+                `whitespace-nowrap border-b-2 px-1 py-2 txt-small-plus outline-none focus-visible:shadow-borders-interactive-with-focus ${
                   isActive
                     ? "border-ui-fg-base text-ui-fg-base"
                     : "border-transparent text-ui-fg-subtle hover:text-ui-fg-base"

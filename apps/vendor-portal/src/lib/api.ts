@@ -105,6 +105,10 @@ const PATHS = {
   onboarding: "/vendor/onboarding",
   acceptInvite: "/vendor/accept-invite",
   login: "/auth/vendor/emailpass",
+  agreementCurrent: "/vendor/agreement/current",
+  agreementAccept: "/vendor/agreement/accept",
+  locations: "/vendor/me/locations",
+  passwordChange: "/vendor/me/password",
 } as const
 
 export const getMe = () => fetchJson<Me>(PATHS.me)
@@ -299,3 +303,55 @@ export const verifyEnrolment = async (factorId: string, code: string): Promise<s
   }
   return codes
 }
+
+export const portalKeys = {
+  onboarding: ["portal", "onboarding"] as const,
+  agreement: ["portal", "agreement"] as const,
+  locations: ["portal", "locations"] as const,
+}
+
+export type AgreementDocument = { key: string; title: string; markdown: string }
+
+export type Agreement = {
+  version: string
+  accepted: boolean
+  accepted_at: string | null
+  documents: AgreementDocument[]
+}
+
+export type PortalLocation = {
+  id: string
+  code: string
+  label: string
+  state_code: string
+  state_name: string
+  pin: string
+  address_1: string
+  address_2: string | null
+  city: string | null
+  pickup_contact_name: string
+  pickup_contact_phone: string
+  status: "active" | "inactive"
+}
+
+export const getAgreement = () => fetchJson<Agreement>(PATHS.agreementCurrent)
+
+export const acceptAgreement = (version: string) =>
+  fetchJson<unknown>(PATHS.agreementAccept, {
+    method: "POST",
+    body: { version, accepted: true },
+  })
+
+export const getLocations = () => fetchJson<{ locations: PortalLocation[] }>(PATHS.locations)
+
+// Password change uses the custom route from decision 0014 E8. Stock
+// /auth/vendor/emailpass/update only accepts a reset-purpose JWT.
+export const changePassword = (input: { currentPassword: string; newPassword: string }) =>
+  fetchJson<unknown>(PATHS.passwordChange, {
+    method: "POST",
+    body: {
+      current_password: input.currentPassword,
+      new_password: input.newPassword,
+    },
+  })
+

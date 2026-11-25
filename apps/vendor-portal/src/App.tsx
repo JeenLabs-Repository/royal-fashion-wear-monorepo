@@ -1,18 +1,14 @@
-import { Heading } from "@medusajs/ui"
 import { Navigate, Route, Routes } from "react-router-dom"
 import { Shell } from "./components/Shell"
 import { RequireSession, SuspendedScreen, useSession } from "./lib/session"
 import { AcceptInvite } from "./screens/AcceptInvite"
+import { Agreement } from "./screens/Agreement"
+import { Home } from "./screens/Home"
+import { Locations } from "./screens/Locations"
 import { Login } from "./screens/Login"
 import { MfaSetup } from "./screens/MfaSetup"
 import { NotFound } from "./screens/NotFound"
-
-// Placeholders for the screens that arrive with the next portal work. Each keeps a test id.
-const Placeholder = ({ name, title }: { name: string; title: string }) => (
-  <div data-testid={`screen-${name}`}>
-    <Heading level="h1">{title}</Heading>
-  </div>
-)
+import { Profile } from "./screens/Profile"
 
 const SuspendedRoute = () => {
   const { status } = useSession()
@@ -39,10 +35,10 @@ const App = () => (
         </RequireSession>
       }
     >
-      <Route index element={<Placeholder name="home" title="Home" />} />
-      <Route path="agreement" element={<Placeholder name="agreement" title="Agreement" />} />
-      <Route path="locations" element={<Placeholder name="locations" title="Locations" />} />
-      <Route path="profile" element={<Placeholder name="profile" title="Profile" />} />
+      <Route index element={<Home />} />
+      <Route path="agreement" element={<Agreement />} />
+      <Route path="locations" element={<Locations />} />
+      <Route path="profile" element={<Profile />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
