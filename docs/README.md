@@ -35,6 +35,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Release A Plugin And Bump The App Pin](guides/plugin-release-and-bump.md)
 - [Give Builds Read Access to the Plugin Registry](guides/plugin-registry-access.md)
 - [Refresh the PIN Directory](guides/pincode-directory.md)
+- [Manage Email Settings in the Dashboard](guides/email-settings.md): where mail settings live, how to change them and how development mail works.
 
 ## Writing Rules
 
