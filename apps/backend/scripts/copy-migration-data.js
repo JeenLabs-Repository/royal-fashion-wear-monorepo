@@ -22,3 +22,13 @@ fs.cpSync(source, destination, {
   recursive: true,
   filter: (src) => fs.statSync(src).isDirectory() || src.endsWith(".json"),
 });
+
+// Single data files the compiled server reads next to its own modules.
+const bundledFiles = [path.join("src", "lib", "geo-india", "pincodes.json")];
+
+for (const relative of bundledFiles) {
+  const from = path.join(projectRoot, relative);
+  const to = path.join(projectRoot, ".medusa", "server", relative);
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(from, to);
+}
