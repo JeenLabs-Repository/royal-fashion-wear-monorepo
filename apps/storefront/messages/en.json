@@ -102,6 +102,7 @@
     "backToCart": "Back to cart",
     "billingHeading": "Billing address",
     "billingSameAsShipping": "Billing address same as shipping",
+    "checkPaymentStatus": "Already paid? Check payment status",
     "close": "Close",
     "contactsHeading": "Contacts",
     "contactsModalTitle": "Contacts",
@@ -131,6 +132,7 @@
     "legal": "By clicking «Pay», you accept our <terms>terms</terms>, <termsOfUse>terms of use</termsOfUse> and <returnPolicy>return policy</returnPolicy>, and agree to our <privacyPolicy>privacy policy</privacyPolicy>.",
     "orderComposition": "Order summary",
     "paymentHeading": "Payment method",
+    "paymentsUnavailable": "Payments are temporarily unavailable. Please try again later.",
     "pinHintFilled": "State and city filled from your PIN. You can change them.",
     "pinHintMismatch": "This PIN belongs to {state}. Check the PIN or the state.",
     "pinHintUnknown": "We could not verify this PIN. Check it, or enter your state and city yourself.",
@@ -472,7 +474,9 @@
     "paymentMethod": "Payment method"
   },
   "PaymentButton": {
+    "paymentFailed": "The payment did not go through. Please try again.",
     "placeOrder": "Pay",
+    "scriptLoadFailed": "Could not open the payment window. Check your connection and try again.",
     "selectPaymentMethod": "Select a payment method"
   },
   "PaymentContainer": {
@@ -493,6 +497,10 @@
     "pp_paypal_paypal": {
       "title": "PayPal"
     },
+    "pp_razorpay_razorpay": {
+      "title": "UPI, cards and netbanking",
+      "subtitle": "Razorpay"
+    },
     "pp_stripe-bancontact_stripe": {
       "title": "Bancontact",
       "subtitle": "Stripe"
@@ -508,6 +516,13 @@
     "pp_system_default": {
       "title": "Manual payment"
     }
+  },
+  "PaymentPending": {
+    "backToCheckout": "Back to checkout",
+    "body": "We are waiting for confirmation from your bank. Keep this page open, it updates by itself.",
+    "heading": "Waiting for your payment",
+    "stillWaiting": "Still waiting. This can take a few minutes for UPI payments.",
+    "timeout": "We have not received confirmation yet. If money left your account, your order will be confirmed automatically and we will email you."
   },
   "PaymentTest": {
     "attention": "Attention:",
