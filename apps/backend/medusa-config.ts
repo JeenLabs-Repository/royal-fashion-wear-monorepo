@@ -28,26 +28,7 @@ if (isProd && !isBuildCommand) {
 // create-medusa-app writes REDIS_URL into every generated .env whether Redis runs
 // or not, so development requires an explicit opt-in.
 const useRedis = Boolean(redisUrl) && (isProd || process.env.USE_REDIS === "true");
-const useSmtp = Boolean(process.env.SMTP_HOST);
 const useS3 = isProd && Boolean(process.env.S3_BUCKET);
-
-const smtpProvider = {
-  resolve: "./src/modules/smtp-notification",
-  id: "smtp",
-  options: {
-    channels: ["email"],
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined,
-    secure: process.env.SMTP_SECURE === "true",
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-    from: process.env.SMTP_FROM,
-    // Shown as the sender's name in the inbox, so the subject lines can stay
-    // about the order alone.
-    from_name: process.env.STORE_NAME,
-    reply_to: process.env.SMTP_REPLY_TO,
-  },
-};
 
 const redisModules = [
   {
@@ -184,7 +165,13 @@ module.exports = defineConfig({
               channels: ["feed"],
             },
           },
-          ...(useSmtp ? [smtpProvider] : []),
+          {
+            resolve: "./src/modules/smtp-notification",
+            id: "smtp",
+            options: {
+              channels: ["email"],
+            },
+          },
         ],
       },
     },
