@@ -5,7 +5,6 @@ import { initiatePaymentSession } from "@lib/data/cart"
 import {
   buildPaymentSessionData,
   isPaymentSessionReady,
-  isStripeLike,
   paymentInfoMap,
 } from "@lib/constants"
 import compareAddresses from "@lib/util/compare-addresses"
@@ -14,7 +13,6 @@ import { CreditCard } from "@medusajs/icons"
 import type { HttpTypes } from "@medusajs/types"
 import PaymentButton from "@modules/checkout/components/payment-button"
 import ErrorMessage from "@modules/checkout/components/error-message"
-import { StripePaymentElement } from "@modules/checkout/components/payment-container"
 import CheckoutBillingSheet from "@modules/checkout/components/checkout-billing-sheet"
 import { Link } from "@i18n/navigation"
 import { useTranslations } from "next-intl"
@@ -41,7 +39,6 @@ export default function CheckoutPaymentSection({
     latestSession?.provider_id ?? ""
   )
   const [error, setError] = useState<string | null>(null)
-  const [, setPaymentComplete] = useState(false)
   const [billingOpen, setBillingOpen] = useState(false)
   const [showBillingDetails, setShowBillingDetails] = useState(false)
   // True when the backend refused to start a payment session because the
@@ -206,16 +203,6 @@ export default function CheckoutPaymentSection({
               )
             })}
           </div>
-
-          {/* Stripe card input */}
-          {isStripeLike(selectedPaymentMethod) && (
-            <div className="mt-2">
-              <StripePaymentElement
-                setError={setError}
-                setPaymentComplete={setPaymentComplete}
-              />
-            </div>
-          )}
         </div>
       )}
 
