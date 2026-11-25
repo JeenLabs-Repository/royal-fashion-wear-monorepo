@@ -87,7 +87,7 @@ const collectStarterFieldRequests = async (surface: SurfaceContext): Promise<Sur
 
   for (const entry of entries) {
     const base = path.posix.basename(entry.file);
-    const patterns = STARTER_FIELD_ROUTES[base];
+    const patterns = STARTER_FIELD_ROUTES[entry.file] ?? STARTER_FIELD_ROUTES[base];
     if (!patterns) {
       throw new Error(
         `The storefront file ${entry.file} sets \`fields\` but has no entry in STARTER_FIELD_ROUTES. Map it to the Store API route it reads.`

@@ -96,9 +96,13 @@ export const RECIPES: Record<string, Recipe> = {
     params: { id: (c) => c.firstId("/store/product-categories", "product_categories") },
   },
   "/store/product-tags": {},
-  "/store/product-tags/:id": { params: { id: (c) => c.firstId("/store/product-tags", "product_tags") } },
+  "/store/product-tags/:id": {
+    skip: "the India starter catalog defines no product tags: list route still crawled; detail covered when tags exist",
+  },
   "/store/product-types": {},
-  "/store/product-types/:id": { params: { id: (c) => c.firstId("/store/product-types", "product_types") } },
+  "/store/product-types/:id": {
+    skip: "the India starter catalog defines no product types: list route still crawled; detail covered when types exist",
+  },
   "/store/product-options": {},
   "/store/product-options/:id": {
     params: { id: (c) => c.firstId("/store/product-options", "product_options") },
@@ -141,8 +145,10 @@ for (const [pattern, recipe] of Object.entries(RECIPES)) {
   }
 }
 
-// Which storefront data file reads which Store API route, so each `fields`
-// string is replayed against the route it was written for.
+// Which storefront file reads which Store API route, so each `fields` string
+// is replayed against the route it was written for. Keys are either the file
+// basename (unique lib/data modules) or the path under src/ when the basename
+// alone would collide (route.ts, index.tsx).
 export const STARTER_FIELD_ROUTES: Record<string, string[]> = {
   "products.ts": ["/store/products"],
   "variants.ts": ["/store/products"],
@@ -155,4 +161,8 @@ export const STARTER_FIELD_ROUTES: Record<string, string[]> = {
   "fulfillment.ts": ["/store/shipping-options"],
   "customer.ts": ["/store/customers/me"],
   "payment.ts": ["/store/payment-providers"],
+  "sitemap.ts": ["/store/products", "/store/product-categories", "/store/collections"],
+  "app/api/payment-return/route.ts": ["/store/carts/:id"],
+  "app/llms.txt/route.ts": ["/store/collections", "/store/product-categories", "/store/products"],
+  "modules/home/components/featured-products/product-rail/index.tsx": ["/store/products"],
 };
