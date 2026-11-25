@@ -1,11 +1,14 @@
 import type { MedusaContainer } from "@medusajs/framework/types";
 import { Modules } from "@medusajs/framework/utils";
-import { linkProductsToSalesChannelWorkflow } from "@medusajs/medusa/core-flows";
+import {
+  linkProductsToSalesChannelWorkflow,
+  updateProductsWorkflow,
+} from "@medusajs/medusa/core-flows";
 import { getDefaultSalesChannelId } from "./default-sales-channel";
 import { getCatalogService } from "./load-content";
 
-// Decision 0021: unlink and relink already emit product.updated, so storefront
-// revalidation needs no extra emit here.
+// Decision 0021: unlink and relink emit product.updated. Setting draft/published
+// also emits it. Keep the explicit announce for the rare case neither path fires.
 const LINK_CHANGE_FIRES_PRODUCT_UPDATED = true;
 
 type Options = { productIds?: string[] };
@@ -20,10 +23,29 @@ async function announce(scope: MedusaContainer, productIds: string[]): Promise<v
   await bus.emit(productIds.map((id) => ({ name: "product.updated", data: { id } })));
 }
 
+async function setProductStatus(
+  scope: MedusaContainer,
+  productIds: string[],
+  status: "draft" | "published"
+): Promise<void> {
+  if (productIds.length === 0) {
+    return;
+  }
+  await updateProductsWorkflow(scope).run({
+    input: {
+      selector: { id: productIds },
+      update: { status } as never,
+    },
+  });
+}
+
 /**
  * Takes every live product of a vendor off sale and marks it, so reactivation can put
  * back exactly these. Products that are not live are never touched. Idempotent: a product
  * already marked is skipped. Returns the product ids it changed.
+ *
+ * Decision 0021: after a sales-channel unlink the Store list and handle lookup can still
+ * return the product. Setting `draft` is what makes the storefront product page 404.
  */
 export async function hideVendorProducts(
   scope: MedusaContainer,
@@ -49,6 +71,7 @@ export async function hideVendorProducts(
   await linkProductsToSalesChannelWorkflow(scope).run({
     input: { id: channelId, remove: productIds },
   });
+  await setProductStatus(scope, productIds, "draft");
   await service.updateProductSubmissions(
     rows.map((row) => ({ id: row.id, hidden_by_suspension: true }))
   );
@@ -81,6 +104,7 @@ export async function restoreVendorProducts(
   const productIds = rows.map((row) => String(row.product_id));
   const channelId = await getDefaultSalesChannelId(scope);
 
+  await setProductStatus(scope, productIds, "published");
   await linkProductsToSalesChannelWorkflow(scope).run({
     input: { id: channelId, add: productIds },
   });
