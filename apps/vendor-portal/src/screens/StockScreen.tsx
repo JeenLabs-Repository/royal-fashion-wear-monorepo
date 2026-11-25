@@ -90,8 +90,10 @@ export const StockScreen = () => {
 
       {data && data.count > 0 && (
         <>
-          <StockTable data={data} />
-          <div className="flex items-center justify-between gap-x-3">
+          <div className="min-w-0 w-full max-w-full">
+            <StockTable data={data} />
+          </div>
+          <div className="flex min-w-0 items-center justify-between gap-x-3">
             <Text size="small" className="text-ui-fg-subtle">{`${from} to ${to} of ${total}`}</Text>
             <div className="flex gap-x-2">
               <Button

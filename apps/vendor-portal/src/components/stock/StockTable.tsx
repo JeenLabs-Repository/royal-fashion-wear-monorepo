@@ -98,15 +98,15 @@ export const StockTable = ({ data }: { data: InventoryList }) => {
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-y-2">
+    <div className="flex min-w-0 max-w-full flex-col gap-y-2">
       <Text size="small" className="text-ui-fg-subtle">
         {`Low means fewer than ${data.low_stock_threshold} units are available after the units reserved for orders.`}
       </Text>
       <div
-        className="overflow-x-auto rounded-lg border border-ui-border-base"
+        className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-ui-border-base"
         data-testid="stock-scroll"
       >
-        <table className="w-full min-w-[640px] text-left" data-testid="stock-table">
+        <table className="text-left" style={{ width: "max-content", minWidth: "100%" }} data-testid="stock-table">
           <thead className="bg-ui-bg-subtle">
             <tr>
               <th scope="col" className="txt-small-plus px-3 py-2">

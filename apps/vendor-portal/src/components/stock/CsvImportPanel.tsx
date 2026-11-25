@@ -61,7 +61,11 @@ export const CsvImportPanel = () => {
   }
 
   return (
-    <section className="flex flex-col gap-y-3" aria-labelledby="csv-heading" data-testid="csv-panel">
+    <section
+      className="flex min-w-0 max-w-full flex-col gap-y-3"
+      aria-labelledby="csv-heading"
+      data-testid="csv-panel"
+    >
       <Heading level="h2" id="csv-heading">
         Update stock from a CSV file
       </Heading>
@@ -117,8 +121,8 @@ export const CsvImportPanel = () => {
             <Text weight="plus" data-testid="csv-failed">{`Failed ${result.failed}`}</Text>
           </div>
           {result.errors.length > 0 && (
-            <div className="overflow-x-auto rounded-lg border border-ui-border-base">
-              <table className="w-full min-w-[480px] text-left" data-testid="csv-errors">
+            <div className="min-w-0 max-w-full overflow-x-auto rounded-lg border border-ui-border-base">
+              <table className="w-max min-w-full text-left" data-testid="csv-errors">
                 <thead className="bg-ui-bg-subtle">
                   <tr>
                     <th scope="col" className="txt-small-plus px-3 py-2">
