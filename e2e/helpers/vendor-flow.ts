@@ -5,7 +5,11 @@ import { seedFreshRegisteredVendor } from "./vendor-seed"
 
 // The portal lives under the /vendor-portal base path. Set E2E_PORTAL_URL to
 // http://localhost:9000/vendor-portal to run against the backend-served build.
-export const portalUrl = process.env.E2E_PORTAL_URL ?? "http://localhost:5173/vendor-portal"
+// Strip a trailing slash so `${portalUrl}/login` never becomes `.../vendor-portal//login`
+// (that double slash lands on the portal NotFound route).
+export const portalUrl = (
+  process.env.E2E_PORTAL_URL ?? "http://localhost:5173/vendor-portal"
+).replace(/\/$/, "")
 export const portalOrigin = new URL(portalUrl).origin
 
 // Path inside the portal, without the base path.
