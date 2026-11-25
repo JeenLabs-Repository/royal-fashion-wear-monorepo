@@ -22,7 +22,6 @@ type Entry = {
   handle?: string
   title?: string
   name?: string
-  subtitle?: string | null
   description?: string | null
 }
 
@@ -90,7 +89,7 @@ async function fetchProducts() {
     count: number
   }>("/store/products", {
     query: {
-      fields: "handle,title,subtitle,description",
+      fields: "handle,title,description",
       limit: PRODUCT_LIMIT,
     },
     next: { tags: ["products"] },
@@ -198,7 +197,7 @@ export async function GET() {
           listItem(
             p.title || p.handle!,
             url(`/products/${p.handle}`),
-            p.subtitle || p.description
+            p.description
           )
         ),
       {
