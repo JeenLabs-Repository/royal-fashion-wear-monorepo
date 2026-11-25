@@ -83,9 +83,19 @@ describe("listVendorRouteFiles", () => {
         "/vendor/me/password",
         "/vendor/accept-invite",
         "/vendor/uploads",
+        "/vendor/categories",
+        "/vendor/products",
+        "/vendor/products/:id",
+        "/vendor/products/:id/submit",
+        "/vendor/products/:id/withdraw",
+        "/vendor/products/:id/discard-changes",
+        "/vendor/inventory",
+        "/vendor/inventory/import",
+        "/vendor/inventory/export",
+        "/vendor/inventory/template",
       ])
     );
-    expect(routes).toHaveLength(8);
+    expect(routes).toHaveLength(18);
   });
 });
 
@@ -205,11 +215,21 @@ describe("findMatrixProblems", () => {
         "accept-invite",
         "agreement__accept",
         "agreement__current",
+        "categories",
+        "inventory",
+        "inventory__export",
+        "inventory__import",
+        "inventory__template",
         "me",
         "me__locations",
         "me__password",
         "onboarding",
         "plugin__compliance",
+        "products",
+        "products___id_",
+        "products___id___discard-changes",
+        "products___id___submit",
+        "products___id___withdraw",
         "uploads",
       ])
     );
