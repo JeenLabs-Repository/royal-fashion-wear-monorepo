@@ -41,3 +41,4 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0024 | [Stock Reserved Quantity And CSV Import](0024-stock-reserved-quantity-and-csv-import.md) | accepted |
 | 0025 | [Plugin Build, Loading And Isolation On Medusa 2.22.7](0025-plugin-mechanics-and-loading.md) | accepted |
 | 0026 | [Plugin Registry, Scope And Token Behaviour](0026-plugin-registry-and-tokens.md) | accepted |
+| 0027 | [Razorpay Webhook Path And Order Completion On Medusa 2.22.7](0027-razorpay-webhook-and-order-completion.md) | accepted |
