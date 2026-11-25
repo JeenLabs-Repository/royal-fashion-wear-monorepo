@@ -34,3 +34,4 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0017 | Admin Extension and Portal Routing | accepted |
 | 0018 | Vendor Plugin Extension Contract | accepted |
 | 0019 | Plain Ids Instead of Module Links | accepted |
+| 0020 | Reservation, Fulfilment And Hub Shipping Behaviour On Medusa 2.22.7 | accepted |
