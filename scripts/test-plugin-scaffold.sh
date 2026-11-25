@@ -80,7 +80,8 @@ expect "plan-reference guard passes in the new repository" sh -c "cd '$REPO' && 
 expect "branch-name guard passes in the new repository" sh -c "cd '$REPO' && node scripts/check-branch-name.mjs active-dev"
 
 # The tag verifier must reject bad tags and accept a good one.
-git -C "$REPO" tag v0.0.1
+# Force an unsigned lightweight tag even when tag.gpgsign is enabled.
+git -C "$REPO" -c tag.gpgsign=false tag v0.0.1
 OUT=$(cd "$REPO" && sh scripts/verify-release-tag.sh v0.0.1 2>&1)
 STATUS=$?
 if [ "$STATUS" -eq 1 ] && printf '%s' "$OUT" | grep -q 'not an annotated tag'; then

@@ -93,7 +93,7 @@ REST=${VERSION#*.}
 MINOR=${REST%%.*}
 PATCH=${REST#*.}
 BAD="v$MAJOR.$MINOR.$((PATCH + 1))"
-git -C "$CLONE" tag "$BAD"
+git -C "$CLONE" -c tag.gpgsign=false tag "$BAD"
 (cd "$CLONE" && sh scripts/verify-release-tag.sh "$BAD" >/dev/null 2>&1)
 STATUS=$?
 [ "$STATUS" -eq 1 ]
