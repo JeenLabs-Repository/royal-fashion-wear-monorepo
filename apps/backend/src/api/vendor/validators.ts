@@ -12,6 +12,12 @@ export const AcceptAgreementSchema = z.strictObject({
 });
 export type AcceptAgreementBody = z.infer<typeof AcceptAgreementSchema>;
 
+export const ChangePasswordSchema = z.strictObject({
+  current_password: z.string().min(1).max(128),
+  new_password: z.string().min(12).max(128),
+});
+export type ChangePasswordBody = z.infer<typeof ChangePasswordSchema>;
+
 // No vendor read route takes a query yet. A route that does adds its schema to
 // VENDOR_QUERY_SCHEMAS in lib/vendor/middlewares.ts, keyed by method and path.
 export const EmptyQuerySchema = z.strictObject({});
