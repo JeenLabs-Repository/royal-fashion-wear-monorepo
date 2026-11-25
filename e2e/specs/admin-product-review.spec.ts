@@ -169,11 +169,24 @@ const submitProduct = async (
   }
 }
 
-const reviewIdFor = async (page: Page, title: string, tab = "New"): Promise<string> => {
+const findReviewRow = async (page: Page, title: string, tab = "New") => {
   await page.goto(`${adminUrl}/product-reviews`)
   await page.getByRole("tab", { name: tab }).click()
+  // The New tab is oldest first with 25 per page; page through until the title shows.
   const row = page.getByRole("row", { name: new RegExp(title) })
-  await expect(row).toBeVisible()
+  for (let pageIndex = 0; pageIndex < 40; pageIndex++) {
+    if ((await row.count()) > 0) break
+    const next = page.getByRole("button", { name: "Next" })
+    if ((await next.count()) === 0 || (await next.isDisabled())) break
+    await next.click()
+    await page.waitForTimeout(300)
+  }
+  await expect(row).toBeVisible({ timeout: 15_000 })
+  return row
+}
+
+const reviewIdFor = async (page: Page, title: string, tab = "New"): Promise<string> => {
+  const row = await findReviewRow(page, title, tab)
   await row.getByRole("link", { name: "Open" }).click()
   await expect(page.getByTestId("review-title")).toHaveText(title)
   return new URL(page.url()).pathname.split("/").pop() as string
@@ -270,9 +283,8 @@ test("the queue lists new products, live edits and changes requested", async ({
 }) => {
   const made = await submitProduct(browser)
   await loginAsDemo(page, "catalog_approver")
-  await page.goto(`${adminUrl}/product-reviews`)
+  await findReviewRow(page, made.title)
   await expect(page.getByRole("heading", { name: "Product reviews" })).toBeVisible()
-  await expect(page.getByRole("row", { name: new RegExp(made.title) })).toBeVisible()
 
   await page.getByRole("tab", { name: "Live edits" }).click()
   await expect(
