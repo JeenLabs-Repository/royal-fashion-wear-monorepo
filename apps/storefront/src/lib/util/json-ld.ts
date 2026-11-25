@@ -10,12 +10,10 @@ import { SITE_NAME, getBaseURL } from "@lib/util/env"
 const BASE = getBaseURL().replace(/\/$/, "")
 
 /**
- * Fields Medusa has no column for. Set them on the product's `metadata` in
- * Admin, following the same convention as the SEO overrides:
- *
- *   brand      — manufacturer name; required by Google for merchant listings
- *   mpn        — manufacturer part number, used when there is no GTIN
- *   condition  — new | used | refurbished | damaged (defaults to new)
+ * Structured data takes no text a vendor supplied and no free text from
+ * product `metadata`. The brand and the seller are always the store name. The
+ * one metadata field read is `condition`, and only through this fixed table
+ * (new | used | refurbished | damaged, defaulting to new).
  */
 const CONDITIONS: Record<string, string> = {
   new: "https://schema.org/NewCondition",
@@ -215,7 +213,6 @@ export function buildProductJsonLd({
     .map((variant) => buildOffer({ variant, productUrl: url, condition }))
     .filter((offer): offer is JsonLdNode => offer !== null)
 
-  const brand = strMeta(meta.brand) ?? SITE_NAME
   const description = stripHtml(product.description ?? product.subtitle)
   const category = categoryPath(product)
 
@@ -225,12 +222,11 @@ export function buildProductJsonLd({
     name: product.title,
     url,
     inLanguage: locale,
-    brand: { "@type": "Brand", name: brand },
+    brand: { "@type": "Brand", name: SITE_NAME },
     ...(description ? { description } : {}),
     ...(images.length ? { image: images } : {}),
     ...(category ? { category } : {}),
     ...(product.material ? { material: product.material } : {}),
-    ...(strMeta(meta.mpn) ? { mpn: strMeta(meta.mpn) } : {}),
     // A single offer stays an object: an array of one reads as a list of
     // choices to validators.
     ...(offers.length
