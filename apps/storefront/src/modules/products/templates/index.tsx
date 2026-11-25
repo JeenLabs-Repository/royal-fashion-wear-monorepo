@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 
 import ImageGallery from "@modules/products/components/image-gallery"
 import ProductActions from "@modules/products/components/product-actions"
+import ProductDeclarations from "@modules/products/components/product-declarations"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductTabs from "@modules/products/components/product-tabs"
 import ShipFromLine from "@modules/products/components/ship-from-line"
@@ -84,6 +85,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
             <ProductOnboardingCta />
             <Suspense fallback={null}>
               <ShipFromLine productId={product.id} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <ProductDeclarations productId={product.id} />
             </Suspense>
             <Suspense
               fallback={
