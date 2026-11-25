@@ -169,45 +169,20 @@ export async function ensureFulfilmentSetup(
   let created = false;
 
   const location = await findLocation(container, { id: input.stockLocationId });
+  // Match the canonical name or the location-suffixed name used on create.
+  // A set may link to only one stock location, so new locations need new sets.
   let set = (location?.fulfillment_sets ?? []).find(
-    (s: { name: string }) => s.name === setName
+    (s: { name: string }) =>
+      s.name === setName || s.name.startsWith(`${setName} `)
   ) as { id: string; service_zones: { id: string; name: string }[] } | undefined;
 
   if (!set) {
-    const listed = await fulfillment.listFulfillmentSets(
-      { name: setName },
-      { relations: ["service_zones"] }
-    );
-    if (listed[0]) {
-      set = {
-        id: listed[0].id,
-        service_zones: (listed[0].service_zones ?? []).map((zone) => ({
-          id: zone.id,
-          name: zone.name ?? "",
-        })),
-      };
-      const linkedIds = new Set(
-        (location?.fulfillment_sets ?? []).map((s: { id: string }) => s.id)
-      );
-      if (!linkedIds.has(listed[0].id)) {
-        const link = container.resolve(ContainerRegistrationKeys.LINK) as unknown as {
-          create(definition: Record<string, unknown>): Promise<unknown>;
-        };
-        await link.create({
-          [Modules.STOCK_LOCATION]: { stock_location_id: input.stockLocationId },
-          [Modules.FULFILLMENT]: { fulfillment_set_id: listed[0].id },
-        });
-      }
-    }
-  }
-
-  if (!set) {
-    // Service zone names are unique across the whole fulfilment module on
-    // 2.22.7. The starter seed already owns "India", so each set gets a
-    // location-scoped zone name while the geo zone stays country "in".
-    const zoneName = `${input.locationName} India`;
+    const uniqueSetName = `${setName} ${input.stockLocationId}`;
+    // Service zone names are unique module-wide on 2.22.7; the starter seed
+    // already owns bare "India", so scope the zone name to this location.
+    const zoneName = `${input.locationName} India ${input.stockLocationId}`;
     const made = await fulfillment.createFulfillmentSets({
-      name: setName,
+      name: uniqueSetName,
       type: "shipping",
       service_zones: [
         {

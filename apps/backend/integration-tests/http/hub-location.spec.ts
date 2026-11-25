@@ -44,7 +44,10 @@ medusaIntegrationTestRunner({
         expect(locations).toHaveLength(1);
 
         const fulfillment = container.resolve(Modules.FULFILLMENT) as any;
-        expect(await fulfillment.listFulfillmentSets({ name: "HUB shipping" })).toHaveLength(1);
+        const hubSets = (await fulfillment.listFulfillmentSets({})).filter(
+          (s: { name: string }) => s.name === "HUB shipping" || s.name.startsWith("HUB shipping ")
+        );
+        expect(hubSets).toHaveLength(1);
         expect(await fulfillment.listShippingOptions({ name: "Standard Delivery" })).toHaveLength(1);
       });
 
