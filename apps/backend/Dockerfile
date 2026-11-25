@@ -16,6 +16,7 @@ FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json ./
 COPY apps/backend/package.json apps/backend/package.json
 COPY apps/storefront/package.json apps/storefront/package.json
+COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
 # pnpm 12 ignores dependency build scripts unless allowed; a clean image has no
 # user allowlist, so the install must opt in (local machines often set this in
 # ~/.config/pnpm). Needed for @swc/core, esbuild and similar native packages.
@@ -24,6 +25,19 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     --store-dir /pnpm/store --filter @dtc/gorgo-medusa-backend...
 COPY apps/backend apps/backend
 RUN pnpm --filter @dtc/gorgo-medusa-backend run build
+
+# The vendor portal is a static build that the backend serves under
+# /vendor-portal/. It is built here, never on the live server.
+FROM base AS portal-build
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json ./
+COPY apps/backend/package.json apps/backend/package.json
+COPY apps/storefront/package.json apps/storefront/package.json
+COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
+    --store-dir /pnpm/store --filter @dtc/vendor-portal...
+COPY apps/vendor-portal apps/vendor-portal
+RUN pnpm --filter @dtc/vendor-portal run build
 
 # Pruned production dependencies from the committed lockfile.
 FROM build AS prod-deps
@@ -38,6 +52,8 @@ WORKDIR /app
 COPY --from=prod-deps --chown=node:node /prod/backend/node_modules /app/node_modules
 COPY --from=build --chown=node:node /app/apps/backend/.medusa/server /app/.medusa/server
 COPY --chown=node:node apps/backend/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY --from=portal-build --chown=node:node /app/apps/vendor-portal/dist /app/static/vendor-portal
+ENV VENDOR_PORTAL_DIR=/app/static/vendor-portal
 RUN mkdir -p /app/.medusa/server/static && chown node:node /app/.medusa/server/static
 USER node
 EXPOSE 9000
