@@ -14,7 +14,9 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 
 - `guides/vendor-plugin-extension-points.md` explains how a compliance plugin attaches to the vendor module.
 - `guides/seed-demo-vendors.md` creates demo vendors for development.
+- `guides/add-a-canary-surface.md` explains how to register a new customer-facing output in the anonymity suite.
 - `concepts/vendor-domain.md` explains vendors, locations, invitations and the sales channel rule.
+- `concepts/anonymity-test-suite.md` explains the layers and the two end-to-end suites that protect vendor identity.
 
 ## Writing Rules
 
