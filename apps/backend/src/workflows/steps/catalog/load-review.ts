@@ -252,10 +252,20 @@ export async function loadReviewDetail(
   const content = toReviewContentView(
     effective,
     urls,
-    await loadCategoryName(container, effective.proposed_category_id)
+    await loadCategoryName(
+      container,
+      typeof effective.proposed_category_id === "string" ? effective.proposed_category_id : null
+    )
   );
   const liveContent = live
-    ? toReviewContentView(live, urls, await loadCategoryName(container, live.proposed_category_id))
+    ? toReviewContentView(
+        live,
+        urls,
+        await loadCategoryName(
+          container,
+          typeof live.proposed_category_id === "string" ? live.proposed_category_id : null
+        )
+      )
     : null;
 
   return {

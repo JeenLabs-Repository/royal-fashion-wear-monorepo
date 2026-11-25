@@ -164,10 +164,10 @@ export type ApplyCsvInput = {
  * already proved it is acceptable. Heavy modules load on first use so the scanner stays light.
  */
 export async function applyCsv(input: ApplyCsvInput): Promise<ImportResult> {
-  const { setVendorStockWorkflow } = await import("../../workflows/stock/set-vendor-stock");
-  const { getCatalogService } = await import("../catalog/load-content");
-  const { getVendorModule } = await import("../vendor/vendor-module");
-  const { recordAudit } = await import("../audit");
+  const { setVendorStockWorkflow } = await import("../../workflows/stock/set-vendor-stock.js");
+  const { getCatalogService } = await import("../catalog/load-content.js");
+  const { getVendorModule } = await import("../vendor/vendor-module.js");
+  const { recordAudit } = await import("../audit/index.js");
 
   const catalog = getCatalogService(input.scope);
   const locations = (await getVendorModule(input.scope).listVendorLocations(
