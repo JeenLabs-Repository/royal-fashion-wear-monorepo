@@ -19,6 +19,9 @@ env:
   MEDUSA_DISABLE_TELEMETRY: "true"
   NEXT_TELEMETRY_DISABLED: "1"
   HUSKY: "0"
+  # Read access to the private plugin packages. Empty until the secret exists and
+  # for fork pull requests; the .npmrc reference accepts an empty value.
+  NODE_AUTH_TOKEN: ${{ secrets.PLUGIN_REGISTRY_TOKEN }}
 
 jobs:
   lint:
