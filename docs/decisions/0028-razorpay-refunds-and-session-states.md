@@ -43,7 +43,7 @@ Decision for the plans: Failed then captured recovers: yes; captured after compl
 
 ## Decision
 
-Use the core refund route and treat provider `data` as the refund-count source for the D-05 idempotency key (convert the BigNumber amount to paise only at the Razorpay boundary). A provider throw returns 400 and creates no refund row. Failed webhook actions are ignored by core; a later `captured` recovers. The guard must de-duplicate by event id and return 200 for unknown sessions; invalid signatures remain a separate 400 policy on the guard because the core route always answers 200.
+Use the core refund route and treat provider `data` as the refund-count source for the refund idempotency key (convert the BigNumber amount to paise only at the Razorpay boundary). A provider throw returns 400 and creates no refund row. Failed webhook actions are ignored by core; a later `captured` recovers. The guard must de-duplicate by event id and return 200 for unknown sessions; invalid signatures remain a separate 400 policy on the guard because the core route always answers 200.
 
 ## Consequences
 
