@@ -80,3 +80,54 @@ export const seedFreshVendor = (): FreshInvite => {
   }
   return { inviteLink: fresh.accept_url, email: fresh.email, password: fresh.password }
 }
+
+export type FreshRegisteredVendor = {
+  email: string
+  password: string
+  name: string
+  status: "invited" | "active"
+}
+
+// Creates a registered vendor (two-factor not enrolled, agreement open unless
+// the active option is used) and returns its credentials from the seed file.
+export const seedFreshRegisteredVendor = (
+  status: "invited" | "active" = "invited"
+): FreshRegisteredVendor => {
+  const args = [
+    "-C",
+    "apps/backend",
+    "exec",
+    "medusa",
+    "exec",
+    "./src/scripts/seed-vendors.ts",
+    "--",
+    "--fresh-vendor",
+  ]
+  if (status === "active") {
+    args.push("--status", "active")
+  }
+  execFileSync("pnpm", args, {
+    cwd: repoRoot(),
+    encoding: "utf8",
+    stdio: "pipe",
+    shell: process.platform === "win32",
+  })
+
+  // The seed file keeps the shape the demo vendor seed writes ({ generated_at,
+  // portal_url, vendors, fresh_invite }) and gains one extra key, fresh_vendor.
+  const parsed = readVendorSeed() as VendorSeedFile & { fresh_vendor?: FreshRegisteredVendor }
+  if (!parsed.fresh_vendor) {
+    throw new Error("The seed file has no fresh_vendor entry. Check the seed output.")
+  }
+  return parsed.fresh_vendor
+}
+
+// Reads one demo vendor by its key (alpha, bravo, charlie, delta or echo) from the
+// `vendors` object of the seed file written by the demo vendor seed.
+export const readDemoVendorCredentials = (key: string): { email: string; password: string } => {
+  const record = readVendorSeed().vendors[key]
+  if (!record) {
+    throw new Error(`The seed file has no vendors.${key} entry. Run the demo vendor seed first.`)
+  }
+  return { email: record.email, password: record.password }
+}

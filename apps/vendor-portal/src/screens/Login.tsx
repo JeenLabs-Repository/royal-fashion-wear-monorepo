@@ -31,8 +31,19 @@ export const Login = () => {
     // Keep the token in memory only, then wait for the identity query so the
     // guards see the new sign-in before the redirect.
     storeToken(sessionToken)
-    await queryClient.fetchQuery({ queryKey: ME_KEY, queryFn: getMe })
-    navigate("/", { replace: true })
+    try {
+      await queryClient.fetchQuery({ queryKey: ME_KEY, queryFn: getMe })
+      navigate("/", { replace: true })
+    } catch (failure) {
+      const problem = toApiError(failure)
+      // A suspended account may still sign in far enough to learn the status;
+      // send them to the suspended screen instead of leaving them on the form.
+      if (problem.status === 403 && problem.code === "vendor_suspended") {
+        navigate("/suspended", { replace: true })
+        return
+      }
+      throw failure
+    }
   }
 
   const submitPassword = async (event: FormEvent) => {
