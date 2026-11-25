@@ -12,6 +12,7 @@ export const CATALOG_ERROR_STATUS = {
   locked_in_review: 409,
   rejected_final: 409,
   invalid_transition: 409,
+  stale_revision: 409,
   no_changes: 400,
   variant_has_stock_or_orders: 409,
   incomplete_content: 400,
