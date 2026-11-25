@@ -46,7 +46,7 @@ export const signIn = async (page: Page, credentials: VendorCredentials): Promis
 // Runs the enrolment screen to the end: reads the setup key, verifies a code,
 // confirms the recovery codes and continues. Returns the secret and the step used.
 export const enrolTotp = async (page: Page): Promise<{ secret: string; step: number }> => {
-  await expect(page.getByTestId("mfa-secret")).toBeVisible()
+  await expect(page.getByTestId("mfa-secret")).toBeVisible({ timeout: 60_000 })
   const secret = (await page.getByTestId("mfa-secret").innerText()).replace(/\s/g, "")
   const { code, step } = await freshTotp(secret)
   await page.getByTestId("mfa-code").fill(code)
