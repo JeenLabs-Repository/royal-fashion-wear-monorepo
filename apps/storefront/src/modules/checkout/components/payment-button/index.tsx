@@ -3,6 +3,7 @@
 import {
   isManual,
   isPaymentSessionReady,
+  isRazorpay,
   isShippingMethodReady,
   isStripeLike,
 } from "@lib/constants"
@@ -14,6 +15,7 @@ import { useSelectedShippingOptionId } from "@modules/checkout/context/shipping-
 import { useLocale, useTranslations } from "next-intl"
 import type React from "react"
 import ManualPaymentButton from "./providers/manual"
+import RazorpayPaymentButton from "./providers/razorpay"
 import StripePaymentButton from "./providers/stripe"
 
 type PaymentButtonProps = {
@@ -82,6 +84,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   }
 
   switch (true) {
+    case isRazorpay(activePaymentMethod):
+      return <RazorpayPaymentButton {...providerProps} />
     case isStripeLike(activePaymentMethod):
       return <StripePaymentButton {...providerProps} />
     case isManual(activePaymentMethod):
