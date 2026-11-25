@@ -1,5 +1,6 @@
 import type { MiddlewareRoute } from "@medusajs/framework/http";
 import { z } from "@medusajs/framework/zod";
+import { VENDOR_QUERY_SCHEMAS } from "../../vendor/middlewares";
 import { strictQuery } from "../../vendor/strict-query";
 import { vendorContentSchema } from "../content-snapshot";
 import { validateCatalogBody } from "../validate-body";
@@ -22,6 +23,11 @@ export const vendorProductsQuerySchema = z.strictObject({
 });
 
 export type VendorProductsQuery = z.infer<typeof vendorProductsQuerySchema>;
+
+// The vendor chain deny-by-default query check runs before catalog middlewares.
+// Register the list query here so limit, offset, state and q are not refused as
+// unrecognized keys.
+VENDOR_QUERY_SCHEMAS["GET /vendor/products"] = vendorProductsQuerySchema;
 
 // The spread order in src/api/middlewares.ts puts these after the vendor chain, so
 // authentication, the two-factor gate and the status guard have already run.

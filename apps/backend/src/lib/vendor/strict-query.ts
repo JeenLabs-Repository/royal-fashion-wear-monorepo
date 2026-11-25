@@ -27,7 +27,14 @@ export function parseStrict<T>(schema: z.ZodType<T>, value: unknown): T {
 export function strictQuery<T>(schema: z.ZodType<T>) {
   return (req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction): void => {
     try {
-      (req as unknown as { validatedQuery: T }).validatedQuery = parseStrict(schema, req.query);
+      // qs can turn a single value into a one-element array; take the first string.
+      const normalized = Object.fromEntries(
+        Object.entries((req.query ?? {}) as Record<string, unknown>).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value[0] : value,
+        ])
+      );
+      (req as unknown as { validatedQuery: T }).validatedQuery = parseStrict(schema, normalized);
       next();
     } catch (error) {
       next(error);
