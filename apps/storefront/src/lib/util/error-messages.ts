@@ -75,7 +75,7 @@ const RULES: { pattern: RegExp; key: ErrorMessageKey }[] = [
     key: "insufficientInventory",
   },
   {
-    pattern: /payment|card|charge|transaction|stripe|declined/i,
+    pattern: /payment|card|charge|transaction|declined/i,
     key: "paymentFailed",
   },
   {

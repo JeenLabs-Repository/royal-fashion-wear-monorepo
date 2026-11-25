@@ -33,7 +33,6 @@ Every `NEXT_PUBLIC_` value is public. Next.js bakes it into the browser bundle a
 | `NEXT_PUBLIC_BASE_URL` | Storefront base URL, used for absolute URLs in metadata, the sitemap, and `llms.txt` | `http://localhost:8000` |
 | `NEXT_PUBLIC_SITE_NAME` | Store name in the header, footer, checkout, `schema.org` markup, and `llms.txt` | none |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID, `G-XXXXXXXXXX`. Leave empty to ship no analytics at all | none |
-| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key, only needed when paying through Stripe | none |
 | `REVALIDATE_SECRET` | Shared secret checked on `api/revalidate`. It must match the backend's value and has no default | none (required) |
 | `MEDUSA_CLOUD_S3_HOSTNAME`, `MEDUSA_CLOUD_S3_PATHNAME` | Add the Medusa Cloud bucket to the allowed image hosts | none |
 | `NODE_ENV` | Node environment | `development` |
