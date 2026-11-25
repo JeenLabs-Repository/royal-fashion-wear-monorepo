@@ -1,0 +1,6 @@
+vendor_sku,location_code,stocked_quantity
+DEMO-A1-S,LOC-0026,25
+DEMO-A1-M,LOC-0026,12
+DEMO-B1-S,LOC-0028,9
+DEMO-A1-S,LOC-9999,5
+NOT-A-DEMO-SKU,LOC-0026,3

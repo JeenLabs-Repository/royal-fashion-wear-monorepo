@@ -25,12 +25,13 @@ import {
   freshInviteVendor,
   type DemoVendor,
 } from "./demo-data/vendors";
+import { seedCatalogDemo } from "./lib/catalog-demo";
 import { createFreshVendor, removeFreshVendors } from "./lib/fresh-vendor";
 
 const VENDOR_SEED_START = "<!-- vendor-seed:start -->";
 const VENDOR_SEED_END = "<!-- vendor-seed:end -->";
 const USAGE =
-  "Usage: pnpm -C apps/backend exec medusa exec ./src/scripts/seed-vendors.ts [--fresh-invite] [--fresh-vendor] [--status active] [--reset] [--out-dir <dir>]";
+  "Usage: pnpm -C apps/backend exec medusa exec ./src/scripts/seed-vendors.ts [--fresh-invite] [--fresh-vendor] [--status active] [--reset] [--out-dir <dir>] [--catalog]";
 
 const seedActor = { id: "seed-vendors", label: "seed-vendors" };
 
@@ -62,6 +63,7 @@ type Options = {
   freshVendor: boolean;
   freshVendorStatus: "invited" | "active";
   reset: boolean;
+  catalog: boolean;
   outDir: string | null;
 };
 
@@ -97,6 +99,8 @@ function parseOptions(args: string[] | undefined): Options {
     "invited",
     "--reset",
     "reset",
+    "--catalog",
+    "catalog",
     "--out-dir",
     "out-dir",
   ]);
@@ -114,6 +118,7 @@ function parseOptions(args: string[] | undefined): Options {
     freshVendor: has("fresh-vendor"),
     freshVendorStatus: status,
     reset: has("reset"),
+    catalog: has("catalog"),
     outDir,
   };
 }
@@ -409,6 +414,11 @@ export default async function seedVendors({ container, args }: ExecArgs): Promis
     writeFileSync(credentialsPath, applyMarkedBlock(base, block));
     summary.credentials_path = credentialsPath;
   };
+
+  if (options.catalog) {
+    await seedCatalogDemo(container);
+    return summary;
+  }
 
   if (options.freshVendor) {
     const fresh = await createFreshVendor(container, {

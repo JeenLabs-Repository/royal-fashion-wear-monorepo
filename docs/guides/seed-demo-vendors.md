@@ -29,8 +29,14 @@ Every vendor location is an opaque stock location named like `LOC-0001`.
 ## Arguments
 
 - `--fresh-invite` adds one more invited vendor named Demo Vendor Echo followed by a number, and writes its link.
+- `--fresh-vendor` creates one extra throwaway vendor for portal MFA tests.
+- `--catalog` creates demo catalog data (products in every review state, stock at Alpha and Bravo locations, Hub, GST types, and `stock-import.sample.csv`). Run the plain vendor seed first so Demo Vendor Alpha and Bravo exist, and run the staff test-data seed so a catalog approver exists. A second run prints `exists` for rows that are already there.
 - `--reset` removes every demo vendor, its users, locations, stock locations and sign-in identities.
 - `--out-dir <dir>` writes the credentials file and the manifest under that folder instead of the repository root. The automated tests use it.
+
+```sh
+pnpm -C apps/backend exec medusa exec ./src/scripts/seed-vendors.ts --catalog
+```
 
 ## Where the Credentials Go
 
