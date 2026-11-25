@@ -6,6 +6,7 @@ import { useSession } from "../lib/session"
 const LINKS = [
   { to: "/", label: "Home", end: true },
   { to: "/products", label: "Products", end: false },
+  { to: "/stock", label: "Stock", end: false },
   { to: "/agreement", label: "Agreement", end: false },
   { to: "/locations", label: "Locations", end: false },
   { to: "/profile", label: "Profile", end: false },

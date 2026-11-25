@@ -7,7 +7,7 @@ import { clearToken, getToken } from "./sdk"
 const ALLOWED_PATHS = [/^\/vendor\//, /^\/auth\/vendor\//, /^\/auth\/mfa\//]
 
 type FetchOptions = {
-  method?: "GET" | "POST" | "DELETE"
+  method?: "GET" | "POST" | "PUT" | "DELETE"
   body?: unknown
   // A multipart body. The browser sets the content type and the boundary.
   form?: FormData
@@ -81,6 +81,36 @@ export const fetchJson = async <T>(path: string, options: FetchOptions = {}): Pr
   }
 
   return parsed as T
+}
+
+// Plain text for the two CSV downloads. Same path rule and same in-memory Bearer
+// token as `fetchJson`, no JSON parsing, and the error carries only the status
+// because a CSV route has no structured error body worth showing.
+export const fetchText = async (path: string): Promise<string> => {
+  if (!ALLOWED_PATHS.some((pattern) => pattern.test(path))) {
+    throw new ApiError(0, "blocked_path", "This request is not allowed.")
+  }
+
+  const headers: Record<string, string> = { accept: "text/csv" }
+  const bearer = getToken()
+  if (bearer) {
+    headers.authorization = `Bearer ${bearer}`
+  }
+
+  let response: Response
+  try {
+    response = await fetch(path, { method: "GET", credentials: "omit", headers })
+  } catch {
+    throw new ApiError(0, "network_error", "The server could not be reached. Check your connection.")
+  }
+
+  const text = await response.text()
+  if (!response.ok) {
+    // A refused token ends the sign-in, as in `fetchJson`.
+    if (response.status === 401) clearToken()
+    throw new ApiError(response.status, null, "Something went wrong. Try again.")
+  }
+  return text
 }
 
 export type VendorStatus = "invited" | "active" | "suspended"

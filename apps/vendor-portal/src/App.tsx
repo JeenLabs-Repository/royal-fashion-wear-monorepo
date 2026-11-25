@@ -11,6 +11,7 @@ import { NotFound } from "./screens/NotFound"
 import { Profile } from "./screens/Profile"
 import { ProductForm } from "./screens/ProductForm"
 import { ProductsList } from "./screens/ProductsList"
+import { StockScreen } from "./screens/StockScreen"
 
 const SuspendedRoute = () => {
   const { status } = useSession()
@@ -43,6 +44,7 @@ const App = () => (
       <Route path="products" element={<ProductsList />} />
       <Route path="products/new" element={<ProductForm />} />
       <Route path="products/:id" element={<ProductForm />} />
+      <Route path="stock" element={<StockScreen />} />
       <Route path="profile" element={<Profile />} />
     </Route>
     <Route path="*" element={<NotFound />} />
