@@ -25,6 +25,7 @@
     "start": "medusa start",
     "dev": "medusa develop",
     "seed": "ALLOW_DEMO_SEED=1 medusa exec ./src/migration-scripts/initial-data-seed.ts",
+    "build:pincodes": "medusa exec ./scripts/build-pincode-data.ts",
     "bootstrap:production": "medusa exec ./src/scripts/bootstrap-production.ts",
     "seed:test-data": "TEST_DATA_SEED=1 medusa exec ./src/migration-scripts/test-data-seed.ts",
     "seed:staff-demo": "medusa exec ./src/scripts/seed-staff-demo.ts",
