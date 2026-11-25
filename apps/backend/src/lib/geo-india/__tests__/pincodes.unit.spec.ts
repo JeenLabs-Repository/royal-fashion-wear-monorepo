@@ -6,6 +6,12 @@ import {
   titleCase,
   type CsvRow,
 } from "../pincode-build";
+import {
+  getPincodeDirectoryMeta,
+  isKnownPin,
+  lookupPin,
+  pincodeLoadCount,
+} from "../pincodes";
 import { STATES } from "../states";
 
 const codeOf = (name: string): string => STATES.find((s) => s.name === name)?.code as string;
@@ -168,5 +174,40 @@ describe("buildDirectory", () => {
     expect(directory.source).toMatch(/GODL|Open Data/);
     expect(directory.count).toBe(Object.keys(directory.pins).length);
     expect(directory.count).toBe(2);
+  });
+});
+
+describe("lookupPin", () => {
+  it("returns state, district, city and at most five localities for a known PIN", () => {
+    const hit = lookupPin("400001");
+    expect(hit?.state_code).toBe("IN-MH");
+    expect(hit?.district).not.toBe("");
+    expect(hit?.city).toBe(hit?.district);
+    expect((hit?.localities ?? []).length).toBeLessThanOrEqual(5);
+  });
+
+  // 999998 is absent from the bundled directory; 999999 is a real Telangana PIN.
+  it.each(["999998", "000001", "40001", "abc", "4000011", ""])("returns null for %s", (pin) => {
+    expect(lookupPin(pin)).toBeNull();
+  });
+
+  it("does not throw for non-string input", () => {
+    expect(lookupPin(undefined as unknown as string)).toBeNull();
+    expect(isKnownPin(null as unknown as string)).toBe(false);
+  });
+
+  it("parses the file once and reuses the index", () => {
+    lookupPin("400001");
+    const before = pincodeLoadCount();
+    lookupPin("560001");
+    lookupPin("110001");
+    expect(pincodeLoadCount()).toBe(before);
+    expect(before).toBeGreaterThanOrEqual(1);
+  });
+
+  it("reports the generation date and the count", () => {
+    const meta = getPincodeDirectoryMeta();
+    expect(meta.generated_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(meta.count).toBeGreaterThan(15000);
   });
 });
