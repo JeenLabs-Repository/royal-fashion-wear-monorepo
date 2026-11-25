@@ -31,7 +31,8 @@
     "release:tag": "sh scripts/release-tag.sh",
     "prepare": "husky",
     "e2e": "playwright test",
-    "e2e:install": "playwright install --with-deps chromium"
+    "e2e:install": "playwright install --with-deps chromium",
+    "vendor-portal:dev": "turbo dev --filter=@dtc/vendor-portal"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
