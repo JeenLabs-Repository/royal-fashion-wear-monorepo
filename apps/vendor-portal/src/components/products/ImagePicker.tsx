@@ -15,14 +15,16 @@ type ImagePickerProps = {
   value: ImageItem[]
   onChange: (items: ImageItem[]) => void
   error?: string
+  disabled?: boolean
 }
 
 // Shows the uploaded images in order, uploads new ones one request at a time,
 // and reports the ordered list. Names and URLs are rendered as text and as an
 // image source only, never as markup.
-export const ImagePicker = ({ value, onChange, error }: ImagePickerProps) => {
+export const ImagePicker = ({ value, onChange, error, disabled = false }: ImagePickerProps) => {
   const [notes, setNotes] = useState<Note[]>([])
   const [busy, setBusy] = useState(false)
+  const locked = disabled || busy
   const latest = useRef(value)
   latest.current = value
 
@@ -96,15 +98,24 @@ export const ImagePicker = ({ value, onChange, error }: ImagePickerProps) => {
           type="file"
           multiple
           accept={IMAGE_TYPES.join(",")}
-          disabled={full || busy}
+          disabled={full || locked}
           aria-label="Add images"
-          className="txt-small max-w-full"
+          className="sr-only"
           onChange={(event) => {
             const files = Array.from(event.target.files ?? [])
             event.target.value = ""
             if (files.length > 0) void addFiles(files)
           }}
         />
+        <Button
+          type="button"
+          size="small"
+          variant="secondary"
+          disabled={full || locked}
+          onClick={() => document.getElementById("product-images")?.click()}
+        >
+          Add images
+        </Button>
       </div>
 
       {value.length > 0 && (
@@ -124,7 +135,7 @@ export const ImagePicker = ({ value, onChange, error }: ImagePickerProps) => {
                   type="button"
                   size="small"
                   variant="secondary"
-                  disabled={index === 0}
+                  disabled={locked || index === 0}
                   aria-label={`Move image ${index + 1} up`}
                   onClick={() => move(index, -1)}
                 >
@@ -134,7 +145,7 @@ export const ImagePicker = ({ value, onChange, error }: ImagePickerProps) => {
                   type="button"
                   size="small"
                   variant="secondary"
-                  disabled={index === value.length - 1}
+                  disabled={locked || index === value.length - 1}
                   aria-label={`Move image ${index + 1} down`}
                   onClick={() => move(index, 1)}
                 >
@@ -144,6 +155,7 @@ export const ImagePicker = ({ value, onChange, error }: ImagePickerProps) => {
                   type="button"
                   size="small"
                   variant="secondary"
+                  disabled={locked}
                   aria-label={`Remove image ${index + 1}`}
                   onClick={() => remove(index)}
                 >

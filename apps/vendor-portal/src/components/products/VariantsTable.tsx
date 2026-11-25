@@ -67,6 +67,7 @@ type VariantsTableProps = {
   rows: VariantRow[]
   onChange: (rows: VariantRow[]) => void
   errorFor: (path: string) => string | undefined
+  disabled?: boolean
 }
 
 const describeOptions = (optionValues: Record<string, string>): string =>
@@ -74,7 +75,7 @@ const describeOptions = (optionValues: Record<string, string>): string =>
     .map(([name, value]) => `${name}: ${value}`)
     .join(", ")
 
-export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) => {
+export const VariantsTable = ({ rows, onChange, errorFor, disabled = false }: VariantsTableProps) => {
   const update = (index: number, patch: Partial<VariantRow>) =>
     onChange(rows.map((row, position) => (position === index ? { ...row, ...patch } : row)))
 
@@ -85,7 +86,7 @@ export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) 
   }
 
   return (
-    <div className="max-w-full overflow-x-auto rounded-md bg-ui-bg-base shadow-elevation-card-rest" data-testid="variants-table">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-md bg-ui-bg-base shadow-elevation-card-rest" data-testid="variants-table">
       <table className="w-max min-w-full text-left txt-small">
         <thead className="border-b border-ui-border-base text-ui-fg-subtle">
           <tr>
@@ -98,7 +99,7 @@ export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) 
               </th>
             ))}
             <th scope="col" className="px-3 py-2">
-              <span className="sr-only">Actions</span>
+              Actions
             </th>
           </tr>
         </thead>
@@ -131,6 +132,7 @@ export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) 
                           aria-label={label}
                           aria-invalid={message ? true : undefined}
                           value={value}
+                          disabled={disabled}
                           onChange={(event) => update(index, { [column.field]: event.target.value })}
                           className="h-8 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-2 txt-small"
                         >
@@ -150,6 +152,7 @@ export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) 
                             aria-invalid={message ? true : undefined}
                             inputMode={column.kind === "text" ? undefined : "decimal"}
                             value={value}
+                            disabled={disabled}
                             maxLength={column.kind === "text" ? 40 : undefined}
                             onChange={(event) =>
                               update(index, { [column.field]: sanitize(column.kind, event.target.value) })
@@ -174,7 +177,7 @@ export const VariantsTable = ({ rows, onChange, errorFor }: VariantsTableProps) 
                     type="button"
                     size="small"
                     variant="secondary"
-                    disabled={rows.length === 1}
+                    disabled={disabled || rows.length === 1}
                     aria-label={`Remove variant ${n}`}
                     onClick={() => onChange(rows.filter((_, position) => position !== index))}
                   >

@@ -356,7 +356,7 @@ export const ProductForm = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-6" data-testid="screen-product-form">
+    <div className="flex min-w-0 flex-col gap-y-6" data-testid="screen-product-form">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Heading level="h1">{mode === "new" ? "Create product" : "Product"}</Heading>
         {detail && <StateChip state={detail.state} is_live={detail.is_live} has_pending={detail.has_pending} />}
@@ -397,8 +397,8 @@ export const ProductForm = () => {
         </StatusBanner>
       )}
 
-      <fieldset disabled={readOnly} className="m-0 flex min-w-0 flex-col gap-y-8 border-0 p-0">
-        <section className="flex flex-col gap-y-4" aria-labelledby="section-basics">
+      <div className="flex min-w-0 flex-col gap-y-8" aria-disabled={readOnly || undefined}>
+        <section className="flex min-w-0 flex-col gap-y-4" aria-labelledby="section-basics">
           <Heading level="h2" id="section-basics">
             Basics
           </Heading>
@@ -410,6 +410,7 @@ export const ProductForm = () => {
               id="product-title"
               value={form.title}
               maxLength={TITLE_MAX}
+              disabled={readOnly}
               aria-invalid={err("title") ? true : undefined}
               onChange={(event) => patch({ title: event.target.value })}
             />
@@ -427,6 +428,7 @@ export const ProductForm = () => {
               id="product-description"
               rows={6}
               value={form.description}
+              disabled={readOnly}
               aria-invalid={err("description") ? true : undefined}
               onChange={(event) => patch({ description: event.target.value })}
             />
@@ -445,6 +447,7 @@ export const ProductForm = () => {
                 id="product-category"
                 value={form.categoryId}
                 className={selectClass}
+                disabled={readOnly}
                 aria-invalid={err("proposed_category_id") ? true : undefined}
                 onChange={(event) => patch({ categoryId: event.target.value })}
               >
@@ -465,6 +468,7 @@ export const ProductForm = () => {
                 id="product-gst"
                 value={form.gstClass}
                 className={selectClass}
+                disabled={readOnly}
                 aria-invalid={err("proposed_gst_class") ? true : undefined}
                 onChange={(event) => patch({ gstClass: event.target.value })}
               >
@@ -485,6 +489,7 @@ export const ProductForm = () => {
                 inputMode="numeric"
                 maxLength={8}
                 value={form.hsn}
+                disabled={readOnly}
                 aria-invalid={err("proposed_hsn") ? true : undefined}
                 onChange={(event) => patch({ hsn: event.target.value.replace(/\D/g, "") })}
               />
@@ -496,14 +501,14 @@ export const ProductForm = () => {
           </div>
         </section>
 
-        <section className="flex flex-col gap-y-4" aria-labelledby="section-images">
+        <section className="flex min-w-0 flex-col gap-y-4" aria-labelledby="section-images">
           <Heading level="h2" id="section-images">
             Images
           </Heading>
-          <ImagePicker value={form.images} onChange={(images) => patch({ images })} error={errorsUnder(errors, "images")[0]} />
+          <ImagePicker value={form.images} onChange={(images) => patch({ images })} error={errorsUnder(errors, "images")[0]} disabled={readOnly} />
         </section>
 
-        <section className="flex flex-col gap-y-4" aria-labelledby="section-variants">
+        <section className="flex min-w-0 flex-col gap-y-4" aria-labelledby="section-variants">
           <Heading level="h2" id="section-variants">
             Options and variants
           </Heading>
@@ -522,12 +527,14 @@ export const ProductForm = () => {
                     placeholder="Name, for example Size"
                     value={option.name}
                     maxLength={40}
+                    disabled={readOnly}
                     onChange={(event) => setOption(option.key, { name: event.target.value })}
                   />
                   <Input
                     aria-label={`Option ${n} values, separated by commas`}
                     placeholder="Values, for example S, M, L"
                     value={option.values}
+                    disabled={readOnly}
                     onChange={(event) => setOption(option.key, { values: event.target.value })}
                   />
                 </div>
@@ -540,6 +547,7 @@ export const ProductForm = () => {
                     size="small"
                     variant="secondary"
                     aria-label={`Remove option ${n}`}
+                    disabled={readOnly}
                     onClick={() => patch({ options: form.options.filter((row) => row.key !== option.key) })}
                   >
                     Remove option
@@ -553,12 +561,12 @@ export const ProductForm = () => {
             <Button
               type="button"
               variant="secondary"
-              disabled={form.options.length >= MAX_OPTIONS}
+              disabled={readOnly || form.options.length >= MAX_OPTIONS}
               onClick={() => patch({ options: [...form.options, { key: newKey(), name: "", values: "" }] })}
             >
               Add option
             </Button>
-            <Button type="button" variant="secondary" onClick={generateVariants}>
+            <Button type="button" variant="secondary" disabled={readOnly} onClick={generateVariants}>
               Generate variants
             </Button>
           </div>
@@ -578,16 +586,16 @@ export const ProductForm = () => {
             </p>
           )}
 
-          <VariantsTable rows={form.variants} onChange={(variants) => patch({ variants })} errorFor={err} />
+          <VariantsTable rows={form.variants} onChange={(variants) => patch({ variants })} errorFor={err} disabled={readOnly} />
         </section>
 
-        <section className="flex flex-col gap-y-4" aria-labelledby="section-declarations">
+        <section className="flex min-w-0 flex-col gap-y-4" aria-labelledby="section-declarations">
           <Heading level="h2" id="section-declarations">
             Declarations
           </Heading>
-          <DeclarationFields value={form.declaration} onChange={(declaration) => patch({ declaration })} errorFor={err} />
+          <DeclarationFields value={form.declaration} onChange={(declaration) => patch({ declaration })} errorFor={err} disabled={readOnly} />
         </section>
-      </fieldset>
+      </div>
 
       <div className="flex flex-wrap gap-3 border-t border-ui-border-base pt-4">
         {!readOnly && (

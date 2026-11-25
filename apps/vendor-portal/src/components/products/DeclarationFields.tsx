@@ -19,6 +19,7 @@ type DeclarationFieldsProps = {
   value: DeclarationState
   onChange: (value: DeclarationState) => void
   errorFor: (path: string) => string | undefined
+  disabled?: boolean
 }
 
 const FieldError = ({ path, message }: { path: string; message?: string }) =>
@@ -29,7 +30,7 @@ const FieldError = ({ path, message }: { path: string; message?: string }) =>
   ) : null
 
 // Legal Metrology fields. What a customer sees of them is decided by the store.
-export const DeclarationFields = ({ value, onChange, errorFor }: DeclarationFieldsProps) => {
+export const DeclarationFields = ({ value, onChange, errorFor, disabled = false }: DeclarationFieldsProps) => {
   const set = (patch: Partial<DeclarationState>) => onChange({ ...value, ...patch })
 
   return (
@@ -41,6 +42,7 @@ export const DeclarationFields = ({ value, onChange, errorFor }: DeclarationFiel
         <Input
           id="declaration-generic-name"
           value={value.generic_name}
+          disabled={disabled}
           aria-invalid={errorFor("declaration.generic_name") ? true : undefined}
           onChange={(event) => set({ generic_name: event.target.value })}
         />
@@ -54,6 +56,7 @@ export const DeclarationFields = ({ value, onChange, errorFor }: DeclarationFiel
         <select
           id="declaration-country"
           value={value.country_of_origin}
+          disabled={disabled}
           aria-invalid={errorFor("declaration.country_of_origin") ? true : undefined}
           onChange={(event) => set({ country_of_origin: event.target.value })}
           className="h-8 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-2 txt-small"
@@ -74,6 +77,7 @@ export const DeclarationFields = ({ value, onChange, errorFor }: DeclarationFiel
         <Input
           id="declaration-packed-by-name"
           value={value.packed_by_name}
+          disabled={disabled}
           aria-invalid={errorFor("declaration.packed_by_name") ? true : undefined}
           onChange={(event) => set({ packed_by_name: event.target.value })}
         />
@@ -88,6 +92,7 @@ export const DeclarationFields = ({ value, onChange, errorFor }: DeclarationFiel
           id="declaration-packed-by-address"
           rows={3}
           value={value.packed_by_address}
+          disabled={disabled}
           aria-invalid={errorFor("declaration.packed_by_address") ? true : undefined}
           onChange={(event) => set({ packed_by_address: event.target.value })}
         />

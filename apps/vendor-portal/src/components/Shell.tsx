@@ -32,9 +32,9 @@ export const Shell = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
       <header className="border-b border-ui-border-base bg-ui-bg-base">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex w-full min-w-0 max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Heading level="h2">Vendor portal</Heading>
           <div className="flex flex-wrap items-center gap-3">
             <Text
@@ -55,7 +55,7 @@ export const Shell = () => {
             </Button>
           </div>
         </div>
-        <nav aria-label="Main" className="mx-auto flex w-full max-w-5xl gap-x-4 overflow-x-auto px-4">
+        <nav aria-label="Main" className="mx-auto flex w-full min-w-0 max-w-5xl gap-x-4 overflow-x-auto px-4">
           {LINKS.map((link) => (
             <NavLink
               key={link.to}
@@ -74,7 +74,7 @@ export const Shell = () => {
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full min-w-0 max-w-5xl flex-1 px-4 py-6">
         <Outlet />
       </main>
     </div>

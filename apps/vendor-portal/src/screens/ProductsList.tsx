@@ -60,7 +60,7 @@ export const ProductsList = () => {
   const create = () => navigate("/products/new")
 
   return (
-    <div className="flex flex-col gap-y-4" data-testid="screen-products">
+    <div className="flex min-w-0 flex-col gap-y-4" data-testid="screen-products">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Heading level="h1">Products</Heading>
         <Button onClick={create} disabled={!canCreate}>
@@ -145,7 +145,7 @@ export const ProductsList = () => {
 
       {data && data.products.length > 0 && (
         <>
-          <div className="max-w-full overflow-x-auto rounded-md bg-ui-bg-base shadow-elevation-card-rest">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-md bg-ui-bg-base shadow-elevation-card-rest">
             <table className="w-full min-w-[32rem] text-left txt-small" data-testid="products-table">
               <thead className="border-b border-ui-border-base text-ui-fg-subtle">
                 <tr>
