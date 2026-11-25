@@ -71,7 +71,10 @@ describe("toMedusaProvince", () => {
 
 describe("validatePinStatePair", () => {
   test("accepts a valid pair", () => {
-    expect(validatePinStatePair("400001", "IN-MH")).toEqual({ ok: true });
+    expect(validatePinStatePair("400001", "IN-MH")).toEqual({
+      ok: true,
+      verified: true,
+    });
   });
 
   test.each(["000001", "40001", "4000011", "40000a", "", " 400001"])(
@@ -95,6 +98,46 @@ describe("validatePinStatePair", () => {
     expect(validatePinStatePair("000001", "IN-XX")).toEqual({
       ok: false,
       reason: "invalid_pin_format",
+    });
+  });
+});
+
+describe("validatePinStatePair against the directory", () => {
+  it("verifies a known PIN with its own state", () => {
+    expect(validatePinStatePair("400001", "IN-MH")).toEqual({
+      ok: true,
+      verified: true,
+    });
+    expect(validatePinStatePair("110001", "in-dl")).toEqual({
+      ok: true,
+      verified: true,
+    });
+  });
+
+  it("rejects a known PIN with another state and names the expected one", () => {
+    expect(validatePinStatePair("400001", "IN-KA")).toEqual({
+      ok: false,
+      reason: "pin_state_mismatch",
+      expected_state: "IN-MH",
+    });
+  });
+
+  // 999998 is absent from the bundled directory; 999999 is a real Telangana PIN.
+  it("accepts an unknown well-formed PIN and marks it unverified", () => {
+    expect(validatePinStatePair("999998", "IN-MH")).toEqual({
+      ok: true,
+      verified: false,
+    });
+  });
+
+  it("keeps the format and unknown state rules ahead of the directory", () => {
+    expect(validatePinStatePair("000001", "IN-MH")).toEqual({
+      ok: false,
+      reason: "invalid_pin_format",
+    });
+    expect(validatePinStatePair("400001", "IN-XX")).toEqual({
+      ok: false,
+      reason: "unknown_state",
     });
   });
 });

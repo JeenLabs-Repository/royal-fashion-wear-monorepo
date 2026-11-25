@@ -1,5 +1,6 @@
 import { MedusaError } from "@medusajs/framework/utils";
 import statesData from "./states-data.json";
+import { PIN_PATTERN, lookupPin } from "./pincodes";
 
 export type IndianState = {
   /** ISO 3166-2:IN code, for example IN-MH */
@@ -50,13 +51,18 @@ export function toMedusaProvince(code: string): string {
 }
 
 export type PinStateResult =
-  | { ok: true }
-  | { ok: false; reason: "invalid_pin_format" | "unknown_state" };
+  | { ok: true; verified: boolean }
+  | {
+      ok: false;
+      reason: "invalid_pin_format" | "unknown_state" | "pin_state_mismatch";
+      expected_state?: string;
+    };
 
-const PIN_PATTERN = /^[1-9][0-9]{5}$/;
-
-// The signature is stable on purpose: a later change replaces only this body
-// to consult a bundled PIN directory.
+/**
+ * Checks a PIN and a state against the bundled directory.
+ * A known PIN with another state is a mismatch. An unknown but well-formed PIN
+ * passes with verified false, so a stale directory never blocks a sale.
+ */
 export function validatePinStatePair(
   pin: string,
   stateCode: string
@@ -64,8 +70,20 @@ export function validatePinStatePair(
   if (typeof pin !== "string" || !PIN_PATTERN.test(pin)) {
     return { ok: false, reason: "invalid_pin_format" };
   }
-  if (!getStateByCode(stateCode)) {
+  const state = getStateByCode(stateCode);
+  if (!state) {
     return { ok: false, reason: "unknown_state" };
   }
-  return { ok: true };
+  const entry = lookupPin(pin);
+  if (!entry) {
+    return { ok: true, verified: false };
+  }
+  if (entry.state_code.toUpperCase() !== state.code.toUpperCase()) {
+    return {
+      ok: false,
+      reason: "pin_state_mismatch",
+      expected_state: entry.state_code,
+    };
+  }
+  return { ok: true, verified: true };
 }
