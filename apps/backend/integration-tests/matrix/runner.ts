@@ -94,7 +94,7 @@ export const findProblems = (
     const expected = fixtureNameFor(route.routePath);
     const key = expected.replace(/\.ts$/, "");
     const entries = fixtures.get(key);
-    // Absolute stock replace on /vendor/inventory is named PUT by D-09. Every other
+    // Absolute stock replace on /vendor/inventory is named PUT. Every other
     // vendor route still uses only GET, POST and DELETE.
     const allowedPutPaths = new Set(["/vendor/inventory"]);
     const forbidden = route.methods.filter((method) => {

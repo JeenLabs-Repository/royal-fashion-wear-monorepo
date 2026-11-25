@@ -17,7 +17,7 @@ export const GET = withStockErrors(async (req: AuthenticatedMedusaRequest, res: 
   res.json(await readInventoryPage(req.scope, vendor.id, query));
 });
 
-// Absolute stock replace is named PUT by D-09, although the backend guidance prefers POST.
+// Absolute stock replace is named PUT, although the backend guidance prefers POST.
 export const PUT = withStockErrors(async (req: AuthenticatedMedusaRequest, res: MedusaResponse) => {
   const vendor = requireVendor(req);
   const body = (req as unknown as Validated).validatedBody;

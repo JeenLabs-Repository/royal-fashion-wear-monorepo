@@ -30,7 +30,7 @@ export type MatrixMultipart = {
 };
 
 export type MatrixEntry = {
-  // PUT is allowlisted only for /vendor/inventory (absolute stock replace, D-09).
+  // PUT is allowlisted only for /vendor/inventory (absolute stock replace).
   method: "GET" | "POST" | "DELETE" | "PUT";
   // The route path with :name for every dynamic segment, for example /vendor/me/locations.
   path: string;

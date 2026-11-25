@@ -15,7 +15,7 @@ import { registerStubPlugin, stubPlugin } from "../stubs/vendor-compliance-stub"
 
 jest.setTimeout(240 * 1000);
 
-// Phase 3 compliance stub shares the onVendorActivating registry with the catalog
+// The compliance stub shares the onVendorActivating registry with the catalog
 // handlers. Medusa itself refuses a second direct hooks.vendorActivating attach.
 registerStubPlugin();
 

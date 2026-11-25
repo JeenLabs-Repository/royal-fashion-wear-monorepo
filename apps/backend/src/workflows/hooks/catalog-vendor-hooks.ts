@@ -5,7 +5,7 @@ import {
 import { onVendorActivating, onVendorSuspended } from "../../modules/vendor/public";
 
 // Medusa 2.22.7 allows only one handler per createHook (decision 0015 + measured).
-// Phase 3's onVendor* helpers own the single attach to:
+// The vendor module's onVendor* helpers own the single attach to:
 //   suspendVendorWorkflow.hooks.vendorSuspended
 //   vendorActivationGateWorkflow.hooks.vendorActivating
 // and fan out to every registered plugin and this catalog coupling.
