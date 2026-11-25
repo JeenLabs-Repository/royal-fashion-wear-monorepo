@@ -14,7 +14,9 @@ export const AUDIT_ACTIONS = [
   "product.changes_applied",
   "product.withdrawn",
   "stock.updated",
+  "upload.created",
   "routing.assigned",
+
   "routing.unassigned",
   "routing.declined",
   "routing.accepted",
