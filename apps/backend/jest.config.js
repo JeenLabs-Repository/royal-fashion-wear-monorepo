@@ -38,4 +38,6 @@ if (process.env.TEST_TYPE === "integration:http") {
     "**/src/**/__tests__/**/*.unit.spec.[jt]s",
     "**/integration-tests/**/__tests__/**/*.unit.spec.[jt]s",
   ];
+} else if (process.env.TEST_TYPE === "canary") {
+  module.exports.testMatch = ["**/integration-tests/canary/*.spec.[jt]s"];
 }
