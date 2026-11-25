@@ -12,7 +12,25 @@ const proxied = ["/vendor", "/auth/vendor", "/auth/mfa"]
 
 export default defineConfig({
   base: "/vendor-portal/",
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      // React Router may land on /vendor-portal without a trailing slash. Vite's
+      // base check refuses that URL on reload, so send it to the slash form.
+      name: "vendor-portal-base-slash",
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === "/vendor-portal") {
+            res.statusCode = 302
+            res.setHeader("Location", "/vendor-portal/")
+            res.end()
+            return
+          }
+          next()
+        })
+      },
+    },
+  ],
   server: {
     port: 5173,
     strictPort: true,
