@@ -39,3 +39,5 @@ A decision record is a short note that explains one key choice and the cost of u
 | 0022 | [Catalog Ownership And Approval](0022-catalog-ownership-and-approval.md) | accepted |
 | 0023 | [Image Pipeline And Random Keys](0023-image-pipeline-and-random-keys.md) | accepted |
 | 0024 | [Stock Reserved Quantity And CSV Import](0024-stock-reserved-quantity-and-csv-import.md) | accepted |
+| 0025 | [Plugin Build, Loading And Isolation On Medusa 2.22.7](0025-plugin-mechanics-and-loading.md) | accepted |
+| 0026 | [Plugin Registry, Scope And Token Behaviour](0026-plugin-registry-and-tokens.md) | accepted |
