@@ -1,5 +1,9 @@
 import { locales } from "@i18n/config"
-import { revalidatePath, revalidateTag } from "next/cache"
+import {
+  revalidatePath,
+  revalidateTag,
+  unstable_expireTag,
+} from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 
 // Route-file patterns (with the `(main)` group) plus the public URL layouts.
@@ -55,6 +59,9 @@ export async function POST(req: NextRequest) {
     body.type === "product-option.deleted"
   ) {
     revalidateTag("products")
+    // expireTag updates the tag stamp every time; revalidateTag alone can leave
+    // a long-lived next-server serving the first force-cached catalog fetch.
+    unstable_expireTag("products")
     revalidateCatalogPaths()
   }
 
@@ -64,6 +71,7 @@ export async function POST(req: NextRequest) {
     body.type === "product-category.deleted"
   ) {
     revalidateTag("categories")
+    unstable_expireTag("categories")
     revalidateCatalogPaths()
   }
 
@@ -73,6 +81,7 @@ export async function POST(req: NextRequest) {
     body.type === "product-collection.deleted"
   ) {
     revalidateTag("collections")
+    unstable_expireTag("collections")
     revalidatePath(`/[locale]/(main)/collections/[handle]`, "page")
     revalidatePath(`/[locale]/(main)/store`, "page")
     for (const locale of locales) {
@@ -91,6 +100,7 @@ export async function POST(req: NextRequest) {
     revalidateTag("products")
     revalidateTag("categories")
     revalidateTag("collections")
+    unstable_expireTag("products", "categories", "collections")
     revalidateCatalogPaths()
   }
 

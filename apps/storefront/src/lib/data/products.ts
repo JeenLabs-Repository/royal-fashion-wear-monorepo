@@ -68,9 +68,13 @@ export const listProducts = async ({
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("products")),
-  }
+  // Handle lookups power the product page. Next's in-process tagsManifest only
+  // stamps each tag once, so a long-lived `revalidateTag("products")` stops
+  // clearing force-cached handle fetches after the first catalog change.
+  // Always read the live Store row for a single handle so live-edit approve
+  // and withdraw show up without waiting for a process restart.
+  const byHandle = Boolean(queryParams?.handle)
+  const next = byHandle ? {} : { ...(await getCacheOptions("products")) }
 
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
@@ -87,7 +91,7 @@ export const listProducts = async ({
         },
         headers,
         next,
-        cache: getFetchCacheMode(headers),
+        cache: byHandle ? "no-store" : getFetchCacheMode(headers),
       }
     )
     .then(({ products, count }) => {
