@@ -1,6 +1,10 @@
 import { once } from "node:events";
 import type { MedusaContainer } from "@medusajs/framework/types";
 import { parse } from "csv-parse";
+import { setVendorStockWorkflow } from "../../workflows/stock/set-vendor-stock";
+import { recordAudit } from "../audit";
+import { getCatalogService } from "../catalog/load-content";
+import { getVendorModule } from "../vendor/vendor-module";
 import {
   CSV_HEADER,
   DECODE_SLICE_BYTES,
@@ -161,14 +165,9 @@ export type ApplyCsvInput = {
  * Second pass. Reads the same file again and applies it in batches of 100 rows through the same
  * workflow the PUT route uses, in partial mode, so a bad row never stops a good one. The data row
  * number counts rows after the header. Nothing here can fail the whole file: the first pass
- * already proved it is acceptable. Heavy modules load on first use so the scanner stays light.
+ * already proved it is acceptable.
  */
 export async function applyCsv(input: ApplyCsvInput): Promise<ImportResult> {
-  const { setVendorStockWorkflow } = await import("../../workflows/stock/set-vendor-stock.js");
-  const { getCatalogService } = await import("../catalog/load-content.js");
-  const { getVendorModule } = await import("../vendor/vendor-module.js");
-  const { recordAudit } = await import("../audit/index.js");
-
   const catalog = getCatalogService(input.scope);
   const locations = (await getVendorModule(input.scope).listVendorLocations(
     { vendor_id: input.vendorId },
