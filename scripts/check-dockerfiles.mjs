@@ -9,6 +9,42 @@ import { fileURLToPath } from "node:url";
 const NODE_TAG_PREFIX = "node:22.23.4";
 const SKIPPED_DIRS = new Set(["node_modules", ".next", ".medusa"]);
 const SECRET_WORDS = /SECRET|PASSWORD|TOKEN|PRIVATE/i;
+const TOKEN_VARIABLE = "NODE_AUTH_TOKEN";
+const MANIFEST_SECTIONS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+];
+
+function readJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+// True when the backend manifest holds any dependency of the plugin scope, which
+// turns the optional registry credential into a required one.
+function hasPluginDependency(root) {
+  const registry = readJson(path.join(root, "config", "plugin-registry.json"));
+  const manifest = readJson(path.join(root, "apps", "backend", "package.json"));
+  if (!registry || !manifest || typeof registry.scope !== "string" || registry.scope === "") {
+    return false;
+  }
+  const prefix = `${registry.scope}/`;
+  return MANIFEST_SECTIONS.some((section) =>
+    Object.keys(manifest[section] ?? {}).some((name) => name.startsWith(prefix)),
+  );
+}
+
+// Every secret mount of the token variable on a RUN line, as the option text.
+function tokenMounts(line) {
+  return (line.match(/--mount=type=secret[^\s]*/g) ?? []).filter((mount) =>
+    new RegExp(`(^|,)id=${TOKEN_VARIABLE}(,|$)`).test(mount.replace("--mount=", "")),
+  );
+}
 
 function parseRoot() {
   const flag = process.argv.indexOf("--root");
@@ -129,6 +165,45 @@ function checkFile(file, root) {
     telemetryOk = text.includes(telemetryNeed);
   }
   rule(`telemetry is disabled (${telemetryNeed})`, telemetryOk);
+
+  const allInstructions = stages.flatMap((stage) => stage.instructions);
+
+  // Rule 7: the backend reads the registry credential only through a secret
+  // mount on every install and deploy step. The mount is required as soon as a
+  // plugin dependency exists. Other Dockerfiles need no mount.
+  let mountOk = true;
+  let mountDetail = "";
+  if (relative.includes("backend")) {
+    const required = hasPluginDependency(root);
+    const steps = allInstructions.filter(
+      (line) => /^RUN\s/i.test(line) && (/pnpm\s+install/.test(line) || /pnpm\b.*\bdeploy\b/.test(line)),
+    );
+    const bad = steps.filter((line) => {
+      const mounts = tokenMounts(line);
+      if (mounts.length === 0) return true;
+      return required && !mounts.every((mount) => /(^|,)required=true(,|$)/.test(mount));
+    });
+    mountOk = steps.length > 0 && bad.length === 0;
+    mountDetail = steps.length === 0
+      ? "no install or deploy step found"
+      : bad.map((line) => line.slice(0, 80)).join("; ");
+  }
+  rule(
+    "install and deploy steps mount the registry credential as a secret (required once a plugin dependency exists)",
+    mountOk,
+    mountDetail,
+  );
+
+  // Rule 8: the token never travels as a build argument or an image environment
+  // value, because both end up in the image history.
+  const leaked = allInstructions.filter(
+    (line) => /^(ARG|ENV)\s/i.test(line) && line.includes(TOKEN_VARIABLE),
+  );
+  rule(
+    `no ARG or ENV names ${TOKEN_VARIABLE}`,
+    leaked.length === 0,
+    leaked.join("; "),
+  );
 
   return results.map((result) => ({ ...result, relative }));
 }
