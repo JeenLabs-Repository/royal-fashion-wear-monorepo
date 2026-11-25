@@ -28,7 +28,7 @@ Every path under `/vendor`, including paths that no route serves yet, passes thr
 
 ## Add the Matrix Fixture
 
-The cross-vendor matrix scans every `route.ts` under `src/api/vendor` and fails when a route or an exported method has no fixture. It also fails when a handler exports PUT or PATCH.
+The cross-vendor matrix scans every `route.ts` under `src/api/vendor` and fails when a route or an exported method has no fixture. It also fails when a handler exports PATCH, or PUT on any path other than `/vendor/inventory` (absolute stock replace).
 
 Name the fixture after the route: take the path below `/vendor`, join the segments with two underscores and write a dynamic segment `:name` as `_name_`. So `me/locations` is `me__locations.ts`, `accept-invite` is `accept-invite.ts` and `things/:id` is `things___id_.ts`. Put the file in `apps/backend/integration-tests/matrix`.
 

@@ -8,6 +8,7 @@ import { getVendorSession } from "../helpers/mfa";
 import { probe, rawProbe } from "../helpers/staff-users";
 import { createVendorFixture } from "../helpers/vendor-fixtures";
 import { seedCatalogMatrix, seedLifecycleMatrix } from "../support/catalog-fixtures";
+import { seedStockMatrix } from "../support/stock-fixtures";
 import { toFormData } from "../helpers/multipart";
 import { findMatrixProblems, loadFixtures } from "../matrix/runner";
 import type { MatrixContext, MatrixEntry, MatrixVendor } from "../matrix/types";
@@ -161,6 +162,7 @@ medusaIntegrationTestRunner({
         const catalogVendorA = { ...a.fixture, headers: a.vendor.headers };
         await seedCatalogMatrix({ api, container: getContainer(), vendorA: catalogVendorA });
         await seedLifecycleMatrix({ api, container: getContainer(), vendorA: catalogVendorA });
+        await seedStockMatrix({ api, container: getContainer(), vendorA: catalogVendorA });
       });
 
       it("has a fixture for every vendor route and exported method", () => {

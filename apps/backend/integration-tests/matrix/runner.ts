@@ -94,12 +94,23 @@ export const findProblems = (
     const expected = fixtureNameFor(route.routePath);
     const key = expected.replace(/\.ts$/, "");
     const entries = fixtures.get(key);
-    const forbidden = route.methods.filter((method) => method === "PUT" || method === "PATCH");
+    // Absolute stock replace on /vendor/inventory is named PUT by D-09. Every other
+    // vendor route still uses only GET, POST and DELETE.
+    const allowedPutPaths = new Set(["/vendor/inventory"]);
+    const forbidden = route.methods.filter((method) => {
+      if (method === "PATCH") {
+        return true;
+      }
+      if (method === "PUT") {
+        return !allowedPutPaths.has(route.routePath);
+      }
+      return false;
+    });
 
     for (const method of forbidden) {
       problems.push({
         problem: `${route.routePath} exports ${method}, which vendor routes do not use`,
-        hint: "Use POST for updates and DELETE for removals. Only GET, POST and DELETE are allowed.",
+        hint: "Use POST for updates and DELETE for removals. Only GET, POST and DELETE are allowed, except PUT /vendor/inventory (absolute stock replace).",
       });
     }
 
@@ -111,7 +122,15 @@ export const findProblems = (
       continue;
     }
 
-    for (const method of route.methods.filter((method) => method !== "PUT" && method !== "PATCH")) {
+    for (const method of route.methods.filter((method) => {
+      if (method === "PATCH") {
+        return false;
+      }
+      if (method === "PUT") {
+        return allowedPutPaths.has(route.routePath);
+      }
+      return true;
+    })) {
       if (!entries.some((entry) => entry.method === method)) {
         problems.push({
           problem: `${route.routePath} exports ${method} but fixture ${expected} has no ${method} entry`,

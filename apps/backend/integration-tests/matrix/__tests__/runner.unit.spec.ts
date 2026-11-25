@@ -131,6 +131,21 @@ describe("findMatrixProblems", () => {
     );
   });
 
+  it("allows PUT only on /vendor/inventory", () => {
+    const { routeDir, fixtureDir } = tree(
+      {
+        inventory: "export async function GET() {}\nexport async function PUT() {}\n",
+      },
+      {
+        "inventory.js": fixtureSource([
+          { method: "GET", path: "/vendor/inventory" },
+          { method: "PUT", path: "/vendor/inventory" },
+        ]),
+      }
+    );
+    expect(findMatrixProblems(routeDir, fixtureDir)).toEqual([]);
+  });
+
   it("fails when a real compliance route exists and only the placeholder fixture does", () => {
     const { routeDir, fixtureDir } = tree(
       { "compliance/ping": GET_ROUTE },
