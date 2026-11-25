@@ -104,3 +104,7 @@ apps/backend/integration-tests/.spike-results/
 graft/
 DESIGN.md
 skills-lock.json
+
+# Local plugin trial files, never committed
+.yalc/
+yalc.lock
