@@ -30,6 +30,9 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Catalog And Stock](concepts/catalog-and-stock.md) explains catalog states, approval, the anonymity pipeline and per-location stock.
 - [Review And Approve Products](guides/review-and-approve-products.md) shows staff how to review and decide on vendor products.
 - [Manage Vendor Products And Stock](guides/vendor-products-and-stock.md) shows vendors how to create products and update stock, including CSV.
+- [Plugins Live In Their Own Repositories](concepts/plugin-repositories.md)
+- [Try A Plugin Change Locally Before You Release It](guides/plugin-local-development.md)
+- [Release A Plugin And Bump The App Pin](guides/plugin-release-and-bump.md)
 
 ## Writing Rules
 
