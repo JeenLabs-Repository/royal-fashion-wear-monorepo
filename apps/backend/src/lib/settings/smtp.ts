@@ -1,6 +1,10 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { createCardReader } from "./card-reader";
-import type { OptionsContainer } from "./resolve-options";
+import {
+  isNotAvailableError,
+  isUnknownIdentifierError,
+  type OptionsContainer,
+} from "./resolve-options";
 import {
   isDevelopmentFallbackAllowed,
   readDevSmtpFromEnv,
@@ -139,7 +143,20 @@ function noteFallbackOnce(container: OptionsContainer, host: string): void {
 export async function getSmtpSettings(
   container: OptionsContainer
 ): Promise<SmtpSettingsResult> {
-  const card = await readCard(container);
+  let card: SmtpSettings;
+  try {
+    card = await readCard(container);
+  } catch (error) {
+    // Notification and payment provider cradles may surface the Integration
+    // Module registration throw instead of a soft unavailable result. Treat
+    // those the same as a missing card so the development fallback can run.
+    if (isUnknownIdentifierError(error) || isNotAvailableError(error)) {
+      card = SMTP_DEFAULTS;
+    } else {
+      throw error;
+    }
+  }
+
   if (card.host) {
     return { settings: card, source: "card" };
   }

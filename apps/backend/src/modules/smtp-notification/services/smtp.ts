@@ -67,10 +67,8 @@ function transportFor(settings: SmtpSettings): Transporter {
 function toOptionsContainer(
   dependencies: InjectedDependencies
 ): OptionsContainer {
-  const candidate = dependencies as { resolve?: unknown };
-  if (typeof candidate.resolve === "function") {
-    return dependencies as unknown as OptionsContainer;
-  }
+  // Never read `.resolve` on an Awilix cradle: that name is looked up as a
+  // registration and throws. Always wrap property access instead.
   return { resolve: (key: string) => dependencies[key] };
 }
 
