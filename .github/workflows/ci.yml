@@ -173,9 +173,83 @@ jobs:
       - name: Check the branch name
         run: node scripts/check-branch-name.mjs "$BRANCH"
 
+  vendor-portal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:${{ vars.POSTGRES_VERSION || '17' }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C apps/vendor-portal run typecheck
+      - run: pnpm -C apps/vendor-portal run test:unit
+      # The build copies the static files into apps/backend/static/vendor-portal.
+      - run: pnpm -C apps/vendor-portal run build
+      - run: pnpm -C apps/backend run build
+      # Builds and starts a backend on a throwaway database, then proves that it
+      # serves the portal with its policy headers, refuses traversal and keeps
+      # /admin and /vendor as API routes. The script makes its own test-only
+      # secrets for the run and never prints them.
+      - name: Check that the backend serves the portal
+        run: sh scripts/check-portal-served.sh --start-backend --skip-build
+
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:${{ vars.POSTGRES_VERSION || '17' }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      CANARY_ADMIN_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The run script generates its own random test-only secrets for every run,
+      # keeps them in the process environment and never prints them. The backend
+      # runs on the in-memory cache, locking and event bus, so no Redis service
+      # is started.
+      - name: Run the canary crawl
+        run: sh scripts/run-canary.sh
+
   ci-gate:
     if: always()
-    needs: [lint, typecheck, build-backend, build-storefront, backend-tests, guards, gitleaks, signatures, branch-name, pr-notes]
+    needs: [lint, typecheck, build-backend, build-storefront, backend-tests, guards, gitleaks, signatures, branch-name, vendor-portal, canary, pr-notes]
     runs-on: ubuntu-latest
     env:
       ANY_FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
@@ -188,12 +262,14 @@ jobs:
       GITLEAKS: ${{ needs.gitleaks.result }}
       SIGNATURES: ${{ needs.signatures.result }}
       BRANCH_NAME: ${{ needs.branch-name.result }}
+      VENDOR_PORTAL: ${{ needs.vendor-portal.result }}
+      CANARY: ${{ needs.canary.result }}
       PR_NOTES: ${{ needs.pr-notes.result }}
     steps:
       - name: Summarise results
         run: |
-          printf 'lint: %s\ntypecheck: %s\nbuild-backend: %s\nbuild-storefront: %s\nbackend-tests: %s\nguards: %s\ngitleaks: %s\nsignatures: %s\nbranch-name: %s\npr-notes: %s\n' \
-            "$LINT" "$TYPECHECK" "$BUILD_BACKEND" "$BUILD_STOREFRONT" "$BACKEND_TESTS" "$GUARDS" "$GITLEAKS" "$SIGNATURES" "$BRANCH_NAME" "$PR_NOTES"
+          printf 'lint: %s\ntypecheck: %s\nbuild-backend: %s\nbuild-storefront: %s\nbackend-tests: %s\nguards: %s\ngitleaks: %s\nsignatures: %s\nbranch-name: %s\nvendor-portal: %s\ncanary: %s\npr-notes: %s\n' \
+            "$LINT" "$TYPECHECK" "$BUILD_BACKEND" "$BUILD_STOREFRONT" "$BACKEND_TESTS" "$GUARDS" "$GITLEAKS" "$SIGNATURES" "$BRANCH_NAME" "$VENDOR_PORTAL" "$CANARY" "$PR_NOTES"
           if [ "$ANY_FAILED" = "true" ]; then
             echo "At least one required job failed or was cancelled."
             exit 1
