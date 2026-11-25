@@ -10,6 +10,7 @@ import { storeGuardRoutes } from "../lib/anonymity/store-guard";
 import { adminMiddlewareRoutes } from "../lib/rbac/admin-chain";
 import { portalRouteEntries } from "../lib/portal/serve-portal";
 import { vendorRouteEntries } from "../lib/vendor/middlewares";
+import { catalogMiddlewares } from "../lib/catalog/middlewares";
 
 export default defineMiddlewares({
   routes: [
@@ -17,6 +18,8 @@ export default defineMiddlewares({
     ...storeGuardRoutes,
     ...vendorRouteEntries,
     ...portalRouteEntries,
+    // Catalog entries come last so authentication, the two-factor gate and the vendor status guard run first.
+    ...catalogMiddlewares,
   ],
 });
 
