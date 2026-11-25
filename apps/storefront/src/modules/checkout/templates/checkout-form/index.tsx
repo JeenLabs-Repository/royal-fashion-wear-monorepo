@@ -1,5 +1,4 @@
 import { listCartShippingMethods } from "@lib/data/fulfillment"
-import { listCartPaymentMethods } from "@lib/data/payment"
 import { listRegions } from "@lib/data/regions"
 import { getCountryCode } from "@lib/data/cookies"
 import { retrieveCustomerAddresses } from "@lib/data/customer"
@@ -7,7 +6,6 @@ import type { HttpTypes } from "@medusajs/types"
 import CheckoutShippingSection from "@modules/checkout/components/checkout-shipping-section"
 import CheckoutInfoRows from "@modules/checkout/components/checkout-info-rows"
 import CheckoutItemList from "@modules/checkout/components/checkout-item-list"
-import ExpressCheckout from "@modules/checkout/components/express-checkout"
 import SignInPrompt from "@modules/checkout/components/sign-in-prompt"
 import { Link } from "@i18n/navigation"
 import { getTranslations } from "next-intl/server"
@@ -21,10 +19,9 @@ export default async function CheckoutForm({
 }) {
   if (!cart) return null
 
-  const [shippingOptions, paymentMethods, regions, currentCountry, addresses, t] =
+  const [shippingOptions, regions, currentCountry, addresses, t] =
     await Promise.all([
       listCartShippingMethods(cart.id),
-      listCartPaymentMethods(cart.region?.id ?? ""),
       listRegions(),
       getCountryCode(),
       retrieveCustomerAddresses(),
@@ -39,8 +36,6 @@ export default async function CheckoutForm({
 
   return (
     <div className="flex flex-col px-4 py-6 lg:pe-10 lg:py-10 lg:ps-0 gap-y-6">
-      <ExpressCheckout cart={cart} availablePaymentMethods={paymentMethods ?? []} />
-
       {!customer && <SignInPrompt />}
 
       <CheckoutShippingSection

@@ -1,11 +1,9 @@
 "use client"
 
 import {
-  isManual,
   isPaymentSessionReady,
   isRazorpay,
   isShippingMethodReady,
-  isStripeLike,
 } from "@lib/constants"
 import { convertToLocale } from "@lib/util/money"
 import type { HttpTypes } from "@medusajs/types"
@@ -14,9 +12,7 @@ import { useCartUpdate } from "@modules/checkout/context/cart-update-context"
 import { useSelectedShippingOptionId } from "@modules/checkout/context/shipping-selection-context"
 import { useLocale, useTranslations } from "next-intl"
 import type React from "react"
-import ManualPaymentButton from "./providers/manual"
 import RazorpayPaymentButton from "./providers/razorpay"
-import StripePaymentButton from "./providers/stripe"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -86,10 +82,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   switch (true) {
     case isRazorpay(activePaymentMethod):
       return <RazorpayPaymentButton {...providerProps} />
-    case isStripeLike(activePaymentMethod):
-      return <StripePaymentButton {...providerProps} />
-    case isManual(activePaymentMethod):
-      return <ManualPaymentButton {...providerProps} />
     default:
       return (
         <Button disabled size="large" className="w-full">

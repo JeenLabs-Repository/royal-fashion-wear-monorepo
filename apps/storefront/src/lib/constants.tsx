@@ -1,7 +1,4 @@
 import { CreditCard } from "@medusajs/icons"
-import Bancontact from "@modules/common/icons/bancontact"
-import Ideal from "@modules/common/icons/ideal"
-import PayPal from "@modules/common/icons/paypal"
 import type { HttpTypes } from "@medusajs/types"
 import type React from "react"
 
@@ -24,50 +21,13 @@ export const isRazorpay = (providerId?: string) =>
 
 /* Map of payment provider_id to their icon and, as a fallback for a provider
    with no entry in the `PaymentMethods` catalog, an English title and subtitle.
-   Add in any payment providers you want to use, and their labels to
-   `messages/*.json`. */
+   A new provider takes an entry here and its labels in `messages/en.json`. */
 export const paymentInfoMap: Record<string, PaymentInfo> = {
   [RAZORPAY_PROVIDER_ID]: {
     title: "UPI, cards and netbanking",
     subtitle: "Razorpay",
     icon: <CreditCard />,
   },
-  pp_stripe_stripe: {
-    title: "Credit card",
-    subtitle: "Stripe",
-    icon: <CreditCard />,
-  },
-  "pp_medusa-payments_default": {
-    title: "Credit card",
-    subtitle: "Medusa Payments",
-    icon: <CreditCard />,
-  },
-  "pp_stripe-ideal_stripe": {
-    title: "iDeal",
-    subtitle: "Stripe",
-    icon: <Ideal />,
-  },
-  "pp_stripe-bancontact_stripe": {
-    title: "Bancontact",
-    subtitle: "Stripe",
-    icon: <Bancontact />,
-  },
-  pp_paypal_paypal: {
-    title: "PayPal",
-    icon: <PayPal />,
-  },
-  pp_system_default: {
-    title: "Manual Payment",
-    icon: <CreditCard />,
-  },
-  // Add more payment providers here
-}
-
-// This only checks if it is native stripe or medusa payments for card payments, it ignores the other stripe-based providers
-export const isStripeLike = (providerId?: string) => {
-  return (
-    providerId?.startsWith("pp_stripe_") || providerId?.startsWith("pp_medusa-")
-  )
 }
 
 const paymentSessionDataBuilders: Array<{
@@ -163,13 +123,6 @@ export const compareShippingOptions = (
   if (byPrice !== 0) return byPrice
 
   return a.name.localeCompare(b.name)
-}
-
-export const isPaypal = (providerId?: string) => {
-  return providerId?.startsWith("pp_paypal")
-}
-export const isManual = (providerId?: string) => {
-  return providerId?.startsWith("pp_system_default")
 }
 
 // Add currencies that don't need to be divided by 100
