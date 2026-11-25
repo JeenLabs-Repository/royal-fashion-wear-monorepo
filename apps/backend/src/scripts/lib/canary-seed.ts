@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { MedusaContainer } from "@medusajs/framework/types";
+import { randomBytes } from "node:crypto";
+import type { ConfigModule, IAuthModuleService, IUserModuleService } from "@medusajs/framework/types";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import {
   createApiKeysWorkflow,
@@ -8,6 +10,7 @@ import {
 } from "@medusajs/medusa/core-flows";
 import { getStoreSalesChannelId } from "../../lib/vendor/channel-links";
 import { getVendorOnboardingSettings } from "../../lib/settings/vendor-onboarding";
+import { STAFF_ACCESS_MODULE } from "../../modules/staff-access";
 import { VENDOR_MODULE } from "../../modules/vendor";
 import { acceptVendorAgreementWorkflow } from "../../workflows/vendors/accept-vendor-agreement";
 import { acceptVendorInviteWorkflow } from "../../workflows/vendors/accept-vendor-invite";
@@ -19,6 +22,7 @@ import { CANARY_VENDORS, type CanaryVendor } from "../demo-data/canary";
 
 const KEY_TITLE = "canary-publishable";
 const ACTOR = { id: "seed:canary" };
+const APPROVER_PASSWORD = "Canary-Approver-Passw0rd-2026!";
 
 type VendorService = {
   listVendorUsers: (filter: Record<string, unknown>) => Promise<{ id: string; vendor_id: string; email: string }[]>;
@@ -173,39 +177,61 @@ const ensurePublishableKey = async (container: MedusaContainer): Promise<string>
   return key.token as string;
 };
 
-// One catalog approver for the catalog surfaces. A rerun keeps the user from the previous
-// manifest while it still exists and creates a new one after a database reset. The test
-// helper loads on demand so the seed script does not pull it in for other uses.
+// One catalog approver for the catalog surfaces. Built in the seed (not via the
+// integration-tests helper) so `medusa exec` does not resolve test-only ESM paths.
 const ensureApprover = async (
   container: MedusaContainer,
   previous: ManifestApprover | undefined
 ): Promise<ManifestApprover> => {
+  const users = container.resolve(Modules.USER) as IUserModuleService;
   if (previous) {
-    const users = container.resolve(Modules.USER) as {
-      listUsers: (
-        filter: Record<string, unknown>,
-        config?: Record<string, unknown>
-      ) => Promise<{ id: string }[]>;
-    };
     const [existing] = await users.listUsers({ id: previous.id }, { take: 1 });
     if (existing) {
       return previous;
     }
   }
-  const { createStaffUser } = await import("../../../integration-tests/helpers/staff-users");
-  const user = await createStaffUser(container, {
-    roleKeys: ["catalog_approver"],
-    mfaEnrolled: true,
+
+  const config = container.resolve(ContainerRegistrationKeys.CONFIG_MODULE) as ConfigModule;
+  const tokenSecret = config.projectConfig.http.jwtSecret;
+  if (typeof tokenSecret !== "string" || tokenSecret.length === 0) {
+    throw new Error("[seed-canary] The app has no jwtSecret; cannot mint catalog approver tokens.");
+  }
+
+  const email = `canary-approver-${randomBytes(4).toString("hex")}@canary.invalid`;
+  const user = await users.createUsers({ email });
+  const auth = container.resolve(Modules.AUTH) as IAuthModuleService;
+  const registered = (await auth.register("emailpass", {
+    body: { email, password: APPROVER_PASSWORD },
+  } as never)) as { success: boolean; authIdentity?: { id: string }; error?: string };
+  if (!registered.success || !registered.authIdentity) {
+    throw new Error(`[seed-canary] Could not register the catalog approver: ${registered.error ?? "unknown"}`);
+  }
+  await auth.updateAuthIdentities({
+    id: registered.authIdentity.id,
+    app_metadata: { user_id: user.id },
   });
+
+  const staff = container.resolve(STAFF_ACCESS_MODULE) as {
+    createStaffAssignments(rows: Array<Record<string, unknown>>): Promise<unknown>;
+  };
+  await staff.createStaffAssignments([
+    {
+      user_id: user.id,
+      role_key: "catalog_approver",
+      is_break_glass: false,
+      assigned_by: "seed:canary",
+    },
+  ]);
+
   return {
     id: user.id,
-    email: user.email,
-    password: user.password,
-    identityId: user.identityId,
-    roleKeys: user.roleKeys,
-    isBreakGlass: user.isBreakGlass,
-    mfaEnrolled: user.mfaEnrolled,
-    tokenSecret: user.tokenSecret,
+    email,
+    password: APPROVER_PASSWORD,
+    identityId: registered.authIdentity.id,
+    roleKeys: ["catalog_approver"],
+    isBreakGlass: false,
+    mfaEnrolled: true,
+    tokenSecret,
   };
 };
 
