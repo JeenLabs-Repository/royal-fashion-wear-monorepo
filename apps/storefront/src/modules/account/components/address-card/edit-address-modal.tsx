@@ -10,14 +10,22 @@ import type { HttpTypes } from "@medusajs/types"
 import { Badge, Button, Heading, Text, clx } from "@medusajs/ui"
 import { formatAddressLines } from "@lib/util/address"
 import { CheckoutModal } from "@modules/checkout/components/checkout-modal"
-import CountrySelect from "@modules/checkout/components/country-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
+import type { AddressFields } from "@modules/common/components/address-autocomplete"
+import IndiaAddressFields from "@modules/common/components/address-autocomplete/providers/india"
 import Input from "@modules/common/components/input"
 import Spinner from "@modules/common/icons/spinner"
 import type React from "react"
 import { useActionState, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+
+const fieldsOf = (address: HttpTypes.StoreCustomerAddress): AddressFields => ({
+  address_1: address.address_1 ?? "",
+  postal_code: address.postal_code ?? "",
+  city: address.city ?? "",
+  province: address.province ?? "",
+})
 
 type EditAddressProps = {
   region: HttpTypes.StoreRegion
@@ -25,8 +33,9 @@ type EditAddressProps = {
   isActive?: boolean
 }
 
+// The country is fixed to India, so the region the parent passes is not read.
 const EditAddress: React.FC<EditAddressProps> = ({
-  region,
+  region: _region,
   address,
   isActive = false,
 }) => {
@@ -35,6 +44,13 @@ const EditAddress: React.FC<EditAddressProps> = ({
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
+  const [fields, setFields] = useState<AddressFields>(() => fieldsOf(address))
+
+  // Start every edit from the saved address, not from an earlier unsaved edit.
+  const openEditor = () => {
+    setFields(fieldsOf(address))
+    open()
+  }
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
     success: false,
@@ -105,7 +121,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         <div className="flex items-center gap-x-4">
           <button
             className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
-            onClick={open}
+            onClick={openEditor}
             data-testid="address-edit-button"
           >
             <Edit />
@@ -141,53 +157,13 @@ const EditAddress: React.FC<EditAddressProps> = ({
               defaultValue={address.company || undefined}
               data-testid="company-input"
             />
-            <Input
-              label={tf("address")}
-              name="address_1"
-              required
-              autoComplete="address-line1"
-              defaultValue={address.address_1 || undefined}
-              data-testid="address-1-input"
-            />
+            <IndiaAddressFields values={fields} onChange={setFields} required />
             <Input
               label={tf("addressLine2")}
               name="address_2"
               autoComplete="address-line2"
               defaultValue={address.address_2 || undefined}
               data-testid="address-2-input"
-            />
-            <div className="grid grid-cols-[144px_1fr] gap-x-2">
-              <Input
-                label={tf("postalCode")}
-                name="postal_code"
-                required
-                autoComplete="postal-code"
-                defaultValue={address.postal_code || undefined}
-                data-testid="postal-code-input"
-              />
-              <Input
-                label={tf("city")}
-                name="city"
-                required
-                autoComplete="locality"
-                defaultValue={address.city || undefined}
-                data-testid="city-input"
-              />
-            </div>
-            <Input
-              label={tf("province")}
-              name="province"
-              autoComplete="address-level1"
-              defaultValue={address.province || undefined}
-              data-testid="state-input"
-            />
-            <CountrySelect
-              name="country_code"
-              region={region}
-              required
-              autoComplete="country"
-              defaultValue={address.country_code || undefined}
-              data-testid="country-select"
             />
             <Input
               label={tf("phone")}
@@ -198,7 +174,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             />
           </div>
 
-          <ErrorMessage error={formState.error} />
+          <ErrorMessage error={formState.error} data-testid="address-error" />
 
           <div className="flex gap-x-2 mt-4">
             <Button
