@@ -15,8 +15,10 @@ COPY apps/backend/package.json apps/backend/package.json
 COPY apps/storefront/package.json apps/storefront/package.json
 # pnpm 12 ignores dependency build scripts unless allowed; a clean image has no
 # user allowlist, so the install must opt in for native packages such as sharp.
+# The storefront depends on no private package. The inline value below only lets the
+# .npmrc reference resolve; it is not a credential and is set for this command alone.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
+    NODE_AUTH_TOKEN=unused-by-storefront pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
     --store-dir /pnpm/store --filter @dtc/gorgo-medusa-storefront...
 
 # Every build argument below is public by definition: it ends up in the browser

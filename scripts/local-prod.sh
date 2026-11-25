@@ -108,6 +108,22 @@ check_browser_path() {
   echo "Browser path OK"
 }
 
+# The backend build reads the registry credential through a BuildKit secret when
+# one is exported. Without a plugin dependency no credential is needed.
+build_backend_image() {
+  scope=$(node -p "require('./config/plugin-registry.json').scope")
+  has_plugin=$(node -e "const p=require('./apps/backend/package.json'); const prefix=process.argv[1]+'/'; const all=Object.assign({}, p.dependencies, p.devDependencies, p.peerDependencies, p.optionalDependencies); console.log(Object.keys(all).some(function (k) { return k.indexOf(prefix) === 0; }) ? 1 : 0)" "$scope")
+  if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+    DOCKER_BUILDKIT=1 docker build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN \
+      -f apps/backend/Dockerfile -t medusa-backend:local .
+  elif [ "$has_plugin" = "1" ]; then
+    echo "NODE_AUTH_TOKEN must be exported: the backend depends on a private plugin package." >&2
+    exit 1
+  else
+    DOCKER_BUILDKIT=1 docker build -f apps/backend/Dockerfile -t medusa-backend:local .
+  fi
+}
+
 up() {
   demo_catalog=0
   if [ "${1:-}" = "--demo-catalog" ]; then
@@ -117,7 +133,7 @@ up() {
   write_env_file
 
   echo "Building the backend image."
-  docker build -f apps/backend/Dockerfile -t medusa-backend:local .
+  build_backend_image
 
   echo "Starting the database, Redis and the backend."
   $COMPOSE up -d --wait --wait-timeout 300 postgres redis backend
