@@ -89,6 +89,9 @@ docker-compose.override.yml
 .canary-backend.log
 .canary-storefront.log
 
+# Reservation and fulfilment spike result lines (local only)
+apps/backend/integration-tests/.spike-results/
+
 # Local agent tooling roots (committed exceptions above)
 .agents/
 .cursor/*
