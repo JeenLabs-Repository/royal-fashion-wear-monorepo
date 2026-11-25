@@ -22,7 +22,7 @@ type SqlManager = {
 };
 
 // Matches the vendor module runSql helper. manager.execute is confirmed on the
-// injected MikroORM manager in Phase 3; getConnection().execute is the fallback.
+// injected MikroORM manager; getConnection().execute is the fallback.
 const runSql = async (
   sharedContext: Context,
   sql: string,
