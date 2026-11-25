@@ -6,6 +6,7 @@ import ImageGallery from "@modules/products/components/image-gallery"
 import ProductActions from "@modules/products/components/product-actions"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductTabs from "@modules/products/components/product-tabs"
+import ShipFromLine from "@modules/products/components/ship-from-line"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
@@ -81,6 +82,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
           <div className="flex flex-col small:sticky small:top-20 small:w-[320px] w-full gap-y-6 py-8 small:py-0 shrink-0">
             <ProductInfo product={product} />
             <ProductOnboardingCta />
+            <Suspense fallback={null}>
+              <ShipFromLine productId={product.id} />
+            </Suspense>
             <Suspense
               fallback={
                 <ProductActions

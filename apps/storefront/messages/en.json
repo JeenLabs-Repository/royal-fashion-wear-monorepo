@@ -513,6 +513,12 @@
     "continueSetup": "You can now continue setting up your store in the admin.",
     "demoCreated": "Your demo product was successfully created!"
   },
+  "ProductPage": {
+    "declarationsHeading": "Product information",
+    "listAnd": "and",
+    "shipFrom": "Ships from {states}",
+    "shipFromMultiple": "Ships from multiple states"
+  },
   "ProductPrice": {
     "from": "From ",
     "original": "Original: "
