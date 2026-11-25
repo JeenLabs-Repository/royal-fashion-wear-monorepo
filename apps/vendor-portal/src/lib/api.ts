@@ -9,6 +9,8 @@ const ALLOWED_PATHS = [/^\/vendor\//, /^\/auth\/vendor\//, /^\/auth\/mfa\//]
 type FetchOptions = {
   method?: "GET" | "POST" | "DELETE"
   body?: unknown
+  // A multipart body. The browser sets the content type and the boundary.
+  form?: FormData
   token?: string
 }
 
@@ -36,7 +38,7 @@ export const fetchJson = async <T>(path: string, options: FetchOptions = {}): Pr
       method: options.method ?? "GET",
       credentials: "omit",
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.form ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
     })
   } catch {
     throw new ApiError(0, "network_error", "The server could not be reached. Check your connection.")
@@ -55,14 +57,27 @@ export const fetchJson = async <T>(path: string, options: FetchOptions = {}): Pr
   if (!response.ok) {
     // A refused token ends the sign-in: drop it so the guards send the vendor to the login screen.
     if (response.status === 401) clearToken()
-    const body = (parsed ?? {}) as { code?: unknown; type?: unknown; message?: unknown }
+    const body = (parsed ?? {}) as {
+      code?: unknown
+      type?: unknown
+      message?: unknown
+      issues?: unknown
+    }
     const code =
       typeof body.code === "string" ? body.code : typeof body.type === "string" ? body.type : null
     const message =
       typeof body.message === "string" && body.message
         ? body.message
         : "Something went wrong. Try again."
-    throw new ApiError(response.status, code, message)
+    const issues = Array.isArray(body.issues)
+      ? body.issues.flatMap((entry: unknown) => {
+          const issue = (entry ?? {}) as { path?: unknown; message?: unknown }
+          return typeof issue.message === "string"
+            ? [{ path: typeof issue.path === "string" ? issue.path : "", message: issue.message }]
+            : []
+        })
+      : []
+    throw new ApiError(response.status, code, message, issues)
   }
 
   return parsed as T

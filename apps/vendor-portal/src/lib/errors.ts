@@ -1,12 +1,16 @@
+export type ApiIssue = { path: string; message: string }
+
 export class ApiError extends Error {
   readonly status: number
   readonly code: string | null
+  readonly issues: ApiIssue[]
 
-  constructor(status: number, code: string | null, message: string) {
+  constructor(status: number, code: string | null, message: string, issues: ApiIssue[] = []) {
     super(message)
     this.name = "ApiError"
     this.status = status
     this.code = code
+    this.issues = issues
   }
 }
 
