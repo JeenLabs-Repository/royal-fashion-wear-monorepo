@@ -17,11 +17,21 @@ export type PaymentInfo = {
   icon: React.JSX.Element
 }
 
+export const RAZORPAY_PROVIDER_ID = "pp_razorpay_razorpay"
+
+export const isRazorpay = (providerId?: string) =>
+  providerId === RAZORPAY_PROVIDER_ID
+
 /* Map of payment provider_id to their icon and, as a fallback for a provider
    with no entry in the `PaymentMethods` catalog, an English title and subtitle.
    Add in any payment providers you want to use, and their labels to
    `messages/*.json`. */
 export const paymentInfoMap: Record<string, PaymentInfo> = {
+  [RAZORPAY_PROVIDER_ID]: {
+    title: "UPI, cards and netbanking",
+    subtitle: "Razorpay",
+    icon: <CreditCard />,
+  },
   pp_stripe_stripe: {
     title: "Credit card",
     subtitle: "Stripe",
