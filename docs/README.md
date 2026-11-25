@@ -33,6 +33,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Plugins Live In Their Own Repositories](concepts/plugin-repositories.md)
 - [Try A Plugin Change Locally Before You Release It](guides/plugin-local-development.md)
 - [Release A Plugin And Bump The App Pin](guides/plugin-release-and-bump.md)
+- [Give Builds Read Access to the Plugin Registry](guides/plugin-registry-access.md)
 
 ## Writing Rules
 
