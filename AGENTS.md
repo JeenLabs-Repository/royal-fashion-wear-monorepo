@@ -273,14 +273,12 @@ its glob there. Skip that and the component renders unstyled, with no error anyw
 
 **The middleware matcher.** `config.matcher` in [middleware.ts](apps/storefront/src/middleware.ts)
 excludes `/api`, so a route handler under `src/app/api` gets no locale prefix and no country cookie
-resolution. Take the locale from a query parameter or a cookie there, the way
-[api/payment-return](apps/storefront/src/app/api/payment-return/route.ts) does.
+resolution. Take the locale from a query parameter or a cookie when an `/api` handler needs one.
 
-**Cookie `sameSite` on the payment return.** `_medusa_jwt` and `_medusa_cart_id` are set `lax` in
-[lib/data/cookies.ts](apps/storefront/src/lib/data/cookies.ts). A redirect-based payment method
-brings the customer back through a cross-site top-level navigation, and a `strict` cookie is withheld
-on it, which turns the return into a logged-out visitor with no cart. Do not tighten these to
-`strict`.
+**Cookie `sameSite` on checkout.** `_medusa_jwt` and `_medusa_cart_id` are set `lax` in
+[lib/data/cookies.ts](apps/storefront/src/lib/data/cookies.ts). A cross-site top-level navigation
+(for example after leaving the site for a payment window) withholds a `strict` cookie, which turns
+the return into a logged-out visitor with no cart. Do not tighten these to `strict`.
 
 **The seed is all or nothing.** `initial_data_seed` returns early when the sales channel named in
 `data/store/json/store.json` already exists, so no stage runs on a database that has been seeded

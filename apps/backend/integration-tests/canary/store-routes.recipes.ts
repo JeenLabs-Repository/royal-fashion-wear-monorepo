@@ -168,7 +168,6 @@ export const STARTER_FIELD_ROUTES: Record<string, string[]> = {
   "customer.ts": ["/store/customers/me"],
   "payment.ts": ["/store/payment-providers"],
   "sitemap.ts": ["/store/products", "/store/product-categories", "/store/collections"],
-  "app/api/payment-return/route.ts": ["/store/carts/:id"],
   "app/llms.txt/route.ts": ["/store/collections", "/store/product-categories", "/store/products"],
   "modules/home/components/featured-products/product-rail/index.tsx": ["/store/products"],
 };
