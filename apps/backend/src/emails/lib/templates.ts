@@ -4,6 +4,26 @@ import BreakGlassReviewReminderEmail, {
 } from "../break-glass-review-reminder";
 import BreakGlassUsedEmail, { type BreakGlassUsedProps } from "../break-glass-used";
 import StaffAlertEmail, { type StaffAlertProps } from "../staff-alert";
+import StaffProductReviewNeededEmail, {
+  type StaffProductReviewNeededProps,
+  staffProductReviewNeededSubject,
+  staffProductReviewNeededText,
+} from "../staff-product-review-needed";
+import VendorProductApprovedEmail, {
+  type VendorProductApprovedProps,
+  vendorProductApprovedSubject,
+  vendorProductApprovedText,
+} from "../vendor-product-approved";
+import VendorProductChangesRequestedEmail, {
+  type VendorProductChangesRequestedProps,
+  vendorProductChangesRequestedSubject,
+  vendorProductChangesRequestedText,
+} from "../vendor-product-changes-requested";
+import VendorProductRejectedEmail, {
+  type VendorProductRejectedProps,
+  vendorProductRejectedSubject,
+  vendorProductRejectedText,
+} from "../vendor-product-rejected";
 import VendorInviteEmail, {
   type VendorInviteProps,
   vendorInviteSubject,
@@ -15,6 +35,10 @@ import { safeHttpUrl } from "./safe-url";
 // the sender accepts only that type: there is no free-form props escape hatch.
 // That is how a later audit can prove what each email is able to contain.
 export type EmailTemplates = {
+  "staff-product-review-needed": StaffProductReviewNeededProps;
+  "vendor-product-approved": VendorProductApprovedProps;
+  "vendor-product-rejected": VendorProductRejectedProps;
+  "vendor-product-changes-requested": VendorProductChangesRequestedProps;
   "vendor-invite": VendorInviteProps;
   "staff-alert": StaffAlertProps;
   "break-glass-used": BreakGlassUsedProps;
@@ -28,6 +52,26 @@ export type TemplateEntry<P> = {
 };
 
 export const EMAIL_TEMPLATES: { [K in keyof EmailTemplates]: TemplateEntry<EmailTemplates[K]> } = {
+  "staff-product-review-needed": {
+    Component: StaffProductReviewNeededEmail,
+    subject: staffProductReviewNeededSubject,
+    text: staffProductReviewNeededText,
+  },
+  "vendor-product-approved": {
+    Component: VendorProductApprovedEmail,
+    subject: vendorProductApprovedSubject,
+    text: vendorProductApprovedText,
+  },
+  "vendor-product-rejected": {
+    Component: VendorProductRejectedEmail,
+    subject: vendorProductRejectedSubject,
+    text: vendorProductRejectedText,
+  },
+  "vendor-product-changes-requested": {
+    Component: VendorProductChangesRequestedEmail,
+    subject: vendorProductChangesRequestedSubject,
+    text: vendorProductChangesRequestedText,
+  },
   "vendor-invite": {
     Component: VendorInviteEmail,
     subject: vendorInviteSubject,
