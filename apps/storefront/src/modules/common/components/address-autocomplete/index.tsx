@@ -1,41 +1,14 @@
 "use client"
 
-import { useId, useState } from "react"
-import { Checkbox, Text } from "@medusajs/ui"
-import { useTranslations } from "next-intl"
-import PlainAddressInput from "./providers/plain"
-import ManualAddressFields from "./manual-address-fields"
+import IndiaAddressFields from "./providers/india"
 import type { AddressAutocompleteProps } from "./types"
 
 export type { AddressFields } from "./types"
 
-const AddressAutocomplete = (props: AddressAutocompleteProps) => {
-  const t = useTranslations("CheckoutPage")
-  const uid = useId()
-  const [manual, setManual] = useState(false)
-
-  return (
-    <div className="flex flex-col gap-y-3">
-      <div className="flex items-center gap-x-2">
-        <Checkbox
-          id={uid}
-          checked={manual}
-          onCheckedChange={(value) => setManual(value === true)}
-        />
-        <Text
-          className="text-ui-fg-subtle"
-        >
-          {t("manualInput")}
-        </Text>
-      </div>
-
-      {manual ? (
-        <ManualAddressFields {...props} />
-      ) : (
-        <PlainAddressInput {...props} />
-      )}
-    </div>
-  )
-}
+const AddressAutocomplete = (props: AddressAutocompleteProps) => (
+  <div className="flex flex-col gap-y-3">
+    <IndiaAddressFields {...props} />
+  </div>
+)
 
 export default AddressAutocomplete

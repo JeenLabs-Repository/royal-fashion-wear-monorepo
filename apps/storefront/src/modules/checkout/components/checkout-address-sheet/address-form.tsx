@@ -185,7 +185,7 @@ export default function CheckoutAddressForm({
           data-testid="shipping-company-input"
         />
       </div>
-      <ErrorMessage error={error} />
+      <ErrorMessage error={error} data-testid="shipping-address-error" />
       <div className="flex gap-x-2 mt-4">
         <Button
           type="button"
@@ -201,6 +201,7 @@ export default function CheckoutAddressForm({
           disabled={isSubmitting}
           size="large"
           className="w-full"
+          data-testid="shipping-address-save"
         >
           {isSubmitting ? t("saving") : (submitLabel ?? t("save"))}
         </Button>

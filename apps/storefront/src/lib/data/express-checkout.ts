@@ -4,10 +4,27 @@ import { sdk } from "@lib/config"
 import { compareShippingOptions, findShippingOptionDescriptor } from "@lib/constants"
 import compareAddresses from "@lib/util/compare-addresses"
 import { isPickupShippingOption } from "@lib/util/fulfillment"
+import { INDIA_STATES } from "@lib/util/india-states"
 import medusaError from "@lib/util/medusa-error"
 import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { getAuthHeaders, getCacheTag, getCartId } from "./cookies"
+
+/** Maps a wallet province (label, ISO code or `in-xx`) to the Medusa value. */
+function toIndiaProvince(raw: string | null | undefined): string | null {
+  if (typeof raw !== "string") return null
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  const lower = trimmed.toLowerCase()
+  const byCode = INDIA_STATES.find(
+    (state) => state.value === lower || state.code.toLowerCase() === lower
+  )
+  if (byCode) return byCode.value
+  const byLabel = INDIA_STATES.find(
+    (state) => state.label.toLowerCase() === lower
+  )
+  return byLabel?.value ?? null
+}
 
 /**
  * Express checkout takes the address from a wallet while the wallet's window
@@ -134,12 +151,17 @@ export async function quoteExpressShipping(
       return { ok: false, reason: "noShipping" }
     }
 
+    const province = toIndiaProvince(address.province)
+    if (!province) {
+      return { ok: false, reason: "noShipping" }
+    }
+
     await sdk.store.cart.update(
       cartId,
       {
         shipping_address: {
           country_code: countryCode,
-          province: address.province ?? "",
+          province,
           city: address.city ?? "",
           postal_code: address.postal_code ?? "",
         },
@@ -171,6 +193,11 @@ export async function saveExpressContact(
     return { ok: false, reason: "missingContact" }
   }
 
+  const province = toIndiaProvince(address.province)
+  if (!province) {
+    return { ok: false, reason: "missingContact" }
+  }
+
   const { cartId, headers } = await context()
   try {
     const cartAddress = {
@@ -179,7 +206,7 @@ export async function saveExpressContact(
       address_1: address.address_1,
       address_2: address.address_2 ?? "",
       city: address.city ?? "",
-      province: address.province ?? "",
+      province,
       postal_code: address.postal_code ?? "",
       country_code: address.country_code.toLowerCase(),
       phone: contact.phone ?? "",
@@ -268,6 +295,8 @@ export async function restoreExpressCheckout(snapshot: ExpressSnapshot) {
       (!cart.shipping_address || !compareAddresses(address, cart.shipping_address))
 
     if (restoreAddress) {
+      const province =
+        toIndiaProvince(address.province) ?? address.province ?? ""
       await sdk.store.cart.update(
         cartId,
         {
@@ -278,7 +307,7 @@ export async function restoreExpressCheckout(snapshot: ExpressSnapshot) {
             address_1: address.address_1,
             address_2: address.address_2 ?? "",
             city: address.city ?? "",
-            province: address.province ?? "",
+            province,
             postal_code: address.postal_code ?? "",
             country_code: address.country_code,
             phone: address.phone ?? "",

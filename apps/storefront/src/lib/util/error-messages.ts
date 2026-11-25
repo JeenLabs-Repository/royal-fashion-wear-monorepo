@@ -12,6 +12,10 @@ export const ERROR_MESSAGE_KEYS = [
   "passwordTooShort",
   "passwordMismatch",
   "invalidResetLink",
+  "pinStateMismatch",
+  "invalidPin",
+  "invalidState",
+  "invalidPhone",
 ] as const
 
 export type ErrorMessageKey = (typeof ERROR_MESSAGE_KEYS)[number]
@@ -37,6 +41,13 @@ const RULES: { pattern: RegExp; key: ErrorMessageKey }[] = [
   { pattern: /^passwordTooShort$/, key: "passwordTooShort" },
   { pattern: /^passwordMismatch$/, key: "passwordMismatch" },
   { pattern: /^invalidResetLink$/, key: "invalidResetLink" },
+  // Address sentences from the server's address check. They come before the
+  // looser patterns below so a word such as "state" or "number" cannot be
+  // swallowed by a generic rule.
+  { pattern: /another state/i, key: "pinStateMismatch" },
+  { pattern: /6-digit PIN/i, key: "invalidPin" },
+  { pattern: /choose a valid state/i, key: "invalidState" },
+  { pattern: /10-digit mobile/i, key: "invalidPhone" },
   {
     pattern:
       /network|no response|setting up the request|failed to fetch|fetch failed|econnrefused|etimedout|timeout|socket hang up/i,
