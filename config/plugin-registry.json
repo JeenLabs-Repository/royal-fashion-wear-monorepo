@@ -3,7 +3,7 @@
   "registry": "https://npm.pkg.github.com",
   "scope": "@jeenlabs-repository",
   "token_env": "NODE_AUTH_TOKEN",
-  "npmrc_wired": false,
+  "npmrc_wired": true,
   "repos": {
     "medusa-payment-razorpay": {
       "package": "@jeenlabs-repository/medusa-payment-razorpay",
