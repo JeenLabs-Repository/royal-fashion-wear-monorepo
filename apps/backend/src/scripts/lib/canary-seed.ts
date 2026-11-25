@@ -259,7 +259,11 @@ export const seedCanary = async (
   const vendors: Record<string, ManifestVendor> = {};
   for (const vendor of Object.values(CANARY_VENDORS)) {
     const entry = await ensureVendor(container, vendor);
-    const secret = previous.vendors?.[vendor.key]?.totp_secret;
+    // Keep a stored TOTP secret only when it belongs to the same vendor row.
+    // A new vendor_id after a database reset must enrol again.
+    const previousEntry = previous.vendors?.[vendor.key];
+    const secret =
+      previousEntry?.vendor_id === entry.vendor_id ? previousEntry.totp_secret : undefined;
     vendors[vendor.key] = secret ? { ...entry, totp_secret: secret } : entry;
   }
 

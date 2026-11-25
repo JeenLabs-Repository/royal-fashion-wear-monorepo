@@ -120,11 +120,28 @@ export const seedCatalogCanary = async (input: SeedCatalogCanaryInput): Promise<
 
   expectStatus(await call(api, "POST", `/vendor/products/${productId}/submit`, vendorHeaders, {}), 200, "submit");
 
-  const queue = await call(api, "GET", "/admin/product-reviews?tab=new&limit=25", approverHeaders);
-  expectStatus(queue, 200, "GET /admin/product-reviews");
-  const row = (queue.body.reviews as { id: string; title: string }[]).find((entry) => entry.title === body.title);
-  if (!row) {
-    throw new Error(`The submitted canary product "${body.title}" is not in the New tab of the review queue.`);
+  // The list route caps limit at 25 and returns oldest first. Paginate until the
+  // just-submitted title appears (it lands on the last page).
+  let row: { id: string; title: string } | undefined;
+  let offset = 0;
+  for (;;) {
+    const queue = await call(
+      api,
+      "GET",
+      `/admin/product-reviews?tab=new&limit=25&offset=${offset}`,
+      approverHeaders
+    );
+    expectStatus(queue, 200, "GET /admin/product-reviews");
+    const reviews = (queue.body.reviews as { id: string; title: string }[]) ?? [];
+    row = reviews.find((entry) => entry.title === body.title);
+    if (row) {
+      break;
+    }
+    const count = Number(queue.body.count ?? 0);
+    offset += reviews.length;
+    if (reviews.length === 0 || offset >= count) {
+      throw new Error(`The submitted canary product "${body.title}" is not in the New tab of the review queue.`);
+    }
   }
   const submissionId = row.id;
 
@@ -202,24 +219,49 @@ export const ensureCatalogCanary = (context: SurfaceContext): Promise<CatalogCan
 type VendorCredentials = { email: string; password: string; totp_secret?: string };
 
 // Canary vendors have email/password and an optional stored TOTP secret, not a
-// mintable token_secret. Sign in the same way the plugin-placeholder surface does.
+// mintable token_secret. Mirror the plugin-placeholder MFA sequence: enrol when
+// sign-in is not challenged, answer the challenge when it is.
 const vendorHeadersFromManifest = async (
   api: Api,
-  alpha: VendorCredentials
+  alpha: VendorCredentials,
+  saveSecret?: (secret: string) => void
 ): Promise<Headers> => {
-  let secret = alpha.totp_secret;
-  if (!secret) {
-    const firstFactor = await vendorLogin(api as never, {
+  if (alpha.totp_secret) {
+    const token = await loginVendorWithMfa(api as never, {
       email: alpha.email,
       password: alpha.password,
+      secret: alpha.totp_secret,
     });
-    const enrolled = await enrollVendorMfa(api as never, firstFactor);
-    secret = enrolled.secret;
+    return vendorBearer(token);
   }
+
+  // First factor only. When MFA is already enrolled this returns a challenge
+  // token that cannot start enrolment; the seed must keep the matching secret.
+  const login = await (api as never as {
+    request: (config: Record<string, unknown>) => Promise<{ status: number; data: any }>;
+  }).request({
+    method: "POST",
+    url: "/auth/vendor/emailpass",
+    data: { email: alpha.email, password: alpha.password },
+    validateStatus: () => true,
+  });
+  const challenge = login.data?.mfa_challenge as { id?: string } | undefined;
+  if (challenge?.id) {
+    throw new Error(
+      "The canary vendor has two-factor enrolment but the manifest holds no totp_secret. Re-run the canary seed after a database reset, or restore the secret from the previous crawl."
+    );
+  }
+  if (login.status !== 200 || typeof login.data?.token !== "string") {
+    throw new Error(`Vendor sign-in answered ${login.status}`);
+  }
+  const enrolled = await enrollVendorMfa(api as never, login.data.token);
+  saveSecret?.(enrolled.secret);
+  // Wait for the next TOTP window so the verify code is not reused.
+  await new Promise((resolve) => setTimeout(resolve, 30_000 - (Date.now() % 30_000) + 500));
   const token = await loginVendorWithMfa(api as never, {
     email: alpha.email,
     password: alpha.password,
-    secret,
+    secret: enrolled.secret,
   });
   return vendorBearer(token);
 };
@@ -248,7 +290,14 @@ const seedCatalogCanaryLive = async (context: SurfaceContext): Promise<CatalogCa
 
   const api = axios.create({ baseURL: context.backendUrl, validateStatus: () => true }) as unknown as Api;
   const { staffHeaders } = await import("../helpers/staff-users");
-  const vendorHeaders = await vendorHeadersFromManifest(api, alpha);
+  const { writeFileSync, readFileSync } = await import("node:fs");
+  const vendorHeaders = await vendorHeadersFromManifest(api, alpha, (secret) => {
+    const current = JSON.parse(readFileSync(context.manifestPath, "utf8")) as typeof manifest;
+    if (current.vendors?.alpha) {
+      current.vendors.alpha = { ...current.vendors.alpha, totp_secret: secret };
+      writeFileSync(context.manifestPath, `${JSON.stringify(current, null, 2)}\n`);
+    }
+  });
   const approverHeaders = await staffHeaders(api as never, manifest.approver as never);
 
   return seedCatalogCanary({
