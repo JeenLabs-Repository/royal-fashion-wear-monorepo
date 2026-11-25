@@ -34,7 +34,7 @@ import {
 
 export type SpikeLayout = "hub-only" | "per-location";
 export type LocationLabel = "A" | "B" | "HUB";
-export type SpikeId = "S1" | "S2" | "S3";
+export type SpikeId = "S1" | "S2" | "S3" | "C";
 
 export const PROVINCE_A = "in-mh";
 export const PROVINCE_B = "in-ka";
