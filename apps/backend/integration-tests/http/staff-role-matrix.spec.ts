@@ -26,7 +26,8 @@ const EVERYONE = ACTOR_KEYS;
 // the permission layer counts as allowed.
 const CASES: Case[] = [
   { method: "GET", path: "/admin/products", allowed: ["superadmin", "catalog_approver", "order_router", "finance_readonly"] },
-  { method: "POST", path: "/admin/products", body: {}, allowed: ["superadmin", "catalog_approver"] },
+  { method: "POST", path: "/admin/products", body: {}, allowed: ["superadmin"] },
+  { method: "POST", path: "/admin/product-categories", body: { name: "x" }, allowed: ["superadmin", "catalog_approver"] },
   { method: "GET", path: "/admin/orders", allowed: ["superadmin", "order_router", "support", "finance_readonly"] },
   { method: "POST", path: "/admin/orders/order_x/cancel", body: {}, allowed: ["superadmin"] },
   { method: "DELETE", path: "/admin/customers/cus_x", allowed: ["superadmin"] },

@@ -179,12 +179,29 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
   { method: "GET", pattern: "/admin/vendors*", permission: PERM.vendorsRead },
   ...only(["POST", "DELETE", "PUT", "PATCH"], "/admin/vendors*", PERM.vendorsManage),
 
-  // Core families, read then write
+  // Product review queue. The review routes are the approver's only path to
+  // publication: the decision routes need `catalog:review`, text and image
+  // order edits need `catalog:edit`, and the core product editor below is
+  // superadmin only for writes. The decision routes are declared here and
+  // answer 404 until they exist.
+  { method: "GET", pattern: "/admin/product-reviews*", permission: PERM.catalogRead },
+  ...only(["POST"], "/admin/product-reviews/:id/content", PERM.catalogEdit),
+  ...only(["POST"], "/admin/product-reviews/:id/approve", PERM.catalogReview),
+  ...only(["POST"], "/admin/product-reviews/:id/reject", PERM.catalogReview),
+  ...only(["POST"], "/admin/product-reviews/:id/request-changes", PERM.catalogReview),
+
+  // Core product and variant writes are superadmin so an approver cannot
+  // publish around the review screen. Options go with them.
+  ...family(["/admin/products"], {
+    read: PERM.catalogRead,
+    write: "superadmin",
+  }),
+  ...family(["/admin/product-variants", "/admin/product-options"], {
+    read: PERM.catalogRead,
+    write: "superadmin",
+  }),
   ...family(
     [
-      "/admin/products",
-      "/admin/product-variants",
-      "/admin/product-options",
       "/admin/product-categories",
       "/admin/product-tags",
       "/admin/product-types",
