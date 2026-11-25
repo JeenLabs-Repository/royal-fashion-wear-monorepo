@@ -24,7 +24,9 @@ fs.cpSync(source, destination, {
 });
 
 // Single data files the compiled server reads next to its own modules.
-const bundledFiles = [path.join("src", "lib", "geo-india", "pincodes.json")];
+const bundledFiles = [
+  path.join("src", "lib", "geo-india", "pincode-directory.json"),
+];
 
 for (const relative of bundledFiles) {
   const from = path.join(projectRoot, relative);

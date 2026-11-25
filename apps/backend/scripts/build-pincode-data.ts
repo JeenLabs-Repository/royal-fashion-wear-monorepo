@@ -25,7 +25,10 @@ function resolveCsvPath(args: string[] | undefined): string {
 // Run from apps/backend: pnpm run build:pincodes -- data-source/pincode-directory.csv
 export default async function buildPincodeData({ args }: ExecArgs) {
   const csvPath = resolveCsvPath(args);
-  const outPath = resolve(process.cwd(), "src/lib/geo-india/pincodes.json");
+  const outPath = resolve(
+    process.cwd(),
+    "src/lib/geo-india/pincode-directory.json"
+  );
 
   try {
     console.log(`[pincode-build] reading ${csvPath}`);

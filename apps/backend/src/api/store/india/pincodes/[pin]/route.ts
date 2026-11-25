@@ -1,9 +1,11 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { MedusaError } from "@medusajs/framework/utils";
-import { z } from "@medusajs/framework/zod";
-import { lookupPin, PIN_PATTERN } from "../../../../../lib/geo-india/pincodes";
+import { lookupPin } from "../../../../../lib/geo-india/pincodes";
 
-const PinParam = z.string().regex(PIN_PATTERN);
+// Keep the pattern local. Passing an imported RegExp into zod's .regex() throws
+// `Cannot set properties of undefined (setting 'lastIndex')` under Medusa's
+// develop loader (zod 4).
+const PIN_RE = /^[1-9][0-9]{5}$/;
 
 // Public static data: one explicit shape, no vendor, store or customer field can enter it.
 type PincodeBody = {
@@ -18,20 +20,20 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse<PincodeBody>
 ): Promise<void> {
-  const parsed = PinParam.safeParse(req.params.pin);
-  if (!parsed.success) {
+  const pin = typeof req.params.pin === "string" ? req.params.pin : "";
+  if (!PIN_RE.test(pin)) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       "The PIN must be six digits and not start with 0."
     );
   }
-  const hit = lookupPin(parsed.data);
+  const hit = lookupPin(pin);
   if (!hit) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "No such PIN in the directory.");
   }
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.json({
-    pin: parsed.data,
+    pin,
     state_code: hit.state_code,
     district: hit.district,
     city: hit.city,

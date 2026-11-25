@@ -4,7 +4,7 @@ This guide explains where the bundled PIN directory comes from, how you refresh 
 
 ## Where the Data Comes From
 
-The file `apps/backend/src/lib/geo-india/pincodes.json` is generated from the All India Pincode Directory on data.gov.in. The directory is published under the Government Open Data Licence India (GODL), which allows commercial use when you keep the attribution. The file keeps that attribution in its `source` field and records the generation date in `generated_at`.
+The file `apps/backend/src/lib/geo-india/pincode-directory.json` is generated from the All India Pincode Directory on data.gov.in. The directory is published under the Government Open Data Licence India (GODL), which allows commercial use when you keep the attribution. The file keeps that attribution in its `source` field and records the generation date in `generated_at`.
 
 When the data.gov.in portal asks for an account or returns a captcha, you may refresh from a 1:1 republish of the same Department of Posts directory (for example a public CSV mirror), as long as the generated file still attributes GODL and data.gov.in. Prefer the portal download when you can.
 
