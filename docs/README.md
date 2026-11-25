@@ -34,6 +34,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Try A Plugin Change Locally Before You Release It](guides/plugin-local-development.md)
 - [Release A Plugin And Bump The App Pin](guides/plugin-release-and-bump.md)
 - [Give Builds Read Access to the Plugin Registry](guides/plugin-registry-access.md)
+- [Refresh the PIN Directory](guides/pincode-directory.md)
 
 ## Writing Rules
 
