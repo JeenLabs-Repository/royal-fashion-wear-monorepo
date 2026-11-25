@@ -8,17 +8,27 @@ import { addCustomerAddress } from "@lib/data/customer"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import type { HttpTypes } from "@medusajs/types"
 import { CheckoutModal } from "@modules/checkout/components/checkout-modal"
-import CountrySelect from "@modules/checkout/components/country-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
+import type { AddressFields } from "@modules/common/components/address-autocomplete"
+import IndiaAddressFields from "@modules/common/components/address-autocomplete/providers/india"
 import Input from "@modules/common/components/input"
 import { useTranslations } from "next-intl"
 
-const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
+const EMPTY_ADDRESS: AddressFields = {
+  address_1: "",
+  postal_code: "",
+  city: "",
+  province: "",
+}
+
+// The country is fixed to India, so the region the parent passes is not read.
+const AddAddress = (_props: { region: HttpTypes.StoreRegion }) => {
   const t = useTranslations("AddressCard")
   const tf = useTranslations("AddressForm")
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
+  const [fields, setFields] = useState<AddressFields>(EMPTY_ADDRESS)
 
   const [formState, formAction] = useActionState(addCustomerAddress, {
     success: false,
@@ -27,6 +37,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
 
   const close = () => {
     setSuccessState(false)
+    setFields(EMPTY_ADDRESS)
     closeModal()
   }
 
@@ -71,48 +82,12 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
               autoComplete="organization"
               data-testid="company-input"
             />
-            <Input
-              label={tf("address")}
-              name="address_1"
-              required
-              autoComplete="address-line1"
-              data-testid="address-1-input"
-            />
+            <IndiaAddressFields values={fields} onChange={setFields} required />
             <Input
               label={tf("addressLine2")}
               name="address_2"
               autoComplete="address-line2"
               data-testid="address-2-input"
-            />
-            <div className="grid grid-cols-[144px_1fr] gap-x-2">
-              <Input
-                label={tf("postalCode")}
-                name="postal_code"
-                required
-                autoComplete="postal-code"
-                data-testid="postal-code-input"
-              />
-              <Input
-                label={tf("city")}
-                name="city"
-                required
-                autoComplete="locality"
-                data-testid="city-input"
-              />
-            </div>
-            <Input
-              label={tf("province")}
-              name="province"
-              autoComplete="address-level1"
-              data-testid="state-input"
-            />
-            <CountrySelect
-              region={region}
-              name="country_code"
-              required
-              autoComplete="country"
-              data-testid="country-select"
-              className="h-10"
             />
             <Input
               label={tf("phone")}
