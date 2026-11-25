@@ -43,6 +43,9 @@ tpl:tsconfig.json.tpl => tsconfig.json
 tpl:npmrc.tpl => .npmrc
 tpl:ci.yml.tpl => .github/workflows/ci.yml
 tpl:publish.yml.tpl => .github/workflows/publish.yml
+tpl:verify-release-tag.sh => scripts/verify-release-tag.sh
+tpl:rehearse-release.sh => scripts/rehearse-release.sh
+
 
 
 
