@@ -1,0 +1,27 @@
+{
+  "_note": "This file is the single place the plugin registry choice is kept. The .npmrc, the Dockerfiles and the workflows are checked against it by scripts/check-plugin-refs.mjs.",
+  "registry": "https://npm.pkg.github.com",
+  "scope": "@jeenlabs-repository",
+  "token_env": "NODE_AUTH_TOKEN",
+  "npmrc_wired": false,
+  "repos": {
+    "medusa-payment-razorpay": {
+      "package": "@jeenlabs-repository/medusa-payment-razorpay",
+      "description": "The Razorpay payment provider and its settings card.",
+      "pin": null,
+      "planned": false
+    },
+    "medusa-store-settings": {
+      "package": "@jeenlabs-repository/medusa-store-settings",
+      "description": "All Integration Module settings cards, one folder per card plus a card registry.",
+      "pin": null,
+      "planned": false
+    },
+    "medusa-vendor-compliance": {
+      "package": "@jeenlabs-repository/medusa-vendor-compliance",
+      "description": "The vendor compliance plugin.",
+      "pin": null,
+      "planned": true
+    }
+  }
+}
