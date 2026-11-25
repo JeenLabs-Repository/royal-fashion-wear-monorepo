@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { MedusaContainer } from "@medusajs/framework/types";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import {
   createApiKeysWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
@@ -35,10 +35,24 @@ type ManifestVendor = {
   totp_secret?: string;
 };
 
+// The staff user the catalog surfaces sign in as. The fields are the ones the test
+// helper `staffHeaders` reads to mint a token for an enrolled user.
+export type ManifestApprover = {
+  id: string;
+  email: string;
+  password: string;
+  identityId: string;
+  roleKeys: string[];
+  isBreakGlass: boolean;
+  mfaEnrolled: boolean;
+  tokenSecret: string;
+};
+
 export type CanaryManifestFile = {
   publishable_key: string;
   generated_at: string;
   vendors: Record<string, ManifestVendor>;
+  approver?: ManifestApprover;
 };
 
 const findRepoRoot = (): string => {
@@ -159,6 +173,42 @@ const ensurePublishableKey = async (container: MedusaContainer): Promise<string>
   return key.token as string;
 };
 
+// One catalog approver for the catalog surfaces. A rerun keeps the user from the previous
+// manifest while it still exists and creates a new one after a database reset. The test
+// helper loads on demand so the seed script does not pull it in for other uses.
+const ensureApprover = async (
+  container: MedusaContainer,
+  previous: ManifestApprover | undefined
+): Promise<ManifestApprover> => {
+  if (previous) {
+    const users = container.resolve(Modules.USER) as {
+      listUsers: (
+        filter: Record<string, unknown>,
+        config?: Record<string, unknown>
+      ) => Promise<{ id: string }[]>;
+    };
+    const [existing] = await users.listUsers({ id: previous.id }, { take: 1 });
+    if (existing) {
+      return previous;
+    }
+  }
+  const { createStaffUser } = await import("../../../integration-tests/helpers/staff-users");
+  const user = await createStaffUser(container, {
+    roleKeys: ["catalog_approver"],
+    mfaEnrolled: true,
+  });
+  return {
+    id: user.id,
+    email: user.email,
+    password: user.password,
+    identityId: user.identityId,
+    roleKeys: user.roleKeys,
+    isBreakGlass: user.isBreakGlass,
+    mfaEnrolled: user.mfaEnrolled,
+    tokenSecret: user.tokenSecret,
+  };
+};
+
 export const seedCanary = async (
   container: MedusaContainer,
   options: { outDir?: string } = {}
@@ -191,6 +241,7 @@ export const seedCanary = async (
     publishable_key: await ensurePublishableKey(container),
     generated_at: new Date().toISOString(),
     vendors,
+    approver: await ensureApprover(container, previous.approver),
   };
 
   mkdirSync(outDir, { recursive: true });

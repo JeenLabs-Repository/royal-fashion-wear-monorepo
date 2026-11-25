@@ -3,6 +3,7 @@ import {
   CANARY_PLUGIN,
   CANARY_VENDORS,
 } from "../../src/scripts/demo-data/canary";
+import { CATALOG_CANARY_TOKENS } from "./catalog-strings";
 
 export { CANARY_PLUGIN, CANARY_VENDORS };
 
@@ -30,6 +31,10 @@ export const allCanaryTokens = (): string[] => {
     tokens.add(vendor.location.city);
     tokens.add(vendor.location.pickup_contact_name);
     tokens.add(vendor.location.pickup_contact_phone);
+  }
+
+  for (const token of CATALOG_CANARY_TOKENS) {
+    tokens.add(token);
   }
 
   tokens.add(CANARY_PLUGIN.pan);

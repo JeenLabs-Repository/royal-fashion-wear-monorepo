@@ -2,6 +2,7 @@
 // this folder that calls registerSurface and one import line here.
 import "./store-api";
 import "./storefront";
+import "./catalog";
 import "./plugin-placeholder";
 
 export { listSurfaces } from "./registry";

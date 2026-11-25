@@ -117,6 +117,12 @@ export const RECIPES: Record<string, Recipe> = {
     params: { id: (c) => c.firstId("/store/products", "products") },
     query: { region_id: REGION },
   },
+  "/store/ship-from": {
+    query: { product_ids: (c) => c.firstId("/store/products", "products") },
+  },
+  "/store/product-declarations": {
+    query: { product_ids: (c) => c.firstId("/store/products", "products") },
+  },
   "/store/currencies": {},
   "/store/currencies/:code": { params: { code: async () => "inr" } },
   "/store/payment-providers": { query: { region_id: REGION } },

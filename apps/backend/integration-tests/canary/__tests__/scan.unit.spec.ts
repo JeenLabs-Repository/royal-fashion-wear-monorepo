@@ -1,4 +1,5 @@
 import { allCanaryTokens, variantsOf } from "../canary-strings";
+import { CATALOG_CANARY_TOKENS } from "../catalog-strings";
 import { CANARY_PLUGIN, CANARY_VENDORS } from "../../../src/scripts/demo-data/canary";
 import { assertNoCanary, scanText } from "../scan";
 
@@ -108,6 +109,14 @@ describe("canary tokens and variants", () => {
     const tokens = allCanaryTokens();
     expect(tokens).toContain("CNRYP9999X");
     expect(tokens).toContain("29CNRYP9999X1Z5");
+  });
+
+  it("includes the eight catalog tokens", () => {
+    const tokens = allCanaryTokens();
+    expect(CATALOG_CANARY_TOKENS).toHaveLength(8);
+    for (const token of CATALOG_CANARY_TOKENS) {
+      expect(tokens).toContain(token);
+    }
   });
 
   it("holds unique tokens for every vendor field", () => {

@@ -26,6 +26,17 @@ export type CanaryManifest = {
       totp_secret?: string;
     }
   >;
+  // Written by the canary seed for catalog surfaces that approve products.
+  approver?: {
+    id: string;
+    email: string;
+    password: string;
+    identityId: string;
+    roleKeys: string[];
+    isBreakGlass: boolean;
+    mfaEnrolled: boolean;
+    tokenSecret: string;
+  };
 };
 
 export type SurfaceContext = {
