@@ -182,6 +182,19 @@ export const useRequestChanges = (id: string) => {
   });
 };
 
+/** One mutation for the shared reason dialog. */
+export const useRejectOrRequest = (id: string) => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ReasonInput & { kind: "reject" | "request" }) =>
+      sdk.client.fetch(`${one(id)}/${input.kind === "reject" ? "reject" : "request-changes"}`, {
+        method: "POST",
+        body: { content_hash: input.content_hash, reason: input.reason },
+      }),
+    onSuccess: () => client.invalidateQueries({ queryKey: reviewKeys.all }),
+  });
+};
+
 export const useEditContent = (id: string) => {
   const client = useQueryClient();
   return useMutation({
