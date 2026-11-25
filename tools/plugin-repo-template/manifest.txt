@@ -37,7 +37,11 @@ app:apps/backend/jest.config.js => jest.config.js
 app:apps/backend/integration-tests/setup.js => integration-tests/setup.js
 
 [package]
-# Package manifest, TypeScript config, npm config and workflows are added here.
+# Package manifest, TypeScript config, npm config and workflows.
+tpl:package.json.tpl => package.json
+tpl:tsconfig.json.tpl => tsconfig.json
+tpl:npmrc.tpl => .npmrc
+
 
 [rules-and-docs]
 app:.cursor/rules/00-working-agreement.mdc
