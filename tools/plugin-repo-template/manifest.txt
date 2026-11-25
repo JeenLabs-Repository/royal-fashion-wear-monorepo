@@ -1,0 +1,47 @@
+# Files copied into every plugin repository by scripts/new-plugin-repo.sh.
+# One entry per line:
+#   app:<path in this repository> => <path in the plugin repository>   copy a live file
+#   tpl:<file under tools/plugin-repo-template/files/> => <destination> render a template
+# An app: line without => keeps the same path. A directory is copied recursively.
+# Sections become three signed commits in this order. Comment lines start with #.
+# App-specific guards are deliberately not listed.
+
+[tooling]
+app:commitlint.config.cjs
+app:.husky/commit-msg
+app:.husky/pre-commit
+app:.husky/pre-push
+app:.gitleaks.toml
+app:scripts/gitleaks-staged.sh
+app:scripts/check-gitleaks-hook.sh
+app:scripts/check-commit-rules.mjs
+app:scripts/run-guards.mjs
+app:scripts/check-no-plan-refs.mjs
+app:scripts/check-workflow-pins.mjs
+app:scripts/check-branch-name.mjs
+app:scripts/verify-signatures.sh
+app:scripts/squash-fixups.sh
+app:scripts/setup-branch-protection.sh
+app:scripts/changelog.mjs
+app:scripts/lib/changelog.mjs
+app:scripts/check-changelog-generator.mjs
+app:scripts/release-prepare.sh
+app:scripts/release-tag.sh
+app:scripts/check-pr-notes.mjs
+app:.github/pull_request_template.md
+app:.nvmrc
+app:.github/allowed_signers
+app:.gitignore
+app:apps/backend/eslint.config.mjs => eslint.config.mjs
+app:apps/backend/jest.config.js => jest.config.js
+app:apps/backend/integration-tests/setup.js => integration-tests/setup.js
+
+[package]
+# Package manifest, TypeScript config, npm config and workflows are added here.
+
+[rules-and-docs]
+app:.cursor/rules/00-working-agreement.mdc
+app:.cursor/rules/02-branches-and-pull-requests.mdc
+app:.cursor/rules/03-git-commits.mdc
+app:docs/README.md
+app:docs/decisions/0000-template.md
