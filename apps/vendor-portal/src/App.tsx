@@ -9,6 +9,8 @@ import { Login } from "./screens/Login"
 import { MfaSetup } from "./screens/MfaSetup"
 import { NotFound } from "./screens/NotFound"
 import { Profile } from "./screens/Profile"
+import { ProductForm } from "./screens/ProductForm"
+import { ProductsList } from "./screens/ProductsList"
 
 const SuspendedRoute = () => {
   const { status } = useSession()
@@ -38,6 +40,9 @@ const App = () => (
       <Route index element={<Home />} />
       <Route path="agreement" element={<Agreement />} />
       <Route path="locations" element={<Locations />} />
+      <Route path="products" element={<ProductsList />} />
+      <Route path="products/new" element={<ProductForm />} />
+      <Route path="products/:id" element={<ProductForm />} />
       <Route path="profile" element={<Profile />} />
     </Route>
     <Route path="*" element={<NotFound />} />
