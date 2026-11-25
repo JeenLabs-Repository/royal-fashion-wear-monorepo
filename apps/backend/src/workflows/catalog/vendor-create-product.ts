@@ -17,7 +17,7 @@ export type VendorCreateProductInput = {
 // compensates the earlier ones.
 export const vendorCreateProductWorkflow = createWorkflow(
   "vendor-create-product",
-  (input: VendorCreateProductInput) => {
+  function (input: VendorCreateProductInput) {
     assertVendorEligibleStep({ vendor_id: input.vendor_id });
     const imageUrls = validateContentRefsStep({
       vendor_id: input.vendor_id,
