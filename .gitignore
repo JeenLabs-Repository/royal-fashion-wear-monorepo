@@ -105,6 +105,9 @@ graft/
 DESIGN.md
 skills-lock.json
 
+# Downloaded government data, regenerated into a committed file
+apps/backend/data-source/
+
 # Local plugin trial files, never committed
 .yalc/
 yalc.lock
