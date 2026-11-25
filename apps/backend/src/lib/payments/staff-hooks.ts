@@ -58,9 +58,10 @@ type AuditHelper = {
 
 // Optional shared helpers, loaded at call time so payment code works before or
 // after the alert and audit modules land.
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- optional shared helper, loaded at call time
+// Optional shared helpers, loaded at call time (require so missing modules are catchable).
+// eslint-disable-next-line -- optional shared helper
 const requireAlerts = (): AlertHelper => require("../alerts/send-staff-alert");
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- optional shared helper, loaded at call time
+// eslint-disable-next-line -- optional shared helper
 const requireAudit = (): AuditHelper => require("../audit/record-audit");
 
 const isMissingModule = (error: unknown, needle: string): boolean => {

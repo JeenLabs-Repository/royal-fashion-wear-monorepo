@@ -37,7 +37,7 @@ async function loadWith(options: {
   );
   // require (not import) so Jest resolves the TypeScript source without a .js suffix
   // that tsc's node16 resolution would otherwise demand on a dynamic import.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  // eslint-disable-next-line -- dynamic require in test
   return require("../staff-hooks") as Hooks;
 }
 
@@ -241,7 +241,7 @@ describe("shared helper detector", () => {
     jest.resetModules();
     jest.dontMock("../../alerts/send-staff-alert");
     jest.dontMock("../../audit/record-audit");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line -- dynamic require in test
     const { helperAvailability } = require("../staff-hooks") as Hooks;
     const available = helperAvailability();
     if (fs.existsSync(path.join(srcRoot, "lib/alerts/send-staff-alert.ts"))) {
