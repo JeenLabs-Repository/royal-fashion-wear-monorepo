@@ -128,8 +128,37 @@ module.exports = defineConfig({
         // Integration providers plug in here. Browse the catalog at
         // https://gorgojs.com/medusa/plugins?integrationModule=true or read
         // https://docs.gorgojs.com/medusa-modules/integration
-        providers: [],
+        providers: [
+          {
+            resolve:
+              "@jeenlabs-repository/medusa-payment-razorpay/providers/integration-razorpay",
+            id: "razorpay",
+          },
+          {
+            resolve:
+              "@jeenlabs-repository/medusa-store-settings/providers/integration-gst-invoicing",
+            id: "gst-invoicing",
+          },
+          {
+            resolve:
+              "@jeenlabs-repository/medusa-store-settings/providers/integration-smtp",
+            id: "smtp",
+          },
+          {
+            resolve:
+              "@jeenlabs-repository/medusa-store-settings/providers/integration-vendor-onboarding",
+            id: "vendor-onboarding",
+          },
+        ],
       },
+    },
+    {
+      resolve: "@jeenlabs-repository/medusa-payment-razorpay",
+      options: {},
+    },
+    {
+      resolve: "@jeenlabs-repository/medusa-store-settings",
+      options: {},
     },
   ],
   modules: [
@@ -152,7 +181,19 @@ module.exports = defineConfig({
     { resolve: "./src/modules/audit-log" },
     { resolve: "./src/modules/vendor" },
     { resolve: "./src/modules/vendor-catalog" },
-
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve:
+              "@jeenlabs-repository/medusa-payment-razorpay/providers/razorpay",
+            id: "razorpay",
+            options: {},
+          },
+        ],
+      },
+    },
     {
       resolve: "@medusajs/medusa/notification",
       options: {

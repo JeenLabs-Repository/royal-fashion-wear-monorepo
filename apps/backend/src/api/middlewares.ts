@@ -14,6 +14,7 @@ import {
   type MiddlewareRoute,
 } from "@medusajs/framework/http";
 import { MedusaError } from "@medusajs/framework/utils";
+import { razorpayWebhookGuard } from "@jeenlabs-repository/medusa-payment-razorpay/public";
 import { storeGuardRoutes } from "../lib/anonymity/store-guard";
 import { catalogMiddlewares } from "../lib/catalog/middlewares";
 import { validateAddressInput } from "../lib/geo-india/address-validation";
@@ -106,6 +107,7 @@ export const addressValidationRoutes: MiddlewareRoute[] = [
 
 export default defineMiddlewares({
   routes: [
+    razorpayWebhookGuard,
     ...adminMiddlewareRoutes,
     ...storeGuardRoutes,
     ...vendorRouteEntries,
