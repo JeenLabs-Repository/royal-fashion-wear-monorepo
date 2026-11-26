@@ -39,7 +39,8 @@
     "test:canary": "TEST_TYPE=canary NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
     "check:admin-routes": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit --testPathPattern=admin-routes-mapped",
-    "check:governance": "pnpm run check:admin-routes && pnpm run test:unit && pnpm run test:integration:modules && pnpm run test:integration:http"
+    "check:governance": "pnpm run check:admin-routes && pnpm run test:unit && pnpm run test:integration:modules && pnpm run test:integration:http",
+    "seed:india": "medusa exec ./src/scripts/seed-india-commerce.ts"
   },
   "dependencies": {
     "@gorgo/medusa-integration": "2.0.0",

@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework";
 import { logger } from "@medusajs/framework/logger";
+import { seedIndiaCommerce } from "../lib/commerce/india-seed";
 import {
   isAlreadySeeded,
   seedCategories,
@@ -12,7 +13,6 @@ import {
   seedRegions,
   seedStockLocations,
   seedStore,
-  seedTaxRegions,
   seedTranslations,
   step,
 } from "./lib";
@@ -36,7 +36,6 @@ export default async function initial_data_seed({
 
   await step(seedStore(container), "store data");
   await step(seedRegions(container), "regions");
-  await step(seedTaxRegions(container), "tax regions");
   await step(seedStockLocations(container), "stock locations");
   await step(seedFulfillment(container), "fulfillment data");
   await step(seedCategories(container), "product categories");
@@ -46,4 +45,5 @@ export default async function initial_data_seed({
   await step(seedCollections(container), "product collections");
   await step(seedTranslations(container), "translations");
   await step(seedInventoryLevels(container), "inventory levels");
+  await step(seedIndiaCommerce(container), "india commerce");
 }

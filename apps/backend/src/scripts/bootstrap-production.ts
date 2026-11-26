@@ -13,6 +13,7 @@ import {
   linkSalesChannelsToApiKeyWorkflow,
   updateStoresWorkflow,
 } from "@medusajs/medusa/core-flows";
+import { RAZORPAY_PAYMENT_PROVIDER_ID } from "../lib/commerce/india-seed";
 
 // One-time setup for a real first deploy, run after the migration:
 //   medusa exec ./src/scripts/bootstrap-production.ts
@@ -149,7 +150,7 @@ export const ensureProductionEssentials = async (
             name: REGION_NAME,
             currency_code: CURRENCY_CODE,
             countries: [COUNTRY_CODE],
-            payment_providers: ["pp_system_default"],
+            payment_providers: [RAZORPAY_PAYMENT_PROVIDER_ID],
           },
         ],
       },

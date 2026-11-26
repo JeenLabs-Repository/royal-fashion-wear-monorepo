@@ -7,7 +7,7 @@ export {
   seedProductOptions,
   seedProducts,
 } from "./products";
-export { seedRegions, seedTaxRegions } from "./regions";
+export { seedRegions } from "./regions";
 export { seedStockLocations } from "./stock-locations";
 export { isAlreadySeeded, seedStore } from "./store";
 export { seedTranslations } from "./translations";

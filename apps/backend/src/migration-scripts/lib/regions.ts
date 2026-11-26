@@ -1,8 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework";
-import {
-  createRegionsWorkflow,
-  createTaxRegionsWorkflow,
-} from "@medusajs/medusa/core-flows";
+import { createRegionsWorkflow } from "@medusajs/medusa/core-flows";
+import { RAZORPAY_PAYMENT_PROVIDER_ID } from "../../lib/commerce/india-seed";
 import { SEED_REGIONS } from "../data/regions";
 import { toKey } from "./utils";
 
@@ -33,19 +31,9 @@ export const seedRegions = async (container: MedusaContainer) => {
         name: seedRegion.name,
         currency_code: seedRegion.currency_code,
         countries: seedRegion.countries,
-        payment_providers: ["pp_system_default"],
+        payment_providers: [RAZORPAY_PAYMENT_PROVIDER_ID],
       })),
     },
   });
 };
 
-export const seedTaxRegions = async (container: MedusaContainer) => {
-  await createTaxRegionsWorkflow(container).run({
-    input: SEED_REGIONS.flatMap((seedRegion) =>
-      seedRegion.countries.map((country_code) => ({
-        country_code,
-        provider_id: "tp_system",
-      })),
-    ),
-  });
-};
