@@ -91,9 +91,16 @@ eval "TOKEN_VALUE=\${$TOKEN_ENV:-}"
 USERCONFIG=$(mktemp)
 HOST=$(printf '%s' "$REGISTRY" | sed 's|^https\{0,1\}://||; s|/*$||')
 printf '%s:registry=%s\n' "$SCOPE" "$REGISTRY" > "$USERCONFIG"
-printf '//%s/:_authToken=${%s}\n' "$HOST" "$TOKEN_ENV" >> "$USERCONFIG"
+# Write the live token into the throwaway userconfig. Project .npmrc auth lines
+# are not expanded by pnpm 12, so a clean working directory is required for the
+# publication check.
+printf '//%s/:_authToken=%s\n' "$HOST" "$TOKEN_VALUE" >> "$USERCONFIG"
 
-PUBLISHED=$(NPM_CONFIG_USERCONFIG="$USERCONFIG" npm view "$PACKAGE@$VERSION" version --registry "$REGISTRY" 2>/dev/null || true)
+VIEW_DIR=$(mktemp -d)
+PUBLISHED=$(
+  cd "$VIEW_DIR" && NPM_CONFIG_USERCONFIG="$USERCONFIG" npm view "$PACKAGE@$VERSION" version --registry "$REGISTRY" 2>/dev/null || true
+)
+rm -rf "$VIEW_DIR"
 [ "$PUBLISHED" = "$VERSION" ] || fail "$PACKAGE@$VERSION is not published in $REGISTRY"
 
 pnpm --filter "$BACKEND_FILTER" add "$PACKAGE@$VERSION" --save-exact
