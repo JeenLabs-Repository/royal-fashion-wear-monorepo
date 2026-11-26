@@ -128,26 +128,24 @@ module.exports = defineConfig({
         // Integration providers plug in here. Browse the catalog at
         // https://gorgojs.com/medusa/plugins?integrationModule=true or read
         // https://docs.gorgojs.com/medusa-modules/integration
+        // Instance id is omitted so each card registers as `default`, matching
+        // the app and plugin readers that call getResolvedOptions(identifier, "default").
         providers: [
           {
             resolve:
               "@jeenlabs-repository/medusa-payment-razorpay/providers/integration-razorpay",
-            id: "razorpay",
           },
           {
             resolve:
               "@jeenlabs-repository/medusa-store-settings/providers/integration-gst-invoicing",
-            id: "gst-invoicing",
           },
           {
             resolve:
               "@jeenlabs-repository/medusa-store-settings/providers/integration-smtp",
-            id: "smtp",
           },
           {
             resolve:
               "@jeenlabs-repository/medusa-store-settings/providers/integration-vendor-onboarding",
-            id: "vendor-onboarding",
           },
         ],
       },
