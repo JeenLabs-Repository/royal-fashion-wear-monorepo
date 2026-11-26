@@ -1,3 +1,41 @@
+diff --git a/.medusa/server/src/lib/razorpay/client.js b/.medusa/server/src/lib/razorpay/client.js
+index fb0027ff01ae26a023576cae629b1ea53f6310be..87dc5cbaca3a0e74c6f1cefb181983293b30f245 100644
+--- a/.medusa/server/src/lib/razorpay/client.js
++++ b/.medusa/server/src/lib/razorpay/client.js
+@@ -50,7 +50,32 @@ async function readRazorpayCredentials(container) {
+         if (error instanceof Error && NOT_AVAILABLE_PATTERN.test(error.message)) {
+             return { status: "unconfigured", reason: "unsaved" };
+         }
+-        throw error;
++        // Payment provider cradles cannot resolve the Integration Module. Fall
++        // back to the package helper, which runs through the workflow engine.
++        if (error instanceof Error && /Could not resolve/i.test(error.message)) {
++            try {
++                const options = await (0, medusa_integration_1.resolveIntegrationOptions)({
++                    identifier: constants_1.RAZORPAY_INTEGRATION_IDENTIFIER,
++                    instance_id: medusa_integration_1.DEFAULT_INSTANCE_ID,
++                }, { optional: true });
++                if (options === null || options === undefined) {
++                    return { status: "unconfigured", reason: "unsaved" };
++                }
++                result = { options };
++            }
++            catch (fallbackError) {
++                if (fallbackError instanceof Error && UNKNOWN_IDENTIFIER_PATTERN.test(fallbackError.message)) {
++                    return { status: "unconfigured", reason: "missing" };
++                }
++                if (fallbackError instanceof Error && NOT_AVAILABLE_PATTERN.test(fallbackError.message)) {
++                    return { status: "unconfigured", reason: "unsaved" };
++                }
++                throw fallbackError;
++            }
++        }
++        else {
++            throw error;
++        }
+     }
+     if (result === null || result === undefined || typeof result !== "object") {
+         return { status: "unconfigured", reason: "unsaved" };
 diff --git a/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js b/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js
 index 0105fbd0961a665de6d6a9be1d21afc176654b10..cf510be738c9f48f7f9370d61e77ed42d94fce3e 100644
 --- a/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js
