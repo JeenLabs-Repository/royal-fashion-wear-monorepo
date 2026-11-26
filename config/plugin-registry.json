@@ -8,7 +8,7 @@
     "medusa-payment-razorpay": {
       "package": "@jeenlabs-repository/medusa-payment-razorpay",
       "description": "The Razorpay payment provider and its settings card.",
-      "pin": null,
+      "pin": "0.1.0",
       "planned": false
     },
     "medusa-store-settings": {

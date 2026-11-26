@@ -4,6 +4,9 @@ packages:
   - "!apps/storefront/.next/**"
 
 # Keep one React types line so storefront typecheck does not see two ReactNode types.
+minimumReleaseAgeExclude:
+  - "@jeenlabs-repository/medusa-payment-razorpay@0.1.0"
+
 overrides:
   "@types/react": "19.0.5"
   "@types/react-dom": "19.0.5"
