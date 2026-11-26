@@ -21,11 +21,11 @@ COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
 # user allowlist, so the install must opt in (local machines often set this in
 # ~/.config/pnpm). Needed for @swc/core, esbuild and similar native packages.
 # The registry credential is mounted as a build secret, never an ARG or ENV, so it
-# stays out of every layer. The mounts are optional until the first plugin
-# dependency is installed; adding that dependency changes every mount to required=true.
+# stays out of every layer. Plugin packages are installed from the private registry,
+# so every install and deploy mount requires the credential.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    --mount=type=secret,id=NODE_AUTH_TOKEN,required=false \
-    if [ -s /run/secrets/NODE_AUTH_TOKEN ]; then NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; fi; \
+    --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
+    NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
     pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
     --store-dir /pnpm/store --filter @dtc/gorgo-medusa-backend...
 COPY apps/backend apps/backend
@@ -39,8 +39,8 @@ COPY apps/backend/package.json apps/backend/package.json
 COPY apps/storefront/package.json apps/storefront/package.json
 COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    --mount=type=secret,id=NODE_AUTH_TOKEN,required=false \
-    if [ -s /run/secrets/NODE_AUTH_TOKEN ]; then NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; fi; \
+    --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
+    NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
     pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
     --store-dir /pnpm/store --filter @dtc/vendor-portal...
 COPY apps/vendor-portal apps/vendor-portal
@@ -48,8 +48,8 @@ RUN pnpm --filter @dtc/vendor-portal run build
 
 # Pruned production dependencies from the committed lockfile.
 FROM build AS prod-deps
-RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=false \
-    if [ -s /run/secrets/NODE_AUTH_TOKEN ]; then NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; fi; \
+RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
+    NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
     pnpm --filter @dtc/gorgo-medusa-backend deploy --prod --legacy \
     --config.dangerouslyAllowAllBuilds=true /prod/backend
 

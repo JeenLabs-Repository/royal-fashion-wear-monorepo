@@ -197,6 +197,9 @@ importers:
       '@jeenlabs-repository/medusa-payment-razorpay':
         specifier: 0.1.0
         version: 0.1.0(6d7915868cddc64f4568931b0d9f4061)
+      '@jeenlabs-repository/medusa-store-settings':
+        specifier: 0.1.0
+        version: 0.1.0(e4e592b92b1adb6da5242e7a2507d9cb)
       '@medusajs/admin-sdk':
         specifier: 2.22.7
         version: 2.22.7
@@ -2011,6 +2014,20 @@ packages:
       '@medusajs/medusa': 2.22.7
       '@medusajs/test-utils': 2.22.7
       '@medusajs/types': 2.22.7
+
+  '@jeenlabs-repository/medusa-store-settings@0.1.0':
+    resolution: {integrity: sha512-8SoFvR8xMSRifzaQHgyhovNIeArr3aMchwTY8gikaINaTczYkAXjcn0gAzIHDVunE8ohVSaJlo3qXG8ls+KRLQ==, tarball: https://npm.pkg.github.com/download/@jeenlabs-repository/medusa-store-settings/0.1.0/87117b80b0d156af69051144520f25ba556d4f0b}
+    engines: {node: '>=22.23.4'}
+    peerDependencies:
+      '@gorgo/medusa-integration': 2.0.0
+      '@medusajs/admin-sdk': 2.22.7
+      '@medusajs/admin-shared': 2.22.7
+      '@medusajs/cli': 2.22.7
+      '@medusajs/framework': 2.22.7
+      '@medusajs/medusa': 2.22.7
+      '@medusajs/test-utils': 2.22.7
+      '@medusajs/types': 2.22.7
+      nodemailer: 10.6.1
 
   '@jercle/yargonaut@1.1.5':
     resolution: {integrity: sha512-zBp2myVvBHp1UaJsNTyS6q4UDKT7eRiqTS4oNTS6VQMd6mpxYOdbeK4pY279cDCdakGy6hG0J3ejoXZVsPwHqw==}
@@ -11126,6 +11143,18 @@ snapshots:
     transitivePeerDependencies:
       - debug
       - supports-color
+
+  '@jeenlabs-repository/medusa-store-settings@0.1.0(e4e592b92b1adb6da5242e7a2507d9cb)':
+    dependencies:
+      '@gorgo/medusa-integration': 2.0.0(@medusajs/admin-sdk@2.22.7)(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@medusajs/dashboard@2.22.7(@sinclair/typebox@0.34.52)(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(ajv@8.13.0)(typescript@5.9.3))(@medusajs/deps@2.22.7(@types/node@20.19.43)(supports-color@8.1.1))(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0))(@medusajs/icons@2.22.7(react@18.3.1))(@medusajs/medusa@2.22.7)(@medusajs/test-utils@2.22.7)(@medusajs/ui@4.2.14(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-router-dom@7.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@medusajs/admin-sdk': 2.22.7
+      '@medusajs/admin-shared': 2.22.7
+      '@medusajs/cli': 2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      '@medusajs/framework': 2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0)
+      '@medusajs/medusa': 2.22.7(7c114a4c4d83b36cd56f17d4f53012de)
+      '@medusajs/test-utils': 2.22.7(@medusajs/core-flows@2.22.7(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0)))(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0))(@medusajs/medusa@2.22.7)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      '@medusajs/types': 2.22.7(express@4.22.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))
+      nodemailer: 6.10.1
 
   '@jercle/yargonaut@1.1.5':
     dependencies:

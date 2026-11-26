@@ -44,6 +44,7 @@
   "dependencies": {
     "@gorgo/medusa-integration": "2.0.0",
     "@jeenlabs-repository/medusa-payment-razorpay": "0.1.0",
+    "@jeenlabs-repository/medusa-store-settings": "0.1.0",
     "@medusajs/admin-sdk": "2.22.7",
     "@medusajs/admin-shared": "2.22.7",
     "@medusajs/caching": "2.22.7",

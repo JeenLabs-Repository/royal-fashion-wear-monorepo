@@ -14,7 +14,7 @@
     "medusa-store-settings": {
       "package": "@jeenlabs-repository/medusa-store-settings",
       "description": "All Integration Module settings cards, one folder per card plus a card registry.",
-      "pin": null,
+      "pin": "0.1.0",
       "planned": false
     },
     "medusa-vendor-compliance": {
