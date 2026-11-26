@@ -241,6 +241,14 @@ export const PERMISSION_MANIFEST: readonly ManifestRule[] = [
     read: PERM.returnsRead,
     write: "superadmin",
   }),
+  // Razorpay reconciliation and refund status: finance staff read, acting needs the refund permission.
+  { method: "GET", pattern: "/admin/razorpay/reconciliation*", permission: PERM.financeRead },
+  { method: "GET", pattern: "/admin/razorpay/refunds*", permission: PERM.financeRead },
+  {
+    method: "POST",
+    pattern: "/admin/razorpay/reconciliation/items/:id/refund",
+    permission: PERM.financeRefund,
+  },
   { method: "POST", pattern: "/admin/payments/:id/refund", permission: PERM.financeRefund },
   ...family(["/admin/payments", "/admin/payment-collections"], {
     read: PERM.financeRead,
