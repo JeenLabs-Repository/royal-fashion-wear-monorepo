@@ -36,6 +36,7 @@
 
 ## Known risks
 
+<!-- Adopting a third-party plugin requires a wrapper descriptor listed in config/plugin-descriptors.json. -->
 <!-- Anything that could go wrong after release. -->
 
 ## Screenshots
