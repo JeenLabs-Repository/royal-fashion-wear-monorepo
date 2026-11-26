@@ -36,6 +36,8 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Give Builds Read Access to the Plugin Registry](guides/plugin-registry-access.md)
 - [Refresh the PIN Directory](guides/pincode-directory.md)
 - [Manage Email Settings in the Dashboard](guides/email-settings.md): where mail settings live, how to change them and how development mail works.
+- [Settings Boundary](concepts/settings-boundary.md) - what stays in the environment and what lives in settings cards.
+- [Adopt a Plugin](guides/adopt-a-plugin.md) - the steps and tests for adopting a third-party plugin.
 
 ## Writing Rules
 
