@@ -177,6 +177,29 @@ export async function ensureRazorpayCard(
   return secrets;
 }
 
+/**
+ * Deletes the saved Razorpay card values so the next webhook sees no secret and
+ * answers 503. The provider registration stays; call ensureRazorpayCard again to restore.
+ */
+export async function clearRazorpayCard(
+  api: ApiClient,
+  adminHeaders: Record<string, string>
+): Promise<void> {
+  const list = await api.get("/admin/integrations", { headers: adminHeaders });
+  const card = (list.data.integrations ?? []).find(
+    (item: { identifier?: string; id?: string; provider_id?: string }) =>
+      item.identifier === "integration-razorpay" || item.id === "integration-razorpay"
+  );
+  if (!card) {
+    return;
+  }
+  const providerId = String(card.provider_id ?? card.id);
+  await api.delete(`/admin/integrations/${providerId}`, {
+    headers: adminHeaders,
+    validateStatus: () => true,
+  });
+}
+
 export type PayableLine = {
   /** null leaves the product without a type, so the default rate applies. */
   productType: GstProductTypeValue | null;
