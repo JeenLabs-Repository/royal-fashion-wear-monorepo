@@ -26,8 +26,10 @@ COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
     NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
+    printf '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n' > /root/.npmrc; \
     pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
-    --store-dir /pnpm/store --filter @dtc/gorgo-medusa-backend...
+    --store-dir /pnpm/store --filter @dtc/gorgo-medusa-backend...; \
+    rm -f /root/.npmrc
 COPY apps/backend apps/backend
 RUN pnpm --filter @dtc/gorgo-medusa-backend run build
 
@@ -41,8 +43,10 @@ COPY apps/vendor-portal/package.json apps/vendor-portal/package.json
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
     NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
+    printf '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n' > /root/.npmrc; \
     pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
-    --store-dir /pnpm/store --filter @dtc/vendor-portal...
+    --store-dir /pnpm/store --filter @dtc/vendor-portal...; \
+    rm -f /root/.npmrc
 COPY apps/vendor-portal apps/vendor-portal
 RUN pnpm --filter @dtc/vendor-portal run build
 
@@ -50,8 +54,10 @@ RUN pnpm --filter @dtc/vendor-portal run build
 FROM build AS prod-deps
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
     NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)"; export NODE_AUTH_TOKEN; \
+    printf '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n' > /root/.npmrc; \
     pnpm --filter @dtc/gorgo-medusa-backend deploy --prod --legacy \
-    --config.dangerouslyAllowAllBuilds=true /prod/backend
+    --config.dangerouslyAllowAllBuilds=true /prod/backend; \
+    rm -f /root/.npmrc
 
 FROM node:22.23.4-bookworm-slim AS runtime
 ENV GORGO_DISABLE_TELEMETRY=true

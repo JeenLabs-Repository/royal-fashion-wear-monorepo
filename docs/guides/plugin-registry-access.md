@@ -18,7 +18,7 @@ The change that adds the first plugin dependency also changes every backend secr
 
 1. Open the application repository, then Settings, Secrets and variables, Actions.
 2. Add a repository secret named `PLUGIN_REGISTRY_TOKEN` with the token as its value.
-3. For local installs, export `NODE_AUTH_TOKEN` in your shell once a plugin is installed. Never write it to a file, never commit it. Gitleaks and the commit hook reject token-shaped strings.
+3. For local installs, export `NODE_AUTH_TOKEN` in your shell once a plugin is installed, then run `sh scripts/write-registry-userconfig.sh` once per machine (or add the same `//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}` line to your user `~/.npmrc`). pnpm 12 ignores environment tokens in the repository `.npmrc`, so the user-level file is what the installer reads. Never write the literal token into any repository file. Gitleaks and the commit hook reject token-shaped strings.
 
 ## 4. Know What Each Place Does With It
 

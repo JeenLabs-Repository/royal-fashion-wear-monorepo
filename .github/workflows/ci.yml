@@ -33,7 +33,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm -C apps/backend run lint
       - run: pnpm -C apps/storefront run lint
 
@@ -46,7 +51,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm -C apps/backend exec tsc --noEmit
       - run: pnpm -C apps/storefront exec tsc --noEmit
 
@@ -59,7 +69,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm -C apps/backend run build
 
   build-storefront:
@@ -71,7 +86,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm -C apps/storefront run build
 
   backend-tests:
@@ -106,7 +126,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - name: Check admin routes
         run: pnpm -C apps/backend run check:admin-routes
       - run: pnpm -C apps/backend run test:unit
@@ -122,7 +147,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm run guards
 
   gitleaks:
@@ -202,7 +232,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       - run: pnpm -C apps/vendor-portal run typecheck
       - run: pnpm -C apps/vendor-portal run test:unit
       # The build copies the static files into apps/backend/static/vendor-portal.
@@ -242,7 +277,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            sh scripts/write-registry-userconfig.sh
+          fi
+          pnpm install --frozen-lockfile
       # The run script generates its own random test-only secrets for every run,
       # keeps them in the process environment and never prints them. The backend
       # runs on the in-memory cache, locking and event bus, so no Redis service
