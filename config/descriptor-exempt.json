@@ -1,0 +1,3 @@
+{
+  "exempt": ["@gorgo/medusa-integration"]
+}

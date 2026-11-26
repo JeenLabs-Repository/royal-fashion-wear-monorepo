@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "@jeenlabs-repository/medusa-payment-razorpay": ["integration-razorpay"],
+    "@jeenlabs-repository/medusa-store-settings": [
+      "integration-gst-invoicing",
+      "integration-smtp",
+      "integration-vendor-onboarding"
+    ]
+  },
+  "ownProviders": {
+    "./src/modules/smtp-notification": ["integration-smtp"]
+  }
+}
