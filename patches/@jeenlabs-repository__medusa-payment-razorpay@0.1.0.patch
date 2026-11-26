@@ -1,0 +1,18 @@
+diff --git a/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js b/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js
+index 0105fbd0961a665de6d6a9be1d21afc176654b10..cf510be738c9f48f7f9370d61e77ed42d94fce3e 100644
+--- a/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js
++++ b/.medusa/server/src/providers/integration-razorpay/services/razorpay-integration.js
+@@ -78,6 +78,13 @@ function buildRazorpayDescriptor() {
+                     if (keyId && !(0, client_1.modeFromKeyId)(keyId)) {
+                         ctx.addIssue({ path: ["key_id"], message: KEY_PREFIX_MESSAGE });
+                     }
++                    // Gorgo skips blank secrets in the write set, so an empty key_secret
++                    // never reaches its own option validator. When key_id is written,
++                    // require a non-empty secret on the merged config (existing or new).
++                    const secret = ctx.options.key_secret;
++                    if (typeof secret !== "string" || secret.trim() === "") {
++                        ctx.addIssue({ path: ["key_secret"], message: "Key secret is required." });
++                    }
+                 },
+             },
+             key_secret: {

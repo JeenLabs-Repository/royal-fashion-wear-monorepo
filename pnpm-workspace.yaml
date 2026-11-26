@@ -11,3 +11,7 @@ minimumReleaseAgeExclude:
 overrides:
   "@types/react": "19.0.5"
   "@types/react-dom": "19.0.5"
+
+patchedDependencies:
+  '@jeenlabs-repository/medusa-payment-razorpay@0.1.0': patches/@jeenlabs-repository__medusa-payment-razorpay@0.1.0.patch
+  '@jeenlabs-repository/medusa-store-settings@0.1.0': patches/@jeenlabs-repository__medusa-store-settings@0.1.0.patch

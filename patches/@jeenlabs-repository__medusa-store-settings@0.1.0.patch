@@ -1,0 +1,55 @@
+diff --git a/.medusa/server/src/providers/integration-gst-invoicing/services/gst-invoicing-integration.js b/.medusa/server/src/providers/integration-gst-invoicing/services/gst-invoicing-integration.js
+index a1e508f666751a09c20ef5efc4d11244fe686a0d..6223d8da1135f3d47b194aea39b90ebb6ab26548 100644
+--- a/.medusa/server/src/providers/integration-gst-invoicing/services/gst-invoicing-integration.js
++++ b/.medusa/server/src/providers/integration-gst-invoicing/services/gst-invoicing-integration.js
+@@ -81,6 +81,16 @@ function buildGstInvoicingDescriptor() {
+                 hint: "The 15-character GST identification number of the supplier. Checked for format and check character.",
+                 required: true,
+                 minLength: 1,
++                validate: (value, ctx) => {
++                    for (const issue of validateGstIdentity({
++                        ...ctx.options,
++                        gstin: typeof value === "string" ? value : ctx.options.gstin,
++                    })) {
++                        if (issue.path === "gstin") {
++                            ctx.addIssue({ path: [issue.path], message: issue.message });
++                        }
++                    }
++                },
+             },
+             registered_state: {
+                 type: "enum",
+@@ -90,6 +100,16 @@ function buildGstInvoicingDescriptor() {
+                 required: true,
+                 values: STATE_VALUES,
+                 valueLabels: STATE_LABELS,
++                validate: (value, ctx) => {
++                    for (const issue of validateGstIdentity({
++                        ...ctx.options,
++                        registered_state: typeof value === "string" ? value : ctx.options.registered_state,
++                    })) {
++                        if (issue.path === "gstin" || issue.path === "registered_state") {
++                            ctx.addIssue({ path: [issue.path], message: issue.message });
++                        }
++                    }
++                },
+             },
+             address_line_1: {
+                 type: "string",
+@@ -112,6 +132,16 @@ function buildGstInvoicingDescriptor() {
+                 hint: "Six-digit PIN code of the registered address.",
+                 required: true,
+                 minLength: 1,
++                validate: (value, ctx) => {
++                    for (const issue of validateGstIdentity({
++                        ...ctx.options,
++                        pin: typeof value === "string" ? value : ctx.options.pin,
++                    })) {
++                        if (issue.path === "pin") {
++                            ctx.addIssue({ path: [issue.path], message: issue.message });
++                        }
++                    }
++                },
+             },
+             grievance_officer_name: {
+                 type: "string",

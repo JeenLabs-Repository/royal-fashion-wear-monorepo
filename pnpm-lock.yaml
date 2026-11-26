@@ -166,6 +166,10 @@ overrides:
   '@types/react': 19.0.5
   '@types/react-dom': 19.0.5
 
+patchedDependencies:
+  '@jeenlabs-repository/medusa-payment-razorpay@0.1.0': 43f3f6878189ef5ef5fce845b9a546a55362455b7d53b1fae54bb6564841093f
+  '@jeenlabs-repository/medusa-store-settings@0.1.0': 1b10b6b60827270aae23d469a60ef6d7f3ab4c6023e82c64c0e9d23422ddbaf5
+
 importers:
 
   .:
@@ -196,10 +200,10 @@ importers:
         version: 2.0.0(@medusajs/admin-sdk@2.22.7)(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@medusajs/dashboard@2.22.7(@sinclair/typebox@0.34.52)(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(ajv@8.13.0)(typescript@5.9.3))(@medusajs/deps@2.22.7(@types/node@20.19.43)(supports-color@8.1.1))(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0))(@medusajs/icons@2.22.7(react@18.3.1))(@medusajs/medusa@2.22.7)(@medusajs/test-utils@2.22.7)(@medusajs/ui@4.2.14(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-router-dom@7.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@jeenlabs-repository/medusa-payment-razorpay':
         specifier: 0.1.0
-        version: 0.1.0(6d7915868cddc64f4568931b0d9f4061)
+        version: 0.1.0(patch_hash=43f3f6878189ef5ef5fce845b9a546a55362455b7d53b1fae54bb6564841093f)(6d7915868cddc64f4568931b0d9f4061)
       '@jeenlabs-repository/medusa-store-settings':
         specifier: 0.1.0
-        version: 0.1.0(e4e592b92b1adb6da5242e7a2507d9cb)
+        version: 0.1.0(patch_hash=1b10b6b60827270aae23d469a60ef6d7f3ab4c6023e82c64c0e9d23422ddbaf5)(e4e592b92b1adb6da5242e7a2507d9cb)
       '@medusajs/admin-sdk':
         specifier: 2.22.7
         version: 2.22.7
@@ -11129,7 +11133,7 @@ snapshots:
 
   '@istanbuljs/schema@0.1.6': {}
 
-  '@jeenlabs-repository/medusa-payment-razorpay@0.1.0(6d7915868cddc64f4568931b0d9f4061)':
+  '@jeenlabs-repository/medusa-payment-razorpay@0.1.0(patch_hash=43f3f6878189ef5ef5fce845b9a546a55362455b7d53b1fae54bb6564841093f)(6d7915868cddc64f4568931b0d9f4061)':
     dependencies:
       '@gorgo/medusa-integration': 2.0.0(@medusajs/admin-sdk@2.22.7)(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@medusajs/dashboard@2.22.7(@sinclair/typebox@0.34.52)(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(ajv@8.13.0)(typescript@5.9.3))(@medusajs/deps@2.22.7(@types/node@20.19.43)(supports-color@8.1.1))(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0))(@medusajs/icons@2.22.7(react@18.3.1))(@medusajs/medusa@2.22.7)(@medusajs/test-utils@2.22.7)(@medusajs/ui@4.2.14(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-router-dom@7.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@medusajs/admin-sdk': 2.22.7
@@ -11144,7 +11148,7 @@ snapshots:
       - debug
       - supports-color
 
-  '@jeenlabs-repository/medusa-store-settings@0.1.0(e4e592b92b1adb6da5242e7a2507d9cb)':
+  '@jeenlabs-repository/medusa-store-settings@0.1.0(patch_hash=1b10b6b60827270aae23d469a60ef6d7f3ab4c6023e82c64c0e9d23422ddbaf5)(e4e592b92b1adb6da5242e7a2507d9cb)':
     dependencies:
       '@gorgo/medusa-integration': 2.0.0(@medusajs/admin-sdk@2.22.7)(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@medusajs/dashboard@2.22.7(@sinclair/typebox@0.34.52)(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(ajv@8.13.0)(typescript@5.9.3))(@medusajs/deps@2.22.7(@types/node@20.19.43)(supports-color@8.1.1))(@medusajs/framework@2.22.7(@medusajs/cli@2.22.7(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@20.19.43)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@20.19.43)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))(zod@4.2.0))(@medusajs/icons@2.22.7(react@18.3.1))(@medusajs/medusa@2.22.7)(@medusajs/test-utils@2.22.7)(@medusajs/ui@4.2.14(@types/react-dom@19.0.5(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-router-dom@7.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@medusajs/admin-sdk': 2.22.7
