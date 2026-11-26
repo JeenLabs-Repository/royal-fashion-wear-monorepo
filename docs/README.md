@@ -38,6 +38,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Manage Email Settings in the Dashboard](guides/email-settings.md): where mail settings live, how to change them and how development mail works.
 - [Settings Boundary](concepts/settings-boundary.md) - what stays in the environment and what lives in settings cards.
 - [Adopt a Plugin](guides/adopt-a-plugin.md) - the steps and tests for adopting a third-party plugin.
+- [Set Up the India Region and GST](guides/india-region-and-gst.md) - the India region seed, GST rates and free-order rule.
 
 ## Writing Rules
 
