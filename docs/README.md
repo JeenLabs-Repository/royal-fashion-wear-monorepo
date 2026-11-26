@@ -40,6 +40,7 @@ This folder holds the reference documentation for the repository. Cursor and Cla
 - [Adopt a Plugin](guides/adopt-a-plugin.md) - the steps and tests for adopting a third-party plugin.
 - [Set Up the India Region and GST](guides/india-region-and-gst.md) - the India region seed, GST rates and free-order rule.
 - [How a Payment Becomes an Order](concepts/payment-flow.md) - webhook completion, retries and orphans.
+- [Review the Daily Payment Reconciliation](guides/payment-reconciliation.md) - what the daily payment check finds and what to do about each finding.
 
 ## Writing Rules
 
