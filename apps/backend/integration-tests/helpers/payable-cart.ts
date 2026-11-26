@@ -25,6 +25,7 @@ import { ensureBareDefaults, ensureStoreAndDefaultChannel } from "../support/spi
 type ApiClient = {
   get(url: string, config?: Record<string, unknown>): Promise<{ data: any }>;
   post(url: string, body?: unknown, config?: Record<string, unknown>): Promise<{ data: any }>;
+  delete?(url: string, config?: Record<string, unknown>): Promise<{ data: any }>;
 };
 
 type Query = {
